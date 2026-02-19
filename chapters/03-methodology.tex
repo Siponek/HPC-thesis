@@ -43,57 +43,6 @@ DSR is appropriate for this research because:
     \item Evaluation can be both utility-based (does it work?) and design-based (is it well-constructed?)
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\subsection{Development Approach}
-\label{subsec:development-approach}
-
-The game development followed an iterative, incremental approach:
-
-\paragraph*{Phase 1: Concept and Prototyping (Weeks 1--3)}
-\begin{itemize}
-    \item Defined core mechanics based on physical card-sorting experiments
-    \item Created paper prototypes and mockups
-    \item Evaluated technology options (game engines, frameworks)
-    \item Developed minimal prototype with basic card rendering
-\end{itemize}
-
-\paragraph*{Phase 2: Single-Player Implementation (Weeks 4--7)}
-\begin{itemize}
-    \item Implemented card generation, shuffling, and rendering
-    \item Developed drag-and-drop mechanics for touch and mouse input
-    \item Created buffer zones for private card storage
-    \item Implemented sorting validation and game completion logic
-    \item Added timer and move counting
-\end{itemize}
-
-\paragraph*{Phase 3: Multiplayer Foundation (Weeks 8--12)}
-\begin{itemize}
-    \item Developed HTTP/SSE relay server for web browser compatibility
-    \item Implemented lobby system for matchmaking
-    \item Developed basic state synchronization
-    \item Integrated GDSync framework with custom web transport layer
-    \item Tested connection establishment and stability
-\end{itemize}
-
-\paragraph*{Phase 4: Multiplayer Refinement (Weeks 13--16)}
-\begin{itemize}
-    \item Implemented card visibility management (private buffers)
-    \item Developed host-authoritative state management
-    \item Added disconnection handling and recovery
-    \item Refined synchronization for card movements
-    \item Addressed framework issues (GDSync protected mode)
-\end{itemize}
-
-\paragraph*{Phase 5: Polish and Testing (Weeks 17--20)}
-\begin{itemize}
-    \item UI/UX improvements for web usability
-    \item Performance optimization (rendering, networking)
-    \item Extensive testing across web browsers
-    \item Documentation and code cleanup
-    \item Preparation for evaluation and thesis writing
-\end{itemize}
-
-%-----------------------------------------------------------------------
 \section{Requirements Analysis}
 \label{sec:requirements}
 
@@ -109,7 +58,7 @@ The primary purpose of the game is education. Requirements were derived from HPC
 \begin{itemize}
     \item The game must simulate shared-memory parallelism
     \item All players must see all cards in the main container (shared memory)
-    \item Players must have private buffers (thread-local storage)
+    \item Players must have public buffers (thread-local storage)
     \item No explicit communication required between players (implicit synchronization)
 \end{itemize}
 
@@ -230,27 +179,32 @@ The complete architecture and pedagogical mapping are detailed in Chapter ~\ref{
 \section{Technology Selection}
 \label{sec:technology-selection}
 
-Technology choices significantly impact development efficiency, game performance, and future extensibility. This section justifies the selection of each major technology component.
+Technology choices were treated as methodological outcomes of iterative experimentation, not fixed assumptions. This section documents the evaluation process, alternatives explored, observed constraints, and final decisions for both core architecture and the supporting development toolchain.
+
+%-----------------------------------------------------------------------
+\subsection{Tool and Framework Evaluation Process}
+\label{subsec:tool-eval-process}
+
+Selection decisions were made using a consistent set of criteria aligned with thesis goals:
+\begin{itemize}
+    \item \textbf{Educational fit}: ability to support clear mapping between gameplay mechanics and HPC concepts
+    \item \textbf{Web deployment feasibility}: practical browser support and export reliability
+    \item \textbf{Multiplayer support}: synchronization model maturity and debugging feasibility
+    \item \textbf{Ecosystem maturity}: documentation quality, examples, and community responsiveness
+    \item \textbf{Debugging observability}: runtime inspection and logging support
+    \item \textbf{Development speed}: iteration time and implementation complexity
+    \item \textbf{Maintainability}: modularity, replacement cost, and long-term project sustainability
+\end{itemize}
+
+Decisions were validated through prototype iterations described in Section~\ref{subsec:development-approach}, with problematic assumptions revisited as implementation evidence emerged.
 
 %-----------------------------------------------------------------------
 \subsection{Game Engine: Godot 4.x}
 \label{subsec:godot-selection}
 
-\paragraph*{Evaluation Criteria:}
+\paragraph*{Alternatives explored:}
 
-Game engines were evaluated based on:
-\begin{itemize}
-    \item License and cost
-    \item 2D rendering capabilities
-    \item Web platform support (HTML5 export)
-    \item Learning curve and documentation
-    \item Community support and plugin ecosystem
-    \item Multiplayer/networking support
-    \item Performance in browsers
-\end{itemize}
-
-\paragraph*{Alternatives Considered:}
-\par
+Unity, Unreal, Godot, and Cocos2d were evaluated against the criteria in Section~\ref{subsec:tool-eval-process}.
 
 \begin{table}[htbp]
     \centering
@@ -271,7 +225,14 @@ Game engines were evaluated based on:
     \end{tabular}
 \end{table}
 
-\paragraph*{Decision Rationale:}
+\paragraph*{Observed constraints:}
+\begin{itemize}
+    \item Web target required small export size and predictable browser behavior
+    \item Educational project constraints favored open-source tooling and no licensing risk
+    \item 2D interaction with many UI elements required efficient scene and layout workflows
+\end{itemize}
+
+\paragraph*{Decision and justification:}
 
 Godot Engine was selected because:
 
@@ -307,7 +268,7 @@ Godot's limitations include:
 \subsection{Programming Language: GDScript}
 \label{subsec:gdscript-selection}
 
-\paragraph*{Language Options in Godot:}
+\paragraph*{Alternatives explored:}
 
 Godot supports three primary programming approaches:
 \begin{enumerate}
@@ -316,7 +277,14 @@ Godot supports three primary programming approaches:
     \item \textbf{C++}: Native modules via GDNative/GDExtension
 \end{enumerate}
 
-\paragraph*{Decision Rationale:}
+\paragraph*{Observed constraints:}
+\begin{itemize}
+    \item Rapid iteration was necessary during repeated gameplay and networking experiments
+    \item Implementation needed to remain readable for thesis communication and educational reuse
+    \item Cross-platform build complexity needed to remain low
+\end{itemize}
+
+\paragraph*{Decision and justification:}
 
 GDScript was chosen because:
 
@@ -343,7 +311,7 @@ GDScript is slower than C++ but acceptable for this use case because:
 \subsection{Multiplayer Framework: GDSync}
 \label{subsec:gdsync-selection}
 
-\paragraph*{Multiplayer Implementation Options:}
+\paragraph*{Alternatives explored:}
 
 Three approaches were considered for multiplayer networking:
 
@@ -353,7 +321,14 @@ Three approaches were considered for multiplayer networking:
     \item \textbf{Custom Protocol}: Build custom WebRTC integration from scratch
 \end{enumerate}
 
-\paragraph*{Decision Rationale:}
+\paragraph*{Observed constraints:}
+\begin{itemize}
+    \item Multiplayer state complexity required reusable abstractions, not only low-level RPC wiring
+    \item Browser deployment exposed transport limitations for native WebRTC assumptions
+    \item Debuggability and incremental adoption were critical during issue diagnosis
+\end{itemize}
+
+\paragraph*{Decision and justification:}
 
 GDSync was selected because:
 
@@ -383,7 +358,14 @@ Despite these challenges, GDSync provided net benefits by significantly reducing
 \subsection{Networking Technology: HTTP/SSE Relay}
 \label{subsec:http-sse-selection}
 
-\paragraph*{Web Browser Constraints:}
+\paragraph*{Alternatives explored:}
+\begin{itemize}
+    \item Native peer-to-peer approaches through WebRTC
+    \item Raw Godot networking patterns (not browser-compatible as implemented)
+    \item Relay-based architecture with standard web protocols
+\end{itemize}
+
+\paragraph*{Observed constraints:}
 
 Web browsers impose significant restrictions on networking that prevented use of traditional approaches:
 
@@ -393,7 +375,7 @@ Web browsers impose significant restrictions on networking that prevented use of
     \item \textbf{No LAN Discovery}: Browser security prevents local network peer discovery
 \end{itemize}
 
-\paragraph*{Solution: HTTP + Server-Sent Events (SSE)}
+\paragraph*{Decision and justification: HTTP + Server-Sent Events (SSE)}
 
 To overcome browser limitations, a custom relay server architecture was developed:
 
@@ -433,37 +415,93 @@ This architecture has trade-offs compared to peer-to-peer approaches:
 \end{figure}
 
 %-----------------------------------------------------------------------
-\subsection{Supporting Plugins and Tools}
-\label{subsec:supporting-tools}
+\subsection{Supporting Development Toolchain}
+\label{subsec:supporting-toolchain}
 
-Several Godot plugins were integrated to enhance development:
+Beyond core engine/networking choices, several tools were selected to improve debugging observability, delivery speed, and reproducibility.
 
-\paragraph*{ToastParty:}
 \begin{itemize}
-    \item Purpose: Display non-intrusive notification messages
-    \item Use: Player joined/left, card moved, errors, game events
-    \item Benefit: Provides feedback without blocking gameplay
+    \item \textbf{ToastParty (Godot plugin)}: non-blocking UI event popups; improved usability feedback during multiplayer sessions.
+    \item \textbf{VarTree (Godot plugin)}: runtime inspection/modification of sync variables; reduced debugging turnaround.
+    \item \textbf{Logger/custom logging client}: structured network/gameplay logs; improved diagnosis of timing and replication issues.
+    \item \textbf{Python/aiohttp relay server}: browser-compatible signaling/relay backend for HTTP/SSE transport.
+    \item \textbf{Ruff}: linting and style checks for Python server/scripts; improved maintainability and consistency.
+    \item \textbf{justfile}: repeatable task automation for build/test/maintenance workflows.
+    \item \textbf{mkcert}: trusted local TLS certificates for secure browser multiplayer testing.
+    \item \textbf{Chocolatey}: standardized Windows package setup, reducing environment variability.
+    \item \textbf{const\_generator}: generated constants to reduce manual duplication and config drift.
+    \item \textbf{Git + GitHub}: version control, issue tracking, and collaborative documentation supporting reproducible research development.
 \end{itemize}
 
-\paragraph*{Logger:}
+%-----------------------------------------------------------------------
+\subsection{Final Toolchain and Rationale Summary}
+\label{subsec:toolchain-summary}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Final toolchain decisions and accepted trade-offs}
+    \label{tab:toolchain-summary}
+    \begin{tabular}{@{}p{2.8cm}p{2.6cm}p{4.5cm}p{4cm}@{}}
+        \toprule
+        \textbf{Tool}                & \textbf{Category}     & \textbf{Selected because}                        & \textbf{Trade-off accepted}                \\
+        \midrule
+        Godot 4.x                    & Engine                & Fast 2D/web workflow, open-source, small exports & Smaller ecosystem than Unity/Unreal        \\
+        GDScript                     & Language              & Fast iteration and readability                   & Lower peak performance than C++            \\
+        GDSync                       & Multiplayer framework & High-level synchronization abstractions          & Framework quirks and debugging overhead    \\
+        HTTP/SSE relay (Python)      & Transport             & Browser compatibility and implementation control & Extra relay infrastructure and hop latency \\
+        Supporting plugins/utilities & Toolchain             & Improved debugging, quality, and reproducibility & Additional maintenance surface             \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%-----------------------------------------------------------------------
+\subsection{Development Approach}
+\label{subsec:development-approach}
+
+The game development followed an iterative, incremental approach:
+
+\paragraph*{Phase 1: Concept and Prototyping (Weeks 1--3)}
 \begin{itemize}
-    \item Purpose: Enhanced debugging output with categorization
-    \item Use: Development troubleshooting and performance analysis
-    \item Benefit: Structured logging with filtering capabilities
+    \item Defined core mechanics based on physical card-sorting experiments
+    \item Created paper prototypes and mockups
+    \item Evaluated technology options (game engines, frameworks)
+    \item Developed minimal prototype with basic card rendering
 \end{itemize}
 
-\paragraph*{VarTree:}
+\paragraph*{Phase 2: Single-Player Implementation (Weeks 4--7)}
 \begin{itemize}
-    \item Purpose: Runtime variable inspection and modification
-    \item Use: Debugging game state during development
-    \item Benefit: Observe and manipulate variables without recompiling
+    \item Implemented card generation, shuffling, and rendering
+    \item Developed drag-and-drop mechanics for touch and mouse input
+    \item Created buffer zones for private card storage
+    \item Implemented sorting validation and game completion logic
+    \item Added timer and move counting
 \end{itemize}
 
-\paragraph*{Scene-Selector:}
+\paragraph*{Phase 3: Multiplayer Foundation (Weeks 8--12)}
 \begin{itemize}
-    \item Purpose: Quick scene navigation during development
-    \item Use: Switch between game scenes without main menu navigation
-    \item Benefit: Faster iteration during development
+    \item Developed HTTP/SSE relay server for web browser compatibility
+    \item Implemented lobby system for matchmaking
+    \item Developed basic state synchronization
+    \item Integrated GDSync framework with custom web transport layer
+    \item Tested connection establishment and stability
+\end{itemize}
+
+\paragraph*{Phase 4: Multiplayer Refinement (Weeks 13--16)}
+\begin{itemize}
+    \item Implemented card visibility management (private buffers)
+    \item Developed host-authoritative state management
+    \item Added disconnection handling and recovery
+    \item Refined synchronization for card movements
+    \item Addressed framework issues (GDSync protected mode)
+\end{itemize}
+
+\paragraph*{Phase 5: Polish and Testing (Weeks 17--20)}
+\begin{itemize}
+    \item UI/UX improvements for web usability
+    \item Performance optimization (rendering, networking)
+    \item Extensive testing across web browsers
+    \item Documentation and code cleanup
+    \item Preparation for evaluation and thesis writing
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -595,7 +633,7 @@ The educational tool's success was evaluated across multiple dimensions:
 \begin{itemize}
     \item \textbf{OS}: Windows 11 / Linux (Ubuntu 22.04)
     \item \textbf{IDE}: Visual Studio Code with GDScript extension
-    \item \textbf{Engine}: Godot Engine 4.2.x
+    \item \textbf{Engine}: Godot Engine 4.5.x
     \item \textbf{Version Control}: Git with GitHub repository
 \end{itemize}
 

@@ -2,7 +2,7 @@
 \chapter{Implementation}
 \label{ch:implementation}
 
-This chapter describes the detailed technical implementation of the HPC Sorting Serious Game, covering both single-player and multiplayer modes, key algorithms, code structure, and mobile-specific optimizations.
+This chapter describes the detailed technical implementation of the HPC Sorting Serious Game, covering both single-player and multiplayer modes, key algorithms, code structure, and mobile-specific optimizations. Selection rationale for tools and frameworks is discussed in Chapter~\ref{ch:methodology}, especially Section~\ref{sec:technology-selection}.
 
 %-----------------------------------------------------------------------
 \section{Development Environment Setup}
@@ -185,7 +185,7 @@ The lobby manages room creation, player joining, and game configuration.
 \subsection{GDSync Integration}
 \label{subsec:impl-gdsync-integration}
 
-GDSync provides high-level networking abstractions.
+GDSync provides high-level networking abstractions. The decision process for adopting GDSync over alternatives is documented in Section~\ref{subsec:gdsync-selection}; this section focuses on implementation details.
 
 \paragraph*{Key Features Used:}
 \begin{itemize}
