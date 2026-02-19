@@ -27,7 +27,6 @@ rectangle "**Physical Classroom Experiment**" as PHYS #LightBlue {
         note as N3
         - Limited scalability
         - Requires physical presence
-        - Hard to reproduce consistently
         - No automated metrics
         end note
     }
