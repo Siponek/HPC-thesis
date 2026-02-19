@@ -140,6 +140,7 @@ Functional requirements specify what the system must do:
     \item Visual animations for card pickup, drop, invalid moves
     \item Sound effects for actions (optional, can be disabled)
     \item Confetti or celebration effects upon game completion
+          % TODO: Add figure/screenshot showing the completion-state celebration effect (confetti) and annotate which UI elements are highlighted.
 \end{itemize}
 
 \paragraph*{FR6: Quality Attributes}
@@ -206,6 +207,21 @@ Decisions were validated through prototype iterations described in Section~\ref{
 
 Unity, Unreal, Godot, and Cocos2d were evaluated against the criteria in Section~\ref{subsec:tool-eval-process}.
 
+\paragraph*{Practical background and evaluation context:}
+Before this thesis, the author had only brief prior hands-on exposure to Unity and Godot, and no production experience with Unreal or Cocos2d. For this reason, engine selection emphasized thesis-time experimentation and iteration evidence rather than long-term prior specialization.
+
+\paragraph*{Unity:}
+Unity was a strong candidate due to its mature ecosystem, large community, and broad platform support. It provides robust tooling and many ready-made resources, which can reduce implementation risk. However, for this specific web-first educational prototype, the overall project/runtime footprint and workflow complexity were less aligned with the goal of fast, lightweight iteration.
+
+\paragraph*{Unreal Engine:}
+Unreal offers advanced rendering and strong networking capabilities, but it was less suitable for a small 2D educational game with frequent design revisions. In practice, heavier tooling and longer compilation/build cycles can slow down rapid prototyping during thesis development, where many short iteration loops are required.
+
+\paragraph*{Cocos2d:}
+Cocos2d is efficient for 2D applications and supports cross-platform development. However, for this thesis it appeared less convenient as an all-in-one workflow for scene editing, multiplayer experimentation, and rapid educational UI iteration. Compared to Godot's integrated editor-first experience, Cocos2d would likely require more custom assembly of tooling and architecture choices for comparable development speed.
+
+\paragraph*{Godot:}
+Godot provided the best balance for this thesis context: small web exports, strong 2D workflow, open-source licensing, and fast iteration through a cohesive scene-based architecture. These factors made it the most natural fit for implementing and evaluating the proposed educational game within thesis time constraints.
+
 \begin{table}[htbp]
     \centering
     \caption{Game engine comparison for HPC Sorting Game}
@@ -243,7 +259,7 @@ Godot Engine was selected because:
 
     \item \textbf{Lightweight}: Web export builds are significantly smaller (10--20 MB) compared to Unity (50--100 MB) or Unreal (100+ MB), important for fast loading in browsers.
 
-    \item \textbf{GDScript}: Python-like scripting language is accessible to students who may examine the source code. Lower barrier to entry than C\# (Unity) or C++ (Unreal).
+    \item \textbf{GDScript}: Python-like scripting language is accessible to students who may examine the source code. Lower barrier to entry than C\# (Unity) or C++ (Unreal/Cocos2D).
 
     \item \textbf{Scene Architecture}: Godot's scene-based architecture promotes modular design and code reuse, aligning well with software engineering best practices.
 
@@ -433,6 +449,22 @@ Beyond core engine/networking choices, several tools were selected to improve de
     \item \textbf{Git + GitHub}: version control, issue tracking, and collaborative documentation supporting reproducible research development.
 \end{itemize}
 
+% TODO: Add verification links for external plugins/tools listed above.
+% TODO: Godot Engine link: <ADD_LINK>
+% TODO: GDSync link: <ADD_LINK>
+% TODO: ToastParty link: <ADD_LINK>
+% TODO: VarTree link: <ADD_LINK>
+% TODO: Logger plugin/custom logger link: <ADD_LINK>
+% TODO: Python link: <ADD_LINK>
+% TODO: aiohttp link: <ADD_LINK>
+% TODO: Ruff link: <ADD_LINK>
+% TODO: justfile/just link: <ADD_LINK>
+% TODO: mkcert link: <ADD_LINK>
+% TODO: Chocolatey link: <ADD_LINK>
+% TODO: const_generator link: <ADD_LINK>
+% TODO: Git link: <ADD_LINK>
+% TODO: GitHub link: <ADD_LINK>
+
 %-----------------------------------------------------------------------
 \subsection{Final Toolchain and Rationale Summary}
 \label{subsec:toolchain-summary}
@@ -459,6 +491,7 @@ Beyond core engine/networking choices, several tools were selected to improve de
 \label{subsec:development-approach}
 
 The game development followed an iterative, incremental approach:
+% TODO: Add timeline figure (Phases 1--5, weeks, and key milestones) to summarize the iterative development process.
 
 \paragraph*{Phase 1: Concept and Prototyping (Weeks 1--3)}
 \begin{itemize}

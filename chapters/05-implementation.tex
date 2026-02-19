@@ -36,6 +36,10 @@ hpc-sorting-serious-game/
 |   |-- Logger/
 |-- project.godot        # Godot project configuration
 \end{lstlisting}
+% TODO: Add plugin/source links for listed addons.
+% TODO: GD-Sync link: <ADD_LINK>
+% TODO: ToastParty link: <ADD_LINK>
+% TODO: Logger link: <ADD_LINK>
 
 %-----------------------------------------------------------------------
 \section{Core Components Implementation}
@@ -180,6 +184,7 @@ The lobby manages room creation, player joining, and game configuration.
     \item Host configures game settings
     \item Host starts game
 \end{enumerate}
+% TODO: Add sequence diagram for lobby lifecycle (create/join room, signaling, host handshake, ready state, game start).
 
 %-----------------------------------------------------------------------
 \subsection{GDSync Integration}
@@ -309,6 +314,7 @@ func update_card_visibility():
 \label{subsec:logger-integration}
 
 The Logger plugin provides categorized logging for debugging.
+% TODO: Add Logger plugin repository/documentation link: <ADD_LINK>
 
 \paragraph*{Usage Example:}
 \begin{lstlisting}
@@ -322,6 +328,7 @@ Logger.error("Failed to synchronize card state")
 \label{subsec:vartree}
 
 VarTree plugin allows real-time inspection and modification of variables during gameplay for debugging purposes. This tool displays GDSync connection state variables such as client ID, host status, current lobby, and player count.
+% TODO: Add VarTree plugin repository/documentation link: <ADD_LINK>
 
 \begin{figure}[htbp]
     \centering
