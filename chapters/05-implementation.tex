@@ -36,10 +36,7 @@ hpc-sorting-serious-game/
 |   |-- Logger/
 |-- project.godot        # Godot project configuration
 \end{lstlisting}
-% TODO: Add plugin/source links for listed addons.
-% TODO: GD-Sync link: <ADD_LINK>
-% TODO: ToastParty link: <ADD_LINK>
-% TODO: Logger link: <ADD_LINK>
+External tool and framework links used in implementation are listed in Appendix~\ref{app:d:tool-links}.
 
 %-----------------------------------------------------------------------
 \section{Core Components Implementation}
@@ -190,7 +187,7 @@ The lobby manages room creation, player joining, and game configuration.
 \subsection{GDSync Integration}
 \label{subsec:impl-gdsync-integration}
 
-GDSync provides high-level networking abstractions. The decision process for adopting GDSync over alternatives is documented in Section~\ref{subsec:gdsync-selection}; this section focuses on implementation details.
+GDSync provides high-level networking abstractions. The decision process for adopting GDSync over alternatives is documented in Section~\ref{subsec:gdsync-selection}; this section focuses on implementation details. For this thesis implementation, the project uses an author-maintained GDSync fork that includes a fix required for the web-export workflow \citep{gdsync_fork}. A pull request with this fix was submitted upstream \citep{gdsync_framework}; until upstream integration is complete, the fork remains the operational dependency.
 
 \paragraph*{Key Features Used:}
 \begin{itemize}
@@ -314,7 +311,8 @@ func update_card_visibility():
 \label{subsec:logger-integration}
 
 The Logger plugin provides categorized logging for debugging.
-% TODO: Add Logger plugin repository/documentation link: <ADD_LINK>
+% TODO: Add figure or listing with real logger output from a multiplayer session (INFO/WARN/ERROR with timestamps and context).
+% Logger source: local implementation in this repository (add external URL only if replaced by third-party plugin)
 
 \paragraph*{Usage Example:}
 \begin{lstlisting}
@@ -328,7 +326,7 @@ Logger.error("Failed to synchronize card state")
 \label{subsec:vartree}
 
 VarTree plugin allows real-time inspection and modification of variables during gameplay for debugging purposes. This tool displays GDSync connection state variables such as client ID, host status, current lobby, and player count.
-% TODO: Add VarTree plugin repository/documentation link: <ADD_LINK>
+VarTree plugin reference: \citep{vartree_asset}.
 
 \begin{figure}[htbp]
     \centering

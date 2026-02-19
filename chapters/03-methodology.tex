@@ -368,7 +368,7 @@ GDSync introduced some difficulties:
     \item \textbf{Framework Overhead}: Additional layer of abstraction sometimes obscured underlying networking behavior
 \end{itemize}
 
-Despite these challenges, GDSync provided net benefits by significantly reducing the amount of low-level networking code required.
+Despite these challenges, GDSync provided net benefits by significantly reducing the amount of low-level networking code required. During development, a framework issue relevant to web export behavior required a local fork maintained by the author to apply a fix \citep{gdsync_fork}. A pull request was submitted to the upstream GDSync repository \citep{gdsync_framework}, but until that change is merged and released, this project uses the author's fork for the web-export-based game build.
 
 %-----------------------------------------------------------------------
 \subsection{Networking Technology: HTTP/SSE Relay}
@@ -437,33 +437,18 @@ This architecture has trade-offs compared to peer-to-peer approaches:
 Beyond core engine/networking choices, several tools were selected to improve debugging observability, delivery speed, and reproducibility.
 
 \begin{itemize}
-    \item \textbf{ToastParty (Godot plugin)}: non-blocking UI event popups; improved usability feedback during multiplayer sessions.
-    \item \textbf{VarTree (Godot plugin)}: runtime inspection/modification of sync variables; reduced debugging turnaround.
+    \item \textbf{ToastParty (Godot plugin)}: non-blocking UI event popups; improved usability feedback during multiplayer sessions \citep{toastparty_asset}.
+    \item \textbf{VarTree (Godot plugin)}: runtime inspection/modification of sync variables; reduced debugging turnaround \citep{vartree_asset}.
     \item \textbf{Logger/custom logging client}: structured network/gameplay logs; improved diagnosis of timing and replication issues.
-    \item \textbf{Python/aiohttp relay server}: browser-compatible signaling/relay backend for HTTP/SSE transport.
-    \item \textbf{Ruff}: linting and style checks for Python server/scripts; improved maintainability and consistency.
-    \item \textbf{justfile}: repeatable task automation for build/test/maintenance workflows.
-    \item \textbf{mkcert}: trusted local TLS certificates for secure browser multiplayer testing.
-    \item \textbf{Chocolatey}: standardized Windows package setup, reducing environment variability.
-    \item \textbf{const\_generator}: generated constants to reduce manual duplication and config drift.
-    \item \textbf{Git + GitHub}: version control, issue tracking, and collaborative documentation supporting reproducible research development.
+    \item \textbf{Python/aiohttp relay server}: browser-compatible signaling/relay backend for HTTP/SSE transport \citep{python_org,aiohttp_docs}.
+    \item \textbf{Ruff}: linting and style checks for Python server/scripts; improved maintainability and consistency \citep{ruff_docs}.
+    \item \textbf{justfile}: repeatable task automation for build/test/maintenance workflows \citep{just_docs}.
+    \item \textbf{mkcert}: trusted local TLS certificates for secure browser multiplayer testing \citep{mkcert_repo}.
+    \item \textbf{Chocolatey}: standardized Windows package setup, reducing environment variability \citep{chocolatey_platform}.
+    \item \textbf{const\_generator}: generated constants to reduce manual duplication and config drift \citep{const_generator_asset}.
+    \item \textbf{Git + GitHub}: version control, issue tracking, and collaborative documentation supporting reproducible research development \citep{git_scm,github_platform}.
 \end{itemize}
 
-% TODO: Add verification links for external plugins/tools listed above.
-% TODO: Godot Engine link: <ADD_LINK>
-% TODO: GDSync link: <ADD_LINK>
-% TODO: ToastParty link: <ADD_LINK>
-% TODO: VarTree link: <ADD_LINK>
-% TODO: Logger plugin/custom logger link: <ADD_LINK>
-% TODO: Python link: <ADD_LINK>
-% TODO: aiohttp link: <ADD_LINK>
-% TODO: Ruff link: <ADD_LINK>
-% TODO: justfile/just link: <ADD_LINK>
-% TODO: mkcert link: <ADD_LINK>
-% TODO: Chocolatey link: <ADD_LINK>
-% TODO: const_generator link: <ADD_LINK>
-% TODO: Git link: <ADD_LINK>
-% TODO: GitHub link: <ADD_LINK>
 
 %-----------------------------------------------------------------------
 \subsection{Final Toolchain and Rationale Summary}
@@ -556,13 +541,21 @@ The core challenge was translating abstract parallel computing concepts into tan
         \textbf{HPC Concept}   & \textbf{Real-World Analogy}        & \textbf{Game Mechanic}               \\
         \midrule
         Sequential Execution   & Single student working alone       & Single player in solo mode           \\
+        \midrule
         Thread (OpenMP)        & Student with access to shared desk & Player in multiplayer mode           \\
+        \midrule
         Shared Memory          & Desk visible to all students       & Shared card container                \\
+        \midrule
         Thread-Local Storage   & Student's private notebook         & Player's private buffer zones        \\
+        \midrule
         Parallel Execution     & Students work simultaneously       & Multiple players, no turn-taking     \\
+        \midrule
         Synchronization        & Students coordinate access         & Shared container access patterns     \\
+        \midrule
         Memory Access Overhead & Time to reach shared desk          & Network latency to shared data       \\
+        \midrule
         Speedup                & Multiple students finish faster    & Timer comparison: solo vs. multi     \\
+        \midrule
         Load Balancing         & Even distribution of work          & Fair work distribution among players \\
         \bottomrule
     \end{tabular}
