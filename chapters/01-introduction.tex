@@ -3,6 +3,10 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
+\paragraph*{Terminology Note}
+Throughout this thesis, the artifact is referred to as a \textbf{game}. For pedagogical precision, it can also be categorized as a \textbf{serious game} and used as an instructional tool in educational contexts.
+This terminology aligns with prior HPC educational activities explicitly framed as serious games~\citep{mullen2021teaching}.
+
 %-----------------------------------------------------------------------
 \section{Context and Motivation}
 \label{sec:context-motivation}
@@ -29,20 +33,20 @@ Traditional lecture-based approaches struggle to convey the dynamic, interactive
 \subsection{Serious Games as Educational Tools}
 \label{subsec:serious-games}
 
-\textbf{Serious games}—games designed with a primary purpose beyond entertainment—have emerged as powerful educational tools. By leveraging game mechanics such as immediate feedback, progressive challenges, and interactive exploration, serious games can make complex concepts more accessible and engaging. Educational games offer several advantages:
+\textbf{Serious games}---games designed with a primary purpose beyond entertainment---have emerged as powerful educational tools. By leveraging mechanics such as immediate feedback, progressive challenges, and interactive exploration, serious-game-based tools can make complex concepts more accessible and engaging.
+
+In this thesis, the artifact is intentionally presented as a \textbf{game}. At the same time, for pedagogical precision, it can be categorized as a \textbf{serious game} and used as an instructor-guided educational tool in classroom or workshop settings.
 
 \begin{itemize}
-	\item \textbf{Active Learning}: Players learn by doing, not just reading or watching
-	\item \textbf{Immediate Feedback}: Instant consequences of actions enable rapid learning cycles
-	\item \textbf{Visualize Abstract Concepts}: Game representations make invisible processes visible
-	\item \textbf{Safe Experimentation}: Risk-free environment for trial and error without expensive computational resources
-	\item \textbf{Lower Entry Barrier}: Abstract away complex setup and language syntax to focus on core concepts
+	\item \textbf{Active Learning}: Learners engage directly with concepts through interaction
+	\item \textbf{Immediate Feedback}: Actions produce visible outcomes quickly
+	\item \textbf{Visualization}: Abstract parallel behaviors become tangible
+	\item \textbf{Safe Experimentation}: Risk-free environment for trial and error  without costly HPC infrastructure
+	\item \textbf{Lower Entry Barrier}: Learners can focus on concepts before full programming complexity
 \end{itemize}
 
-In the context of HPC education, serious games can transform abstract parallelization strategies into tangible, manipulable activities, helping students build intuition before tackling the complexities of parallel programming languages.
-
 %-----------------------------------------------------------------------
-\subsection{From Physical Experiments to Digital Games}
+\subsection{From Physical Experiments to Digital Tooling}
 \label{subsec:physical-experiments}
 
 The pedagogical approach underlying this thesis stems from classroom experiments conducted by Professor Daniele D'Agostino, where students physically sorted numbered cards to simulate parallel computing paradigms:
@@ -52,14 +56,14 @@ The pedagogical approach underlying this thesis stems from classroom experiments
 	\item \textbf{OpenMP Simulation}: Multiple students work collaboratively at a shared desk with all cards visible in a common container, using private buffer areas for local sorting—demonstrating shared memory parallelism with thread-local storage
 \end{itemize}
 
-These physical activities were highly effective at cThese physical activities were highly effective at conveying parallel computing concepts in a tangible, memorable way. However, they faced significant limitations: scalability (limited by classroom size), repeatability (difficult to reproduce), and accessibility (requires physical presence).
+These physical activities were highly effective at conveying parallel computing concepts in a tangible, memorable way. However, they faced significant limitations, including scalability (limited by classroom size).
 
 This thesis aims to capture that pedagogical effectiveness in a scalable, digital format accessible via web browsers, enabling students worldwide to experience similar learning benefits without the constraints of physical classrooms.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{figures/diagrams/physical-to-digital-mapping.png}
-	\caption{Transformation from physical classroom experiments to digital serious game, preserving pedagogical effectiveness while overcoming physical limitations}
+	\caption{Transformation from physical classroom activity to digital serious-game-based educational tool, preserving pedagogical effectiveness while overcoming physical limitations}
 	\label{fig:physical-to-digital}
 \end{figure}
 
@@ -70,16 +74,14 @@ This thesis aims to capture that pedagogical effectiveness in a scalable, digita
 This thesis addresses the following research problem:
 
 \begin{quote}
-	\textit{How can we design and implement an effective serious game for web platforms that teaches fundamental High-Performance Computing concepts (specifically OpenMP shared-memory parallelism and sequential vs. parallel execution) through interactive card-sorting gameplay while overcoming the technical challenges of multiplayer state synchronization and responsive UI/UX constraints?}
+	\textit{How can we design and implement an effective web-based serious-game educational tool that teaches fundamental High-Performance Computing concepts (specifically OpenMP shared-memory parallelism and sequential vs. parallel execution) through interactive card-sorting while overcoming technical challenges of multiplayer state synchronization and responsive UI/UX constraints?}
 \end{quote}
 
 This overarching problem decomposes into three interrelated challenges:
 
 \begin{itemize}
-	\item \textbf{Educational Challenge}: How can abstract parallel computing concepts be mapped to concrete, understandable game mechanics that accurately represent OpenMP paradigms?
-
-	\item \textbf{Technical Challenge}: How can we implement real-time multiplayer gameplay across diverse devices with acceptable latency and consistent state synchronization?
-
+	\item \textbf{Educational Challenge}: How can abstract parallel computing concepts be mapped to concrete mechanics that accurately represent OpenMP paradigms?
+	\item \textbf{Technical Challenge}: How can real-time multiplayer interaction be implemented across diverse devices with acceptable latency and consistent state?
 	\item \textbf{Design Challenge}: How can we balance educational effectiveness with engagement and playability across different screen sizes and devices?
 \end{itemize}
 
@@ -89,53 +91,51 @@ Detailed requirements analysis appears in Chapter~\ref{ch:methodology}.
 \section{Research Objectives}
 \label{sec:objectives}
 
-The primary objective of this thesis is to develop a functional serious game prototype that demonstrates the feasibility of teaching HPC concepts through web-based gaming, creating an open-source platform suitable for future educational research and classroom deployment.
+The primary objective of this thesis is to develop a functional serious-game-based educational tool that demonstrates the feasibility of teaching HPC concepts through web-based interactive activities, creating an open-source platform suitable for educational use and future research.
 
 \subsection{Core Objectives}
 \label{subsec:core-objectives}
 
 \begin{enumerate}
-	\item \textbf{Develop an Interactive Serious Game}: Create a game using card sorting as a metaphor for parallel sorting algorithms, accurately mapping game mechanics to OpenMP paradigms
-
-	\item \textbf{Implement Web-First Functionality}: Develop the game as a web application that runs in browsers with responsive design across different screen sizes and devices
-
-	\item \textbf{Create Multiplayer Capability}: Implement real-time multiplayer functionality enabling 2--4 players to collaborate, simulating distributed computing scenarios
-
-	\item \textbf{Evaluate Technical Feasibility}: Assess challenges and solutions for web-based multiplayer game development, particularly regarding state synchronization using the GDSync framework and HTTP/SSE relay architecture
-
-	\item \textbf{Document Development Process}: Provide comprehensive documentation of technology choices, implementation challenges, and solutions to guide future developers of educational games
+	\item \textbf{Develop an Interactive Game-like Educational Tool}: Use card sorting as a metaphor for parallel sorting and OpenMP-style collaboration
+	\item \textbf{Implement Web-First Functionality}: Run directly in modern browsers with responsive design
+	\item \textbf{Create Multiplayer Capability}: Support many collaborative participants with synchronized shared state
+	\item \textbf{Evaluate Technical Feasibility}: Assess architecture decisions and implementation challenges, including GDSync integration and HTTP/SSE relay networking
+	\item \textbf{Support Instructor-Guided Use}: Ensure the artifact fits classroom and workshop workflows with facilitation and reflection
 \end{enumerate}
 
 %-----------------------------------------------------------------------
 \section{Proposed Solution: HPC Sorting Serious Game}
 \label{sec:proposed-solution}
 
-This thesis presents the \textbf{HPC Sorting Serious Game}, a web-first educational game that teaches parallel computing through interactive card-sorting. The game uses a simple yet effective metaphor: sorting numbered cards represents sorting data in parallel computing systems. By manipulating virtual cards, students gain hands-on experience with parallelization strategies without the complexity of actual parallel programming.
-
-
+This thesis presents the \textbf{HPC Sorting Serious Game}, a web-first serious-game-based educational tool for introducing parallel computing concepts through interactive card sorting. The card interaction model provides an intuitive bridge between concrete manipulation and abstract HPC concepts.
 
 \subsection{Technology Stack}
 \label{subsec:technology-stack}
 
-The game is built using open-source technologies:
+The tool is built using open-source technologies:
 
 \begin{itemize}
-\item \textbf{Godot Engine 4.x}: Lightweight game engine with excellent 2D capabilities and web export support
-\item \textbf{GDScript}: Python-like scripting language for rapid development
-\item \textbf{GDSync Framework}: Multiplayer state synchronization framework
-\item \textbf{HTTP/SSE Relay Server}: Custom server for real-time web-based multiplayer communication game development and web-based multiplayer architecture:
+	\item \textbf{Godot Engine 4.x}: Lightweight engine with strong 2D and web export support
+	\item \textbf{GDScript}: Python-like scripting language for rapid iteration
+	\item \textbf{GDSync Framework}: Synchronization framework used for multiplayer state handling
+	\item \textbf{HTTP/SSE Relay Server}: Browser-compatible real-time relay for multiplayer communication
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\section{Thesis Contributions}
+\label{sec:contributions}
+
+This thesis contributes to HPC education and educational game engineering in four areas:
 
 \begin{enumerate}
-	\item \textbf{Pedagogical Innovation}: A novel game-based approach for teaching OpenMP shared-memory parallelism and sequential vs. parallel execution comparison, directly inspired by successful physical classroom experiments, with systematic mapping between game mechanics and parallel computing paradigms. Additionally, demonstrates that fundamental HPC concepts can be taught effectively without requiring students to first master complex programming languages like C/C++, reducing cognitive load.
-
-	\item \textbf{Technical Implementation}: A functional web-based serious game demonstrating real-time multiplayer synchronization for OpenMP simulation, responsive UI/UX for displaying 50+ interactive elements across diverse screen sizes, and solutions to web platform constraints including state consistency and network latency management.
-
-	\item \textbf{Comprehensive Documentation}: Detailed analysis of technical challenges (particularly GDSync framework issues, multiplayer synchronization, and web browser constraints) and solutions, providing practical guidance for educational game developers.
-
-	\item \textbf{Open-Source Platform}: A freely available, extensible system for HPC education research, suitable for future academic publications and immediate classroom deployment.
+	\item \textbf{Pedagogical Contribution}: A novel game-based approach for teaching OpenMP shared-memory parallelism and sequential vs. parallel execution comparison, directly inspired by successful physical classroom experiments, with systematic mapping between game mechanics and parallel computing paradigms. Additionally, demonstrates that fundamental HPC concepts can be taught effectively without requiring students to first master complex programming languages like C/C++, reducing cognitive load.
+	\item \textbf{Technical Contribution}: A web-first implementation with synchronized multiplayer behavior and responsive UI for high-card-count interaction
+	\item \textbf{Documentation Contribution}: Detailed discussion of practical engineering issues, including synchronization and framework constraints
+	\item \textbf{Open-Source Contribution}: An extensible codebase that can be reused and expanded for future HPC education research
 \end{enumerate}
 
-Detailed discussion of these contributions and their implications appears in Chapter~\ref{ch:conclusion}.
+Detailed discussion of these contributions appears in Chapter~\ref{ch:conclusion}.
 
 %-----------------------------------------------------------------------
 \section{Thesis Organization}
@@ -143,20 +143,20 @@ Detailed discussion of these contributions and their implications appears in Cha
 
 The remainder of this thesis is organized as follows:
 
-\textbf{Chapter~\ref{ch:background}} reviews parallel computing fundamentals (focusing on OpenMP shared-memory parallelism), serious games in education, web game development challenges, and multiplayer architecture patterns, identifying gaps in existing HPC educational tools.
+\textbf{Chapter~\ref{ch:background}} reviews parallel computing fundamentals, serious games in education, web development constraints, and multiplayer architecture patterns.
 
-\textbf{Chapter~\ref{ch:methodology}} describes the Design Science Research methodology, requirements analysis, and technology selection decisions.
+\textbf{Chapter~\ref{ch:methodology}} describes the research method, requirements analysis, and technology selection.
 
-\textbf{Chapter~\ref{ch:architecture}} presents the system design and architecture, including scene structure, component design, multiplayer networking, and responsive UI/UX considerations.
+\textbf{Chapter~\ref{ch:architecture}} presents system architecture, component design, networking model, and UI/UX strategy.
 
-\textbf{Chapter~\ref{ch:implementation}} details the technical implementation, including development environment, single-player and multiplayer implementation, and web-specific optimizations.
+\textbf{Chapter~\ref{ch:implementation}} details implementation choices and key engineering decisions.
 
-\textbf{Chapter~\ref{ch:problems}} provides an honest analysis of difficulties encountered during development, including GDSync framework issues, multiplayer synchronization challenges, and web browser constraints.
+\textbf{Chapter~\ref{ch:problems}} analyzes development challenges and lessons learned.
 
-\textbf{Chapter~\ref{ch:results}} presents completed system features, technical performance metrics, platform compatibility assessment, and preliminary evaluation of educational effectiveness.
+\textbf{Chapter~\ref{ch:results}} presents system capabilities, technical performance, and preliminary educational observations.
 
-\textbf{Chapter~\ref{ch:conclusion}} summarizes contributions, reflects on research questions, discusses implications, and outlines future work directions.
+\textbf{Chapter~\ref{ch:conclusion}} summarizes contributions and outlines future work.
 
-\textbf{Appendices} provide supplementary materials including user manual, code listings, API documentation, and study materials.
+\textbf{Appendices} provide supplementary materials including user documentation and technical references.
 
 %-----------------------------------------------------------------------

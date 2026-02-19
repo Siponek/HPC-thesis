@@ -27,9 +27,9 @@ The main contributions of this work include:
 \paragraph*{2. Technical Implementation}
 
 \begin{itemize}
-    \item Functional serious game prototype demonstrating real-time multiplayer synchronization on mobile platforms
+    \item Functional web-first serious-game-based educational tool demonstrating real-time multiplayer synchronization
     \item Solutions to multiplayer state management challenges, particularly selective visibility and host-authoritative architecture
-    \item Integration of GDSync framework with WebRTC for peer-to-peer educational gaming
+    \item Integration of GDSync framework with an HTTP/SSE relay networking approach for browser-compatible multiplayer
     \item Mobile UI/UX design patterns for displaying and manipulating numerous interactive elements on small screens
 \end{itemize}
 
@@ -82,30 +82,30 @@ This mapping was validated through recognition by HPC-experienced participants a
 \subsection{Addressing the Technical Problem}
 \label{subsec:technical-problem-answered}
 
-\textbf{Q: How can we implement real-time multiplayer gameplay on mobile devices with acceptable performance?}
+\textbf{Q: How can we implement real-time multiplayer interaction in a web-first educational tool with acceptable performance?}
 
 \textbf{A:} The thesis demonstrated that:
 \begin{itemize}
-    \item WebRTC peer-to-peer networking eliminates server costs while providing low latency
+    \item Browser-compatible HTTP/SSE relay networking enabled robust multiplayer synchronization in web deployment
     \item GDSync framework (despite challenges) simplifies state synchronization
     \item Host-authoritative architecture balances consistency and responsiveness
     \item Godot Engine provides adequate performance for 2D card-based gameplay
-    \item Target 60 FPS achieved for typical scenarios on mid-range devices
+    \item Target 60 FPS was achieved for typical scenarios in modern desktop-class browsers
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Addressing the Design Problem}
 \label{subsec:design-problem-answered}
 
-\textbf{Q: How can we balance educational effectiveness with engagement and playability on mobile platforms?}
+\textbf{Q: How can we balance educational effectiveness with engagement and playability in a web-first environment?}
 
-\textbf{A:} The thesis showed that:
+\textbf{A:} The thesis indicates that:
 \begin{itemize}
     \item Touch-based drag-and-drop provides intuitive, engaging interaction
     \item Visual clarity and immediate feedback support learning
     \item Scalable difficulty accommodates learners at different levels
     \item Game mechanics naturally lead to questions about parallel computing
-    \item Informal testing suggests good engagement without sacrificing educational goals
+    \item Informal testing suggests good engagement while supporting introductory educational goals
 \end{itemize}
 
 However, the design can be improved with better onboarding and educational scaffolding for learners without prior HPC exposure.
@@ -267,7 +267,7 @@ Enhancements requiring 3--6 months of development:
     \item Progress tracking across multiple sessions
 \end{itemize}
 
-\paragraph*{Web Export:}
+\paragraph*{Web Distribution Enhancements:}
 
 \begin{itemize}
     \item HTML5 export for browser-based play
@@ -411,7 +411,7 @@ Potential paper topics:
 \subsubsection{Technical Scope:}
 
 \begin{itemize}
-    \item Single platform implementation (Android only)
+    \item Scope centered on web-first browser deployment; native app packaging was not a primary implementation target
     \item Focus on basic parallel concepts (no advanced topics)
     \item Simplified metaphors (not high-fidelity simulations)
     \item Limited integration with formal educational contexts
@@ -448,9 +448,9 @@ Potential paper topics:
 This thesis presented the design, implementation, and evaluation of the HPC Sorting Serious Game, demonstrating that:
 
 \begin{enumerate}
-    \item \textbf{Serious games can effectively teach HPC concepts} through intuitive, engaging mechanics that transform abstract ideas into concrete, manipulable interactions.
+    \item \textbf{Serious-game-based tools can support HPC concept learning} through intuitive mechanics that make abstract ideas concrete and manipulable.
 
-    \item \textbf{Mobile platforms are viable for educational multiplayer games}, despite technical challenges in state synchronization, UI/UX design, and performance optimization.
+    \item \textbf{Web-first platforms are viable for educational multiplayer tools}, despite technical challenges in synchronization, UI/UX design, and performance optimization.
 
     \item \textbf{Open-source technologies enable accessible HPC education} by eliminating cost barriers and empowering educators to customize and extend educational tools.
 
@@ -470,7 +470,7 @@ The author hopes this work inspires further research and development in educatio
 \[To be written last, after all revisions are complete.\]
 Teaching parallel computing remains challenging, but it need not be boring or inaccessible. By combining pedagogical insight, technical innovation, and game design principles, we can create learning experiences that are both effective and enjoyable.
 
-The journey from physical card-sorting experiments in a classroom to a digital multiplayer mobile game demonstrates the potential for technology to scale and extend proven teaching methods. While the game developed in this thesis is far from perfect, it represents a meaningful contribution to the ongoing effort to make HPC education more engaging and accessible.
+The journey from physical card-sorting experiments in a classroom to a digital multiplayer web-based educational tool demonstrates the potential for technology to scale and extend proven teaching methods. While the game developed in this thesis is far from perfect, it represents a meaningful contribution to the ongoing effort to make HPC education more engaging and accessible.
 
 As we look to the future, the convergence of mobile computing, cloud infrastructure, and educational research offers exciting possibilities for serious games in computing education. The author looks forward to seeing how this work evolves, inspires further innovations, and ultimately contributes to better outcomes for students learning parallel computing.
 
