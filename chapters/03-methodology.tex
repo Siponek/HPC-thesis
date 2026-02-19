@@ -205,6 +205,26 @@ Functional requirements specify what the system must do:
     \item No account creation or authentication required
 \end{itemize}
 
+
+\subsection{Core Concept}
+\label{subsec:core-concept}
+
+The game presents players with a deck of numbered cards that must be sorted in ascending order. This simple metaphor maps directly to parallel sorting algorithms, with different game modes representing different execution paradigms:
+
+\paragraph*{Single-Player Mode (Sequential Execution):} Represents traditional sequential algorithm execution where a single process sorts all data. The player works alone with all cards visible, performing the entire sorting task independently.
+
+\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses private buffer zones for local sorting (representing thread-local storage), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
+
+The complete architecture and pedagogical mapping are detailed in Chapter ~\ref{ch:architecture}.
+\par
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/diagrams/sequential-vs-openmp-modes.png}
+    \caption{Comparison of game modes: Single-player represents sequential execution (left) where one player sorts all cards independently; Multiplayer represents OpenMP shared-memory parallelism (right) where multiple players collaborate with a shared container and private buffers}
+    \label{fig:game-modes-comparison}
+\end{figure}
+
 %-----------------------------------------------------------------------
 \section{Technology Selection}
 \label{sec:technology-selection}
