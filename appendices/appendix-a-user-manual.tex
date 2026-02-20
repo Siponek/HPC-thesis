@@ -5,70 +5,68 @@
 \section{Introduction}
 \label{app:a:introduction}
 
-This user manual provides comprehensive instructions for installing, configuring, and playing the HPC Sorting Serious Game. It is intended for students, educators, and anyone interested in learning about parallel computing through interactive gameplay.
+This user manual provides instructions for accessing, configuring, and playing the HPC Sorting Serious Game. It is intended for students, educators, and anyone interested in learning about parallel computing through interactive gameplay.
+
+The game is deployed as a \textbf{web application} (Godot Engine WebAssembly export) and runs directly in a modern browser. No installation is required for the primary deployment. Desktop (Windows) builds are also available for offline use or development.
 
 %-----------------------------------------------------------------------
 \section{System Requirements}
 \label{app:a:system-requirements}
 
-\subsection{Minimum Requirements}
+\subsection{Web Version (Primary)}
 
 \begin{itemize}
-    \item \textbf{Operating System}: Android 7.0 (API level 24) or higher
-    \item \textbf{RAM}: 2 GB minimum
-    \item \textbf{Storage}: 50 MB free space
-    \item \textbf{Screen}: 5-inch display or larger
-    \item \textbf{Graphics}: OpenGL ES 3.0 support
-    \item \textbf{Network}: WiFi or mobile data (for multiplayer mode only)
+    \item \textbf{Browser}: Chromium-based browser (Chrome, Edge, Brave) or Firefox, version 90 or later
+    \item \textbf{WebGL}: WebGL 2.0 support required
+    \item \textbf{SharedArrayBuffer}: Must be enabled (requires HTTPS with proper COOP/COEP headers)
+    \item \textbf{RAM}: 2~GB minimum available to browser
+    \item \textbf{Network}: Internet connection required for multiplayer mode; single-player works offline after initial load
+    \item \textbf{Input}: Mouse or touchscreen; keyboard shortcuts optional
 \end{itemize}
 
-\subsection{Recommended Requirements}
+\subsection{Desktop Version (Windows)}
 
 \begin{itemize}
-    \item Android 9.0 or higher
-    \item 4 GB RAM
-    \item 5.5--6.5 inch display
-    \item Stable WiFi connection for multiplayer
+    \item \textbf{Operating System}: Windows 10 or later (x86\_64)
+    \item \textbf{RAM}: 2~GB minimum
+    \item \textbf{Storage}: 100~MB free space
+    \item \textbf{Graphics}: Vulkan or OpenGL 3.3 support
+    \item \textbf{Network}: Internet connection for multiplayer
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\section{Installation}
-\label{app:a:installation}
+\section{Accessing the Game}
+\label{app:a:accessing}
 
-\subsection{Installing from APK}
+\subsection{Web Version}
 
 \begin{enumerate}
-    \item Download the APK file from the official repository or distribution site
-    \item Navigate to the APK file using your device's file manager
-    \item Tap the APK file to begin installation
-    \item If prompted, allow installation from unknown sources in Settings
-    \item Follow the on-screen installation prompts
-    \item Launch the app from your app drawer
+    \item Navigate to the hosted game URL in a supported browser
+    \item Wait for the WebAssembly module to load (progress bar shown)
+    \item The main menu appears once loading is complete
 \end{enumerate}
 
-\subsection{Installing from Google Play (Future)}
+\noindent\textbf{Note:} The web export requires the hosting server to set specific HTTP headers (\texttt{Cross-Origin-Opener-Policy: same-origin} and \texttt{Cross-Origin-Embedder-Policy: require-corp}) for \texttt{SharedArrayBuffer} support. If these headers are missing, multiplayer functionality will not work. See docs/GITHUB\_PAGES\_AND\_LOCAL\_SIGNALING\_LIMITATIONS.md in the project repository for details.
 
-Once published to Google Play Store:
+\subsection{Desktop Version}
+
 \begin{enumerate}
-    \item Open Google Play Store app
-    \item Search for "HPC Sorting Serious Game"
-    \item Tap "Install"
-    \item Wait for download and installation to complete
-    \item Tap "Open" to launch
+    \item Download the Windows executable from the project releases page
+    \item Extract the archive if necessary
+    \item Run the executable directly---no installation is required
 \end{enumerate}
 
 %-----------------------------------------------------------------------
 \section{Getting Started}
 \label{app:a:getting-started}
 
-\subsection{First Launch}
+\subsection{Main Menu}
 
-On first launch, you will see the main menu with options:
+On launch, the main menu presents the following options:
 \begin{itemize}
-    \item \textbf{Single Player}: Practice sorting alone (sequential execution)
-    \item \textbf{Multiplayer}: Join or host a game with others (OpenMP shared-memory simulation)
-    \item \textbf{Settings}: Configure game options
-    \item \textbf{About}: Information about the game and credits
+    \item \textbf{Single Player}: Practice sorting alone (sequential execution baseline)
+    \item \textbf{Multiplayer}: Join or host a cooperative multiplayer game (OpenMP shared-memory simulation)
+    \item \textbf{Settings}: Configure theme and display options
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -78,41 +76,39 @@ On first launch, you will see the main menu with options:
 \subsection{Starting a Single-Player Game}
 
 \begin{enumerate}
-    \item Tap "Single Player" from the main menu
-    \item Configure game settings:
+    \item Select ``Single Player'' from the main menu
+    \item Configure game parameters in the options dialog:
           \begin{itemize}
-              \item Number of cards: 10--200 (recommended: 50 for beginners)
-              \item Difficulty: Easy, Medium, Hard
+              \item \textbf{Number of cards}: configurable via spin box
+              \item \textbf{Buffer slot count}: number of private buffer positions
+              \item \textbf{Card value range}: upper bound for card values
           \end{itemize}
-    \item Tap "Start Game"
+    \item Click ``Start'' to begin
 \end{enumerate}
 
 \subsection{Gameplay}
 
 \paragraph{Objective:}
-Sort all cards in ascending order in the main container as quickly as possible.
+Sort all cards in ascending order in the main container.
 
 \paragraph{Controls:}
 \begin{itemize}
-    \item \textbf{Drag}: Long-press on a card and drag to move it
-    \item \textbf{Drop}: Release finger to drop card in desired location
-    \item \textbf{Scroll}: Swipe vertically to scroll through cards
-    \item \textbf{Zoom}: Pinch to zoom in/out (if enabled)
+    \item \textbf{Drag and Drop}: Click and drag a card to reposition it within the container or move it to/from a buffer slot
+    \item \textbf{Scroll}: Use the horizontal scroll bar or mouse wheel to navigate through cards when they exceed viewport width
 \end{itemize}
 
-\paragraph{Using Buffers:}
+\paragraph{Using Buffer Slots:}
 \begin{itemize}
-    \item Each player has 2--3 private buffer zones
-    \item Drag cards into buffers for temporary storage
-    \item Sort cards within buffers before merging back
-    \item Buffers simulate thread-local storage in parallel computing
+    \item Buffer slots appear below the main card container
+    \item Drag cards into buffer slots for temporary storage during sorting
+    \item Buffer slots simulate thread-local storage in parallel computing
+    \item Cards in buffers must form a contiguous subsequence of the sorted target before the game can complete
 \end{itemize}
 
 \paragraph{Winning:}
 \begin{itemize}
-    \item Game completes when all cards are in correct ascending order
-    \item Victory screen shows completion time and number of moves
-    \item Try to minimize both time and moves for better performance
+    \item The game completes when all cards are in correct ascending order in the main container
+    \item Completion time is displayed
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -122,109 +118,90 @@ Sort all cards in ascending order in the main container as quickly as possible.
 \subsection{Creating a Game}
 
 \begin{enumerate}
-    \item Tap "Multiplayer" from the main menu
-    \item Tap "Create Game"
-    \item Configure settings:
+    \item Select ``Multiplayer'' from the main menu
+    \item Select ``Create Game''
+    \item Configure game settings:
           \begin{itemize}
-              \item Number of players: 2--4
-              \item Number of cards: 10--200
-              \item Game mode: Cooperative or Competitive
+              \item Number of cards
+              \item Buffer slot count per player
+              \item Barrier mode (first-to-reach or round-robin)
           \end{itemize}
-    \item A unique room code will be generated
+    \item A lobby code is generated automatically
     \item Share this code with other players
-    \item Wait for players to join
-    \item Once all players are ready, tap "Start Game"
+    \item Wait for players to join the lobby
+    \item Once all players are present, click ``Start Game''
 \end{enumerate}
 
 \subsection{Joining a Game}
 
 \begin{enumerate}
-    \item Tap "Multiplayer" from the main menu
-    \item Tap "Join Game"
-    \item Enter the room code provided by the host
-    \item Tap "Join"
+    \item Select ``Multiplayer'' from the main menu
+    \item Select ``Join Game''
+    \item Enter the lobby code provided by the host
+    \item Click ``Join''
     \item Wait in the lobby for the host to start the game
 \end{enumerate}
 
 \subsection{Multiplayer Gameplay}
 
-\paragraph{Shared Memory Access:}
+\paragraph{Shared Container (Shared Memory):}
 \begin{itemize}
-    \item All cards are visible in the shared container (simulating shared memory)
-    \item Each player has private buffers for local work (thread-local storage)
-    \item Players can access the shared container simultaneously
-    \item Other players' private buffers are not directly visible (simulating thread-private data)
+    \item All cards are visible in the shared container, simulating shared memory accessible by all threads
+    \item Any player can drag cards within the shared container to reorder them
+    \item Changes propagate to all connected players in real time
 \end{itemize}
 
-\paragraph{Collaboration:}
+\paragraph{Private Buffers (Thread-Local Storage):}
 \begin{itemize}
-    \item Players must coordinate to sort all cards
-    \item Cards can be passed between players (message passing)
-    \item Communication and strategy are key to success
-    \item Network latency simulates communication overhead in HPC
+    \item Each player has private buffer slots visible only to themselves
+    \item Cards moved to a player's buffer disappear from other players' views
+    \item When a card is returned to the shared container, it becomes visible to all again
+    \item This simulates the distinction between shared and private memory in OpenMP
+\end{itemize}
+
+\paragraph{Barrier Synchronization:}
+\begin{itemize}
+    \item Any player can initiate a barrier (analogous to \texttt{\#pragma omp barrier})
+    \item All players must reach the barrier before proceeding
+    \item Once all players are at the barrier, a designated ``main thread'' (one player) can perform coordinated operations while others are blocked
+    \item Main thread selection is either first-to-reach or round-robin, depending on game settings
+    \item This teaches students about synchronization primitives in parallel computing
 \end{itemize}
 
 \paragraph{Winning Together:}
 \begin{itemize}
-    \item Team wins when all cards across all players are sorted
-    \item Final merge phase combines sorted sequences
-    \item Victory screen shows team performance metrics
+    \item The team wins when all cards are sorted correctly in the shared container
+    \item All players must have returned their buffer cards to the container
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \section{Settings}
 \label{app:a:settings}
 
-\subsection{Game Settings}
-
 \begin{itemize}
-    \item \textbf{Default Card Count}: Set preferred number of cards for quick start
-    \item \textbf{Difficulty}: Choose default difficulty level
-    \item \textbf{Theme}: Light or dark mode
-\end{itemize}
-
-\subsection{Audio Settings}
-
-\begin{itemize}
-    \item \textbf{Sound Effects}: Enable/disable gameplay sounds
-    \item \textbf{Volume}: Adjust volume level
-\end{itemize}
-
-\subsection{Display Settings}
-
-\begin{itemize}
-    \item \textbf{Card Size}: Adjust card display size
-    \item \textbf{Orientation}: Portrait, landscape, or auto
-    \item \textbf{Visual Effects}: Enable/disable animations
-\end{itemize}
-
-\subsection{Network Settings}
-
-\begin{itemize}
-    \item \textbf{Connection Type}: WiFi preferred, mobile data, or either
-    \item \textbf{Signaling Server}: Configure custom server (advanced)
+    \item \textbf{Theme}: Toggle between light and dark mode
+    \item \textbf{Signaling Server URL}: Configure a custom signaling server address for multiplayer (advanced; defaults to the hosted server)
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \section{Tips and Strategies}
 \label{app:a:tips-strategies}
 
-\subsection{Efficient Sorting Strategies}
+\subsection{Sorting Strategies}
 
 \begin{enumerate}
-    \item \textbf{Divide and Conquer}: Use buffers to sort smaller subsets of cards
-    \item \textbf{Merge Sorted Sequences}: Maintain sorted order within buffers, then merge
-    \item \textbf{Minimize Moves}: Think before moving; avoid unnecessary rearrangements
-    \item \textbf{Identify Patterns}: Look for already-sorted subsequences
+    \item \textbf{Divide and Conquer}: Use buffer slots to sort smaller subsets of cards, then merge them back
+    \item \textbf{Find Sorted Runs}: Identify cards that are already in order and build around them
+    \item \textbf{Minimize Moves}: Think before moving---unnecessary rearrangements waste time
 \end{enumerate}
 
 \subsection{Multiplayer Coordination}
 
 \begin{enumerate}
-    \item \textbf{Communicate}: Use external communication (voice, text) to coordinate
-    \item \textbf{Divide Responsibility}: Assign value ranges to each player
-    \item \textbf{Minimize Passing}: Reduce card exchanges to reduce overhead
-    \item \textbf{Plan Ahead}: Discuss strategy before starting
+    \item \textbf{Divide Responsibility}: Each player takes a value range (e.g., player~1 handles cards 1--25, player~2 handles 26--50)
+    \item \textbf{Use Barriers Strategically}: Initiate a barrier when all players have sorted their portions and need to merge
+    \item \textbf{Communicate Externally}: Use voice chat or messaging to coordinate since the game does not include built-in chat
+    \item \textbf{Main Thread Awareness}: When you are the main thread during a barrier, merge sorted chunks efficiently; other players must wait
 \end{enumerate}
 
 %-----------------------------------------------------------------------
@@ -233,37 +210,36 @@ Sort all cards in ascending order in the main container as quickly as possible.
 
 \subsection{Common Issues and Solutions}
 
-\paragraph{Game Won't Launch:}
+\paragraph{Game does not load in browser:}
 \begin{itemize}
-    \item Verify Android version meets minimum requirements
-    \item Ensure sufficient free storage space
-    \item Try restarting device
-    \item Reinstall the app if necessary
+    \item Verify that your browser supports WebGL 2.0 (check \texttt{chrome://gpu} in Chrome)
+    \item Ensure the hosting server sends correct COOP/COEP headers for \texttt{SharedArrayBuffer}
+    \item Try clearing browser cache and reloading
+    \item Try a different Chromium-based browser
 \end{itemize}
 
-\paragraph{Performance Issues (Lag):}
+\paragraph{Performance issues:}
 \begin{itemize}
-    \item Reduce number of cards
-    \item Disable visual effects in settings
-    \item Close background apps
-    \item Ensure device is not overheating
+    \item Reduce the number of cards
+    \item Close other browser tabs to free memory
+    \item Ensure hardware acceleration is enabled in browser settings
+    \item The desktop version generally performs better than the web version for large card counts
 \end{itemize}
 
-\paragraph{Cannot Connect to Multiplayer:}
+\paragraph{Cannot connect to multiplayer:}
 \begin{itemize}
     \item Verify internet connection is active
     \item Check that both players are using the same game version
-    \item Try switching between WiFi and mobile data
-    \item Verify firewall/network settings allow connections
-    \item Re-enter room code carefully
+    \item Ensure the signaling server is reachable (default server requires internet access)
+    \item Re-enter the lobby code carefully
+    \item If using a custom signaling server, verify it is running and accessible
 \end{itemize}
 
-\paragraph{Multiplayer Lag or Disconnections:}
+\paragraph{Multiplayer desynchronization:}
 \begin{itemize}
-    \item Switch to more stable network connection
-    \item Move closer to WiFi router
-    \item Reduce number of players
-    \item Check that signaling server is reachable
+    \item This can occur if network packets are lost or arrive out of order
+    \item The host can use the ``sync state'' mechanism to push authoritative state to all clients
+    \item As a last resort, restart the game session
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -273,44 +249,38 @@ Sort all cards in ascending order in the main container as quickly as possible.
 \subsection{For Students}
 
 \begin{itemize}
-    \item Play single-player mode first to understand mechanics
-    \item Observe how buffers help organize your sorting work
-    \item Notice how coordination becomes harder with more players
-    \item Reflect on how game concepts relate to parallel programming
-    \item Experiment with different strategies and compare performance
+    \item Play single-player mode first to understand the card sorting mechanics
+    \item Observe how buffer slots help organize your sorting work (thread-local storage)
+    \item In multiplayer, notice how coordination becomes harder with more players (communication overhead)
+    \item Pay attention to the barrier mechanic---it directly mirrors \texttt{\#pragma omp barrier}
+    \item Reflect on how game concepts relate to OpenMP parallel programming
 \end{itemize}
 
 \subsection{For Instructors}
 
 \begin{itemize}
-    \item Use as pre-lecture icebreaker to introduce HPC concepts
-    \item Facilitate discussion after gameplay about parallel computing
-    \item Ask students to identify real-world parallels (threads, shared memory)
-    \item Connect game mechanics to OpenMP programming model and sequential execution
-    \item Use performance metrics to discuss speedup and scalability
+    \item Use as a pre-lecture activity to introduce HPC concepts before formal instruction
+    \item The web deployment requires no installation---students can play immediately via a shared URL
+    \item Facilitate post-gameplay discussion connecting game mechanics to parallel programming:
+          \begin{itemize}
+              \item Shared container $\leftrightarrow$ shared memory
+              \item Private buffers $\leftrightarrow$ thread-local / private variables
+              \item Barrier mechanic $\leftrightarrow$ \texttt{\#pragma omp barrier}
+              \item Multiple players $\leftrightarrow$ multiple threads
+              \item Single-player $\leftrightarrow$ sequential execution baseline
+          \end{itemize}
+    \item Use completion metrics to discuss relative effort of parallel coordination vs.\ sequential sorting
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \section{Support and Resources}
 \label{app:a:support}
 
-\subsection{Getting Help}
-
 \begin{itemize}
-    \item \textbf{GitHub Repository}: \texttt{https://github.com/[username]/hpc-sorting-serious-game}
-    \item \textbf{Issue Tracker}: Report bugs and request features on GitHub Issues
-    \item \textbf{Documentation}: Additional documentation in the repository wiki
-    \item \textbf{Contact}: Szymon Zinkowicz - \texttt{[email]}
-\end{itemize}
-
-\subsection{Contributing}
-
-The project is open-source (MIT license). Contributions are welcome:
-\begin{itemize}
-    \item Report bugs and suggest features via GitHub Issues
-    \item Submit pull requests with improvements
-    \item Contribute documentation and educational resources
-    \item Share feedback from classroom use
+    \item \textbf{Game Repository}: \url{https://github.com/Siponek/hpc-sorting-serious-game}
+    \item \textbf{Thesis Repository}: \url{https://github.com/Siponek/HPC-thesis}
+    \item \textbf{Issue Tracker}: Report bugs and request features via GitHub Issues
+    \item \textbf{License}: MIT license---contributions are welcome
 \end{itemize}
 
 %-----------------------------------------------------------------------

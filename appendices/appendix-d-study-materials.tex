@@ -93,11 +93,11 @@ After multiplayer gameplay:
 Bridge from game to formal concepts:
 
 \begin{enumerate}
-    \item How does single-player mode relate to shared-memory parallel programming?
-    \item How does multiplayer mode relate to distributed-memory parallel programming?
+    \item How does single-player mode relate to sequential (single-threaded) execution?
+    \item How does multiplayer mode relate to shared-memory parallel programming (OpenMP)?
     \item What real-world computing problems benefit from parallelism?
-    \item What are the trade-offs between shared-memory and distributed-memory approaches?
-    \item When might communication costs outweigh parallelism benefits?
+    \item What role does the shared container play compared to private buffers?
+    \item When might coordination overhead outweigh parallelism benefits?
 \end{enumerate}
 
 %-----------------------------------------------------------------------
@@ -178,7 +178,7 @@ Bridge from game to formal concepts:
 \section{Exercises}
 \label{app:d:exercises}
 
-These exercises are designed for students aged 12-16 with no prior programming experience. They focus on understanding concepts through the game rather than technical implementation.
+These exercises are designed for students and learners with no prior HPC experience. They focus on understanding parallel computing concepts through gameplay rather than technical implementation.
 
 \subsection{Exercise 1: Comparing Single and Multiple Players}
 
@@ -254,15 +254,17 @@ Play multiplayer mode and try two different strategies:
     \caption{Detailed game-to-OpenMP concept mapping}
     \begin{tabular}{@{}p{4cm}p{5cm}p{5cm}@{}}
         \toprule
-        \textbf{Game Element} & \textbf{OpenMP Concept} & \textbf{Code Example}          \\
+        \textbf{Game Element}         & \textbf{HPC/OpenMP Concept} & \textbf{Code Example}          \\
         \midrule
-        Single-player session & Parallel region         & \texttt{\#pragma omp parallel} \\
-        Main card container   & Shared array            & Global array variable          \\
-        Buffer zones          & Thread-private storage  & \texttt{private(buffer)}       \\
-        No forced turn-taking & Independent threads     & No explicit synchronization    \\
-        Sorting within buffer & Local computation       & Serial code in parallel region \\
-        Merging back to main  & Reduction/merge         & \texttt{\#pragma omp critical} \\
-        Completion check      & Barrier synchronization & \texttt{\#pragma omp barrier}  \\
+        Single-player mode            & Sequential execution        & Single-threaded program        \\
+        Multiplayer session           & Parallel region             & \texttt{\#pragma omp parallel} \\
+        Main card container           & Shared array                & \texttt{shared(array)}         \\
+        Private buffer zones          & Thread-private storage      & \texttt{private(buffer)}       \\
+        Players working independently & Independent threads         & No explicit synchronization    \\
+        Sorting within buffer         & Local computation           & Serial code in parallel region \\
+        Merging back to main          & Critical section            & \texttt{\#pragma omp critical} \\
+        Barrier mechanic              & Barrier synchronization     & \texttt{\#pragma omp barrier}  \\
+        Main thread during barrier    & Master thread               & \texttt{\#pragma omp master}   \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -291,8 +293,8 @@ For instructors wishing to grade student understanding:
 \subsection{Practical Application (30 points)}
 
 \begin{itemize}
-    \item (15 pts) Designs reasonable parallel sorting strategy
-    \item (15 pts) Implements parallel sorting code (OpenMP)
+    \item (15 pts) Designs reasonable parallel sorting strategy using in-game tools
+    \item (15 pts) Demonstrates effective use of buffers, barriers, and coordination during gameplay
 \end{itemize}
 
 \subsection{Analysis and Reflection (30 points)}
@@ -343,22 +345,22 @@ This section lists direct links to core tools, frameworks, and plugins reference
     \caption{External tools and framework links used in this thesis}
     \begin{tabular}{@{}p{3.2cm}p{2.8cm}p{7.0cm}@{}}
         \toprule
-        \textbf{Tool} & \textbf{Category} & \textbf{URL} \\
+        \textbf{Tool}         & \textbf{Category}          & \textbf{URL}                                                     \\
         \midrule
-        Godot Engine & Game engine & \url{https://godotengine.org/} \\
-        GDSync (upstream) & Multiplayer framework & \url{https://www.gd-sync.com/} \\
-        GDSync (project fork) & Multiplayer framework fork & \url{https://github.com/Siponek/GD-Sync-fork} \\
-        ToastParty & Godot plugin & \url{https://godotassetlibrary.com/asset/PcSgaA/toast-party} \\
-        VarTree & Godot plugin & \url{https://godotassetlibrary.com/asset/PUudIL/vartree} \\
-        Const Generator & Godot plugin & \url{https://godotassetlibrary.com/asset/DrA6Bt/const-generator} \\
-        Python & Language/runtime & \url{https://www.python.org/} \\
-        aiohttp & Python web framework & \url{https://docs.aiohttp.org/} \\
-        Ruff & Linter & \url{https://docs.astral.sh/ruff/} \\
-        just & Task runner & \url{https://just.systems/} \\
-        mkcert & Local TLS utility & \url{https://github.com/FiloSottile/mkcert} \\
-        Chocolatey & Package manager & \url{https://chocolatey.org/} \\
-        Git & Version control & \url{https://git-scm.com/} \\
-        GitHub & Collaboration hosting & \url{https://github.com/} \\
+        Godot Engine          & Game engine                & \url{https://godotengine.org/}                                   \\
+        GDSync (upstream)     & Multiplayer framework      & \url{https://www.gd-sync.com/}                                   \\
+        GDSync (project fork) & Multiplayer framework fork & \url{https://github.com/Siponek/GD-Sync-fork}                    \\
+        ToastParty            & Godot plugin               & \url{https://godotassetlibrary.com/asset/PcSgaA/toast-party}     \\
+        VarTree               & Godot plugin               & \url{https://godotassetlibrary.com/asset/PUudIL/vartree}         \\
+        Const Generator       & Godot plugin               & \url{https://godotassetlibrary.com/asset/DrA6Bt/const-generator} \\
+        Python                & Language/runtime           & \url{https://www.python.org/}                                    \\
+        aiohttp               & Python web framework       & \url{https://docs.aiohttp.org/}                                  \\
+        Ruff                  & Linter                     & \url{https://docs.astral.sh/ruff/}                               \\
+        just                  & Task runner                & \url{https://just.systems/}                                      \\
+        mkcert                & Local TLS utility          & \url{https://github.com/FiloSottile/mkcert}                      \\
+        Chocolatey            & Package manager            & \url{https://chocolatey.org/}                                    \\
+        Git                   & Version control            & \url{https://git-scm.com/}                                       \\
+        GitHub                & Collaboration hosting      & \url{https://github.com/}                                        \\
         \bottomrule
     \end{tabular}
 \end{table}

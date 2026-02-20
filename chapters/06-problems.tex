@@ -8,18 +8,26 @@ This chapter provides an honest and comprehensive analysis of the difficulties e
 \section{Overview}
 \label{sec:problems-overview}
 
-Development of a serious game involving real-time multiplayer synchronization on mobile devices presented numerous technical, design, and pedagogical challenges. These problems span multiple domains:
+Development of a web-first serious game with real-time multiplayer exposed challenges that were tightly coupled: early synchronization faults reduced gameplay trust, UI constraints affected interaction quality, and debugging complexity slowed iteration speed.
+% TODO: [Artifact] Case-backed opening mini-narrative (1 concrete failure episode).
+% TODO: [Purpose] Ground the chapter in one real incident that links technical failure to educational/usability impact.
+% TODO: [Source Inputs] Multiplayer session logs; lobby/startup transition traces; short notes from observed user confusion during affected sessions.
+% TODO: [Placement] Immediately after this opening paragraph.
+% TODO: [Done Criteria] Include trigger, observed symptom, immediate impact on user understanding/trust, and mitigation pointer.
+% TODO: [Cross-refs] Section~\ref{subsec:web-patch-case-study}; Chapter~\ref{ch:results}, Section~\ref{subsec:use-cases}.
+
+The problem space spans multiple domains:
 
 \begin{itemize}
-    \item Technology selection and framework limitations
-    \item Multiplayer state synchronization complexity
-    \item Mobile UI/UX constraints
-    \item Performance optimization requirements
-    \item Documentation and community support gaps
-    \item Testing and debugging difficulties
+    \item \textbf{Technology selection and framework limitations}: constrained viable implementation paths and introduced replacement/mitigation overhead.
+    \item \textbf{Multiplayer state synchronization complexity}: caused divergence risks, ordering issues, and authority conflicts.
+    \item \textbf{UI/UX constraints}: touch interaction precision, screen space management, and browser performance variability during collaborative play.
+    \item \textbf{Performance optimization requirements}: directly affected playability and perceived responsiveness.
+    \item \textbf{Documentation and community support gaps}: increased investigation time and uncertainty in fault attribution.
+    \item \textbf{Testing and debugging difficulties}: made timing-dependent defects costly to reproduce and verify.
 \end{itemize}
 
-This chapter documents these challenges, the approaches taken to address them, and lessons learned that may benefit future projects.
+This chapter documents these challenges, the mitigation actions taken, and the resulting lessons that informed subsequent design and evaluation decisions.
 
 %-----------------------------------------------------------------------
 \section{Technology Selection Challenges}
@@ -31,29 +39,32 @@ Selection criteria and the final rationale for tool/framework adoption are prese
 \subsection{Game Engine Trade-offs}
 \label{subsec:engine-tradeoffs}
 
-\textbf{Challenge:} While Godot Engine proved to be a good choice overall, several limitations became apparent during development:
+% TODO: [Artifact] Concise trade-off comparison table/figure.
+% TODO: [Purpose] Connect selection-time assumptions to observed development outcomes.
+% TODO: [Source Inputs] Chapter~\ref{ch:methodology}, Section~\ref{subsec:godot-selection}; iteration notes on export stability, plugin readiness, and debugging effort.
+% TODO: [Placement] At the end of this subsection, after residual limitations.
+% TODO: [Done Criteria] Include at least: iteration speed, export stability, plugin readiness, and debugging effort with one observed impact per criterion.
+% TODO: [Cross-refs] Chapter~\ref{ch:methodology}, Section~\ref{sec:technology-selection}.
 
+\textbf{Challenge observed:}
+Although Godot remained the best fit overall, development revealed practical constraints in ecosystem maturity and plugin/version compatibility during web-first multiplayer work.
+
+\textbf{Concrete consequence in this project:}
 \begin{itemize}
-    \item \textbf{Smaller Ecosystem}: Fewer third-party plugins and assets compared to Unity, requiring custom solutions for some features
-    \item \textbf{Documentation Gaps}: Godot 4.x was relatively new, with incomplete documentation for advanced networking scenarios
-    \item \textbf{Mobile Export Issues}: Occasional problems with Android export templates and permission configurations
-    \item \textbf{Plugin Compatibility}: Some Godot 3.x plugins not yet updated for 4.x
+    \item Some networking and editor extensions required additional validation effort before adoption.
+    \item Documentation gaps for newer engine paths increased trial-and-error cycles during synchronization debugging.
+    \item Export and compatibility checks consumed additional iteration time compared to purely local desktop workflows.
 \end{itemize}
 
-\textbf{Impact:} Development time increased due to the need to:
+\textbf{Mitigation used:}
 \begin{itemize}
-    \item Build custom solutions rather than using existing plugins
-    \item Troubleshoot export issues through trial and error
-    \item Consult community forums for undocumented features
+    \item Scoped architecture boundaries to keep framework/engine-specific code localized.
+    \item Used focused prototype loops before integrating new plugin or export assumptions.
+    \item Maintained reusable debugging utilities (logging + runtime variable inspection) to shorten diagnosis cycles.
 \end{itemize}
 
-\textbf{Mitigation:}
-\begin{itemize}
-    \item Active participation in Godot community (Discord, forums, GitHub)
-    \item Contribution to documentation through issue reports and examples
-    \item Development of reusable utility scripts for common tasks
-    \item Careful version management and testing before engine updates
-\end{itemize}
+\textbf{Residual limitation:}
+The solution is robust for current thesis scope, but continued dependency on evolving plugins and browser-export paths remains a maintenance risk for future extensions.
 
 %-----------------------------------------------------------------------
 \subsection{GDScript Performance Concerns}
@@ -127,12 +138,19 @@ GDSync's "protected mode" (default) prevented RPC calls from being executed betw
 
 \paragraph*{Lesson Learned:}
 
-When using third-party frameworks:
+% TODO: [Artifact] Traceability evidence block (issue/PR links + short log excerpt figure).
+% TODO: [Purpose] Demonstrate how diagnosis decisions were validated and communicated upstream.
+% TODO: [Source Inputs] GDSync issue thread, submitted PR, local logger output from failing and fixed runs.
+% TODO: [Placement] Immediately below this lesson section.
+% TODO: [Done Criteria] Show one evidence item for each step: identification, reproduction, mitigation, and upstream communication.
+% TODO: [Cross-refs] Chapter~\ref{ch:implementation}, Section~\ref{subsec:logger-integration}.
+
+The key lessons are tied to specific actions taken in this project:
 \begin{itemize}
-    \item Read source code, not just documentation
-    \item Test framework features in isolation before integration
-    \item Maintain good logging and diagnostic capabilities
-    \item Engage with framework maintainers early when issues arise
+    \item \textbf{Inspect source, not only docs}: the framework internals were reviewed to verify how protected-mode permissions were enforced; this confirmed that the observed silent RPC drops were policy-driven rather than random transport noise.
+    \item \textbf{Isolate failures before full integration}: a minimal multi-instance setup was used to reproduce the same blocked-call pattern across runs; this removed unrelated gameplay complexity from diagnosis.
+    \item \textbf{Instrument synchronization paths}: structured logger categories and state tracing were added for call origin, target peer, and outcome; these logs exposed where calls were dropped or reordered.
+    \item \textbf{Engage maintainers with actionable evidence}: the issue report included reproducible steps, observed behavior, and mitigation notes, followed by a fork-based patch and PR so thesis progress could continue while upstream review was pending.
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -167,6 +185,49 @@ GDSync documentation covered basic use cases but lacked:
     \item Contributed examples and documentation improvements to upstream project
     \item Built abstraction layer to isolate GDSync-specific code
 \end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Web Export Signaling Patch Case Study}
+\label{subsec:web-patch-case-study}
+
+Web export introduced a mismatch between prototype-era assumptions and browser runtime constraints. During prototyping, GDSync calls were integrated directly; in browser deployment, this path required an interception/replacement layer to keep the original integration style while using a signaling-server-compatible transport flow.
+
+\textbf{Why this became necessary:}
+\begin{itemize}
+    \item Browser runtime constraints and export behavior invalidated assumptions from local prototype networking paths.
+    \item Maintaining thesis velocity favored a compatibility patch over rewriting all synchronization call sites.
+    \item The resulting approach replaced/intercepted the local-server path while preserving higher-level game-manager usage of GDSync abstractions.
+\end{itemize}
+
+\textbf{Patch components used in this project:}
+\begin{itemize}
+    \item \texttt{scenes/Multiplayer/GDSyncWebPatch/gdsync\_web\_patch.gd}: applies web-only patch wiring.
+    \item \texttt{scenes/Multiplayer/GDSyncWebPatch/local\_server\_signaling.gd}: local-server replacement for signaling/relay mode.
+    \item \texttt{scenes/Multiplayer/GDSyncWebPatch/signaling\_client.gd}: HTTP/SSE signaling client behavior.
+\end{itemize}
+
+% TODO: [Artifact] Before/after architecture diff figure (prototype path vs patched web path).
+% TODO: [Purpose] Show exactly what was intercepted/replaced and what remained unchanged at gameplay-manager level.
+% TODO: [Source Inputs] scenes/Multiplayer/GDSyncWebPatch/gdsync_web_patch.gd; scenes/Multiplayer/GDSyncWebPatch/local_server_signaling.gd; scenes/Multiplayer/GDSyncWebPatch/signaling_client.gd.
+% TODO: [Placement] First figure in this subsection.
+% TODO: [Done Criteria] Must identify replaced local-server component, preserved manager API surface, and browser-compatible relay path.
+% TODO: [Cross-refs] Chapter~\ref{ch:architecture}, Section~\ref{subsec:gdsync-integration}.
+
+% TODO: [Artifact] Packet/event-path sequence diagram for the patched flow.
+% TODO: [Purpose] Explain request lifecycle from gameplay event to signaling relay and synchronized client update.
+% TODO: [Source Inputs] local_server_signaling.gd process loop and signaling_client.gd SSE/HTTP event handling.
+% TODO: [Placement] After architecture diff figure.
+% TODO: [Done Criteria] Include prototype-era call intent, interception point, server relay, and returned event propagation.
+% TODO: [Cross-refs] Chapter~\ref{ch:implementation}, Section~\ref{subsec:lobby-system}.
+
+% TODO: [Artifact] "Cost of patching" summary table.
+% TODO: [Purpose] Make trade-offs explicit (complexity, maintenance, and fork dependency).
+% TODO: [Source Inputs] Patch maintenance notes, fork/PR status, debugging effort observations.
+% TODO: [Placement] End of this subsection.
+% TODO: [Done Criteria] At minimum include extra complexity, maintenance burden, and temporary fork dependency with one mitigation each.
+% TODO: [Cross-refs] Chapter~\ref{ch:methodology}, Section~\ref{subsec:toolchain-summary}.
+
+The patch enabled continuity of the existing gameplay integration model but increased maintenance overhead, which is why a fork-plus-PR strategy was used as an interim operational path.
 
 %-----------------------------------------------------------------------
 \subsection{Debugging Multiplayer Issues}
@@ -286,16 +347,16 @@ GDSync's node replication tries to keep all clients' scene trees identical, but 
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\section{Mobile UI/UX Challenges}
+\section{UI/UX Challenges}
 \label{sec:mobile-ux-challenges}
 
 %-----------------------------------------------------------------------
-\subsection{Displaying Many Cards on Small Screens}
+\subsection{Displaying Many Cards on Limited Screen Space}
 \label{subsec:many-cards-small-screens}
 
 \textbf{Challenge:}
 
-Displaying 50--200 cards on a 5--6 inch mobile screen presents significant layout challenges:
+Displaying 50--200 cards on screen (particularly on smaller browser viewports or touch-enabled devices) presents significant layout challenges:
 \begin{itemize}
     \item Cards must be large enough to read and tap
     \item All cards must be accessible without excessive scrolling
@@ -361,7 +422,7 @@ Touch input is less precise than mouse input:
 
 \textbf{Challenge:}
 
-Not all students have flagship smartphones. The game needed to run acceptably on low-end and mid-range devices from 2018--2020.
+Not all students have high-end hardware. The game needed to run acceptably across a range of devices and browsers, including low-end laptops and older browser versions.
 
 \paragraph*{Performance Constraints:}
 
@@ -403,8 +464,8 @@ Testing multiplayer functionality requires:
 \paragraph*{Approaches:}
 
 \begin{enumerate}
-    \item \textbf{Multi-Instance Desktop Testing}: Run multiple Godot instances on development machine
-    \item \textbf{Physical Device Testing}: Test on actual Android phones
+    \item \textbf{Multi-Instance Browser Testing}: Run multiple browser tabs or windows on development machine
+    \item \textbf{Cross-Browser Testing}: Test on Chrome, Firefox, and Edge
     \item \textbf{Automated Test Scenarios}: Scripts to simulate player actions
     \item \textbf{Network Simulation}: Tools to introduce latency and packet loss
 \end{enumerate}
@@ -531,9 +592,9 @@ Formal educational evaluation remains an important direction for future research
 \begin{enumerate}
     \item \textbf{User Testing}: Conduct user testing early; designer assumptions often wrong.
 
-    \item \textbf{Mobile-First}: Design for mobile constraints from the start, not as an afterthought.
+    \item \textbf{Responsive Design}: Design for varying viewport sizes and input methods from the start, not as an afterthought.
 
-    \item \textbf{Simplicity}: Simpler interactions are better on mobile; complexity reduces usability.
+    \item \textbf{Simplicity}: Simpler interactions work better across input methods; complexity reduces usability.
 
     \item \textbf{Feedback}: Clear, immediate feedback is critical for learning and engagement.
 \end{enumerate}
@@ -562,7 +623,7 @@ This chapter documented the significant challenges encountered during developmen
     \item \textbf{Technology Challenges}: Engine trade-offs, framework limitations, and performance concerns
     \item \textbf{GDSync Issues}: Protected mode blocking, incomplete documentation, and debugging difficulty
     \item \textbf{Synchronization Complexity}: Card ordering, race conditions, and selective visibility
-    \item \textbf{Mobile UI/UX}: Screen space constraints, touch precision, and device performance variability
+    \item \textbf{UI/UX}: Screen space constraints, touch/mouse interaction precision, and device performance variability
     \item \textbf{Testing Difficulty}: Multiplayer testing complexity and lack of automated testing tools
     \item \textbf{Educational Design}: Balancing accuracy with playability and assessing learning effectiveness
 \end{itemize}

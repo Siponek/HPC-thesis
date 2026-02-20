@@ -96,3 +96,5 @@ When project scope changes, update this file first, then revise chapters.
 Always include date and summary under this section.
 
 - 2026-02-19: Initial version created. Consolidated scope/positioning rules for consistent AI-assisted thesis writing.
+
+- 2026-02-19: Need to add a section on parallel sorting algorithm

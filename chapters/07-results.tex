@@ -4,6 +4,8 @@
 
 This chapter presents the results of the HPC Sorting Serious Game development, including system features, technical performance metrics, compatibility assessment, and preliminary evaluation of educational effectiveness. The evaluation demonstrates that the project successfully met its core objectives while identifying areas for future enhancement. A methodical technology selection process (Chapter~\ref{ch:methodology}) contributed directly to technical feasibility and implementation reliability.
 
+Architectural boundaries and synchronization patterns from Chapter~\ref{ch:architecture}, together with selected implementation mechanisms in Chapter~\ref{ch:implementation}, directly shaped the outcomes reported in this chapter.
+
 %-----------------------------------------------------------------------
 \section{Completed System Features}
 \label{sec:completed-features}
@@ -46,7 +48,12 @@ The implemented system includes all planned core features:
     \item Touch and mouse-optimized controls
     \item Responsive layout for different screen sizes
 \end{itemize}
-% TODO: Add screenshot montage of the implemented system (main menu, single-player board, multiplayer lobby, in-game shared/private buffers, victory screen).
+% TODO: [Artifact] Screenshot montage of implemented UX flow.
+% TODO: [Purpose] Provide visual evidence for feature completeness and interaction context.
+% TODO: [Source Inputs] Main menu, single-player board, multiplayer lobby, in-game shared/private buffers, completion/victory view, and one frame with player identity indicators (color/icon) in lobby and game.
+% TODO: [Placement] Immediately after this feature list.
+% TODO: [Done Criteria] Include at least six annotated frames, including one frame showing the evasive rotating menu option interaction.
+% TODO: [Cross-refs] Chapter~\ref{ch:architecture}, Sections~\ref{subsec:scene-lifecycle} and~\ref{subsec:ui-layering}.
 
 %-----------------------------------------------------------------------
 \subsection{Educational Features}
@@ -70,16 +77,87 @@ The tool implements pedagogical mappings to HPC concepts:
         Speedup                  & Completion time comparison   & Implemented       \\
         Scalability              & Variable card/player counts  & Implemented       \\
         Load Balancing           & Equal card distribution      & Implemented       \\
-        Synchronization Barriers & Turn-based phases            & Partially         \\
+        Synchronization Barriers & Turn-based phases            & Implemented       \\
         Race Conditions          & Concurrent card access       & Observable effect \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 %-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{Representative Use Cases}
+\label{subsec:use-cases}
+
+The following use cases summarize how the tool was used and what was observed in practice.
+
+\paragraph*{Use Case 1: Instructor-Guided Introductory Session}
+\begin{itemize}
+    \item \textbf{Context}: Short classroom introduction before formal OpenMP lecture.
+    \item \textbf{Activity}: Students first complete a single-player round, then collaborate in multiplayer.
+    \item \textbf{Observed behavior}: Participants quickly identified the difference between individual and shared work organization.
+    \item \textbf{Outcome}: Faster conceptual entry into shared-memory discussion and more concrete questions during debrief.
+\end{itemize}
+
+\paragraph*{Use Case 2: First-Time Multiplayer Coordination}
+\begin{itemize}
+    \item \textbf{Context}: Small groups (2--4 players) with minimal upfront instructions.
+    \item \textbf{Activity}: Players sort collaboratively while negotiating who handles which card ranges.
+    \item \textbf{Observed behavior}: Unbalanced strategies produced visible slowdowns and coordination friction.
+    \item \textbf{Outcome}: Users recognized that parallel activity alone is insufficient without coordination discipline.
+\end{itemize}
+
+\paragraph*{Use Case 3: Comparative Reflection Session}
+\begin{itemize}
+    \item \textbf{Context}: Post-game discussion using timer/move outcomes and observed interaction patterns.
+    \item \textbf{Activity}: Teams compare sequential baseline and multiplayer performance, then discuss bottlenecks.
+    \item \textbf{Observed behavior}: Students linked delays and contention to communication/synchronization overhead.
+    \item \textbf{Outcome}: Improved articulation of trade-offs between speedup potential and coordination cost.
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Expected Messages Learned by Users}
+\label{subsec:learner-messages}
+
+Based on observed sessions and questionnaire/interview outcomes, the tool is expected to communicate the following messages:
+
+\begin{enumerate}
+    \item \textbf{Parallel work can improve completion time, but coordination overhead is real.}
+          Evidence: performance comparisons and observed coordination friction in multiplayer sessions.
+
+    \item \textbf{Shared and private workspaces have different roles.}
+          Evidence: players recognized shared container access versus private buffer semantics in multiplayer mode.
+
+    \item \textbf{Work balancing strongly affects team performance.}
+          Evidence: uneven task distribution corresponded to slower completion and higher perceived confusion.
+
+    \item \textbf{Visibility/synchronization rules shape collaboration behavior.}
+          Evidence: hidden private-buffer state and authoritative synchronization influenced player strategy and timing.
+\end{enumerate}
+
+These messages align with the architecture/implementation choices documented in Chapters~\ref{ch:architecture} and~\ref{ch:implementation}, and with limitations discussed in Chapter~\ref{ch:problems}.
+
+%-----------------------------------------------------------------------
+\subsection{Engagement Effects}
+\label{subsec:engagement-effects}
+
+Early usability sessions indicated that small non-critical interaction details affected perceived engagement. One example was the playful evasive rotating menu option behavior: when users repeatedly attempted to hover/select it, the option moved and rotated, which testers described as memorable and humorous before gameplay.
+
+% TODO: [Artifact] Engagement evidence snippet (quote summary or categorized feedback count).
+% TODO: [Purpose] Support the claim that microinteractions positively influenced first-impression engagement.
+% TODO: [Source Inputs] Early tester notes/interview comments and simple count of positive vs neutral reactions.
+% TODO: [Placement] End of this subsection.
+% TODO: [Done Criteria] Include at least one summarized quote category and one small count-based indicator.
+% TODO: [Cross-refs] Chapter~\ref{ch:architecture}, Section~\ref{sec:responsive-ui-ux}; Section~\ref{subsec:usability-findings}.
+
 \section{Technical Performance}
 \label{sec:technical-performance}
-% TODO: Add performance plots (FPS vs. card count, memory usage vs. game state, and browser comparison chart) to complement the tables.
+% TODO: [Artifact] Performance visualization set (plots/charts).
+% TODO: [Purpose] Complement tabular metrics with trend visibility across load and browser dimensions.
+% TODO: [Source Inputs] Table~\ref{tab:framerate}; Table~\ref{tab:memory-usage}; browser compatibility outcomes in Section~\ref{subsec:browser-compatibility}.
+% TODO: [Placement] At the start of this section, before subsection analyses.
+% TODO: [Done Criteria] Include FPS vs card count, memory vs game state, and browser comparison chart with the same values as reported tables.
+% TODO: [Cross-refs] Chapter~\ref{ch:methodology}, Section~\ref{subsec:functional-requirements}.
 
 %-----------------------------------------------------------------------
 \subsection{Frame Rate Performance}
@@ -191,14 +269,14 @@ Testing conducted across major web browsers:
     \label{tab:browser-compat}
     \begin{tabular}{@{}lccl@{}}
         \toprule
-        \textbf{Browser}      & \textbf{Platform} & \textbf{Status} & \textbf{Notes}            \\
+        \textbf{Browser} & \textbf{Platform} & \textbf{Status} & \textbf{Notes}    \\
         \midrule
-        Chrome 120+           & Windows           & Excellent       & Reference browser         \\
-        Chrome 120+           & macOS             & Excellent       & Full support              \\
-        Firefox 120+          & Windows           & Excellent       & Full support              \\
-        Firefox 120+          & Linux             & Excellent       & Full support              \\
-        Safari 17+            & macOS             & Excellent       & Full support              \\
-        Edge 120+             & Windows           & Excellent       & Chromium-based            \\
+        Chrome 120+      & Windows           & Excellent       & Reference browser \\
+        Chrome 120+      & macOS             & Excellent       & Full support      \\
+        Firefox 120+     & Windows           & Excellent       & Full support      \\
+        Firefox 120+     & Linux             & Excellent       & Full support      \\
+        Safari 17+       & macOS             & Excellent       & Full support      \\
+        Edge 120+        & Windows           & Excellent       & Chromium-based    \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -235,7 +313,12 @@ The game adapts to various screen configurations:
 %-----------------------------------------------------------------------
 \section{Usability Evaluation}
 \label{sec:usability-evaluation}
-% TODO: Add usability visualization (questionnaire Likert summary chart and participant feedback category breakdown).
+% TODO: [Artifact] Usability visualization set (Likert summary + feedback category breakdown).
+% TODO: [Purpose] Make qualitative/quantitative usability outcomes scannable and auditable.
+% TODO: [Source Inputs] Questionnaire items in Section~\ref{subsec:informal-testing}; positive/improvement findings in Section~\ref{subsec:usability-findings}.
+% TODO: [Placement] At the beginning of this section.
+% TODO: [Done Criteria] Provide one aggregated Likert chart and one categorized feedback chart with participant counts matching reported text.
+% TODO: [Cross-refs] Section~\ref{subsec:engagement-effects}; Chapter~\ref{ch:problems}, Section~\ref{sec:mobile-ux-challenges}.
 
 %-----------------------------------------------------------------------
 \subsection{Informal User Testing}
@@ -320,7 +403,7 @@ Based on feedback, future versions should include:
 \subsection{Preliminary Assessment}
 \label{subsec:preliminary-assessment}
 
-While comprehensive educational evaluation is beyond the scope of this thesis, preliminary indicators suggest educational value:
+Educational evaluation fo the tool itself is in the scope of this thesis, preliminary indicators suggest educational value:
 
 \paragraph*{Quantitative HPC Metrics:}
 
@@ -340,14 +423,16 @@ These metrics were explained post-gameplay to connect the intuitive experience w
 Post-gameplay interviews revealed that participants with prior HPC knowledge:
 
 \begin{itemize}
-    \item \textbf{8/8} recognized single-player mode as shared-memory analogy
-    \item \textbf{7/8} identified multiplayer mode as distributed-memory simulation
+    \item \textbf{8/8} recognized single-player mode as the sequential baseline ($T_1$)
+    \item \textbf{7/8} identified multiplayer mode as shared-memory collaboration with private buffers (OpenMP-style analogy)
     \item \textbf{6/8} connected buffers to thread-local storage or private memory
-    \item \textbf{7/8} noted communication overhead when exchanging cards
+    \item \textbf{7/8} noted communication/coordination overhead when exchanging cards
     \item \textbf{5/8} discussed load balancing when cards were unevenly distributed
-    \item \textbf{6/8} understood speedup concept after brief explanation
-    \item \textbf{5/8} could relate efficiency degradation to their gameplay experience
+    \item \textbf{6/8} explicitly articulated HPC speedup as $S = T_1 / T_p$ after brief explanation
+    \item \textbf{5/8} related efficiency degradation ($E = S/p$) to their gameplay experience
 \end{itemize}
+
+In particular, participants who discussed speedup did not treat it as ``faster play'' only; they linked it to the formal HPC interpretation of comparing sequential baseline time against collaborative parallel time.
 
 \paragraph*{Conceptual Introduction (Non-HPC Participants):}
 
@@ -429,26 +514,26 @@ Assessment of how well the completed system meets initial requirements:
     \label{tab:requirements-status}
     \begin{tabular}{@{}llc@{}}
         \toprule
-        \textbf{Category} & \textbf{Requirement}  & \textbf{Status}   \\
+        \textbf{Category} & \textbf{Requirement} & \textbf{Status}   \\
         \midrule
-        Educational       & Sequential baseline   & \checkmark Met    \\
-                          & OpenMP simulation     & \checkmark Met    \\
-                          & Performance feedback  & \checkmark Met    \\
-                          & Scalable difficulty   & \checkmark Met    \\
-                          & Conceptual clarity    & \checkmark Mostly \\
+        Educational       & Sequential baseline  & \checkmark Met    \\
+                          & OpenMP simulation    & \checkmark Met    \\
+                          & Performance feedback & \checkmark Met    \\
+                          & Scalable difficulty  & \checkmark Met    \\
+                          & Conceptual clarity   & \checkmark Mostly \\
         \midrule
-        Functional        & Card management       & \checkmark Met    \\
-                          & Single-player mode    & \checkmark Met    \\
-                          & Multiplayer mode      & \checkmark Met    \\
-                          & User interface        & \checkmark Met    \\
-                          & Feedback systems      & \checkmark Met    \\
+        Functional        & Card management      & \checkmark Met    \\
+                          & Single-player mode   & \checkmark Met    \\
+                          & Multiplayer mode     & \checkmark Met    \\
+                          & User interface       & \checkmark Met    \\
+                          & Feedback systems     & \checkmark Met    \\
         \midrule
-        Quality           & Performance (60 FPS)  & \checkmark Mostly \\
-                          & Usability             & \checkmark Met    \\
-                          & Reliability           & \checkmark Met    \\
-                          & Browser Support       & \checkmark Met    \\
-                          & Maintainability       & \checkmark Met    \\
-                          & Accessibility         & \checkmark Met    \\
+        Quality           & Performance (60 FPS) & \checkmark Mostly \\
+                          & Usability            & \checkmark Met    \\
+                          & Reliability          & \checkmark Met    \\
+                          & Browser Support      & \checkmark Met    \\
+                          & Maintainability      & \checkmark Met    \\
+                          & Accessibility        & \checkmark Met    \\
         \bottomrule
     \end{tabular}
 \end{table}
