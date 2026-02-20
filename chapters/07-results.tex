@@ -30,7 +30,7 @@ The implemented system includes all planned core features:
 \paragraph*{Multiplayer Mode:}
 \begin{itemize}
     \item Lobby system with room creation and joining
-    \item Support for 2--4 players
+    \item Support for 10--40 players
     \item HTTP/SSE relay-based networking
     \item Real-time state synchronization across clients
     \item Shared container visible to all players (OpenMP shared memory)
@@ -48,12 +48,50 @@ The implemented system includes all planned core features:
     \item Touch and mouse-optimized controls
     \item Responsive layout for different screen sizes
 \end{itemize}
-% TODO: [Artifact] Screenshot montage of implemented UX flow.
-% TODO: [Purpose] Provide visual evidence for feature completeness and interaction context.
-% TODO: [Source Inputs] Main menu, single-player board, multiplayer lobby, in-game shared/private buffers, completion/victory view, and one frame with player identity indicators (color/icon) in lobby and game.
-% TODO: [Placement] Immediately after this feature list.
-% TODO: [Done Criteria] Include at least six annotated frames, including one frame showing the evasive rotating menu option interaction.
-% TODO: [Cross-refs] Chapter~\ref{ch:architecture}, Sections~\ref{subsec:scene-lifecycle} and~\ref{subsec:ui-layering}.
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{resources/images/main-menu/main-menu-scene.png}
+        \caption{Main menu}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{resources/images/main-menu/main-menu-scene-moving.png}
+        \caption{Evasive menu interaction}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{resources/images/singleplayer/single-player-game.png}
+        \caption{Single-player board}
+    \end{subfigure}
+
+    \vspace{0.8em}
+
+    \begin{subfigure}[b]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{resources/images/singleplayer/single-player-moving-card.png}
+        \caption{Card drag interaction}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{resources/images/singleplayer/single-player-buffer-card-01.png}
+        \caption{Private buffer interaction}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{resources/images/singleplayer/single-player-options.png}
+        \caption{Gameplay options}
+    \end{subfigure}
+    \caption{Implemented UX flow screenshots, including the playful evasive menu microinteraction and core single-player interaction states}
+    \label{fig:results-screenshot-montage}
+\end{figure}
+
+% TODO: Extend this montage with multiplayer lobby/identity-indicator frames and completion/victory frame when those screenshots are exported.
 
 %-----------------------------------------------------------------------
 \subsection{Educational Features}
@@ -101,7 +139,7 @@ The following use cases summarize how the tool was used and what was observed in
 
 \paragraph*{Use Case 2: First-Time Multiplayer Coordination}
 \begin{itemize}
-    \item \textbf{Context}: Small groups (2--4 players) with minimal upfront instructions.
+    \item \textbf{Context}: Small groups (10--40 players) with minimal upfront instructions.
     \item \textbf{Activity}: Players sort collaboratively while negotiating who handles which card ranges.
     \item \textbf{Observed behavior}: Unbalanced strategies produced visible slowdowns and coordination friction.
     \item \textbf{Outcome}: Users recognized that parallel activity alone is insufficient without coordination discipline.
@@ -403,11 +441,11 @@ Based on feedback, future versions should include:
 \subsection{Preliminary Assessment}
 \label{subsec:preliminary-assessment}
 
-Educational evaluation fo the tool itself is in the scope of this thesis, preliminary indicators suggest educational value:
+While formal educational efficacy evaluation is outside the scope of this thesis, preliminary indicators suggest educational value:
 
 \paragraph*{Quantitative HPC Metrics:}
 
-To evaluate educational effectiveness, we introduced HPC performance concepts during gameplay:
+To evaluate educational effectiveness, HPC performance concepts were introduced during gameplay:
 
 \begin{itemize}
     \item \textbf{Speedup ($S$)}: Defined as $S = T_1 / T_p$ where $T_1$ is single-player completion time and $T_p$ is $p$-player completion time. Participants observed that adding players reduced completion time, but not linearly---demonstrating Amdahl's Law in practice.
@@ -559,7 +597,7 @@ Assessment of how well the completed system meets initial requirements:
 
     \item \textbf{Educational Scaffolding}: Limited in-game explanations; requires instructor context
 
-    \item \textbf{Sorting Algorithms}: Only supports general sorting; doesn't demonstrate specific parallel algorithms (merge sort, sample sort)
+    \item \textbf{Sorting Algorithm Guidance}: The tool's algorithm-agnostic design supports any parallel sorting strategy (see Chapter~\ref{ch:architecture}, Section~\ref{sec:algorithm-mode-extensibility}), but does not yet provide guided step-by-step modes for specific algorithms
 
     \item \textbf{Performance Metrics}: Basic timing and moves; lacks detailed profiling (speedup curves, scalability graphs)
 

@@ -1,0 +1,59 @@
+@startuml card-move-sequence-flow
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign center
+
+title Card Move Sequence (Move -> Broadcast -> Sync -> Visibility Update)
+
+actor "Player A" as Player
+participant "Card\n(UI Node)" as UI
+participant "MultiplayerCardManager\n(Player A)" as MgrA
+participant "GDSync API" as Sync
+participant "LocalServerSignaling\n(web patch)" as LSS
+participant "Relay Server\n(HTTP/SSE)" as Relay
+participant "MultiplayerCardManager\n(Player B)" as MgrB
+
+== Card placed in shared container ==
+Player -> UI : drag card to new position
+UI -> MgrA : _on_card_placed_in_container()\n(dropped_card, was_in_buffer, slot)
+MgrA -> MgrA : super._on_card_placed_in_container()\n(increment move_count, start timer)
+MgrA -> Sync : GDSync.call_func(\nsync_card_moved,\n[value, from_idx, to_idx, client_id])
+Sync -> LSS : route through replacement LocalServer
+LSS -> Relay : HTTP POST broadcast packet
+Relay --> LSS : ack
+Relay -> MgrB : SSE game_packet event
+
+MgrB -> MgrB : sync_card_moved():\nskip if my own move,\nmove_child(card, to_index),\nupdate indices
+
+== Card placed into private buffer ==
+Player -> UI : drag card to buffer slot
+UI -> MgrA : _on_card_placed_in_slot(card, slot)
+MgrA -> MgrA : super._on_card_placed_in_slot()\n(increment move_count)
+MgrA -> Sync : GDSync.call_func(\nsync_card_entered_buffer,\n[card_value, my_client_id])
+Sync -> LSS : route packet
+LSS -> Relay : HTTP POST broadcast
+Relay -> MgrB : SSE game_packet
+
+MgrB -> MgrB : sync_card_entered_buffer():\nremove card from container,\ntrack in cards_in_other_buffers,\nhide card from view
+
+== Card returned from buffer to container ==
+Player -> UI : drag card from buffer back
+UI -> MgrA : _on_card_placed_in_container()\n(was_in_buffer = true)
+MgrA -> Sync : GDSync.call_func(\nsync_card_left_buffer,\n[value, client_id, to_index])
+Sync -> LSS : route packet
+LSS -> Relay : HTTP POST broadcast
+Relay -> MgrB : SSE game_packet
+
+MgrB -> MgrB : sync_card_left_buffer():\nremove from tracking,\nadd card back to container,\nmake visible
+
+note right of MgrA
+All moves are applied locally first,
+then broadcast to peers. No host
+validation/reject cycle exists.
+Private buffer cards are only visible
+to the owning player.
+end note
+
+@enduml
+

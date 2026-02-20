@@ -45,12 +45,12 @@ These layers decouple pedagogical behavior from transport mechanics, which was e
 \label{sec:scene-structure}
 
 The scene model is intentionally concise: a menu/lobby entry path and two gameplay contexts (single-player baseline and multiplayer OpenMP-style collaboration). The scene split supports direct comparison between sequential and collaborative execution while reusing core card and validation logic.
-% TODO: [Artifact] Consolidated scene-transition/state diagram.
-% TODO: [Purpose] Explain lifecycle transitions and their pedagogical meaning.
-% TODO: [Source Inputs] scene_manager.gd; scenes/MainMenuScene/menu_scene.tscn; scenes/Multiplayer/Lobby/multiplayer_lobby.gd.
-% TODO: [Placement] In this section, immediately after the "Architectural Intent" bullets.
-% TODO: [Done Criteria] Include paths MainMenu -> SinglePlayer, MainMenu -> Lobby -> MultiplayerGame, and Gameplay -> Completion; each arrow must state trigger and learning implication.
-% TODO: [Cross-refs] Chapter~\ref{ch:results}, Section~\ref{subsec:use-cases}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/diagrams/scene-transition-lifecycle}
+    \caption{Scene lifecycle transitions used by the game flow, including single-player baseline and multiplayer lobby path}
+    \label{fig:scene-transition-lifecycle}
+\end{figure}
 
 \paragraph*{Architectural Intent:}
 \begin{itemize}
@@ -72,24 +72,18 @@ Scene changes are managed through a central scene manager to avoid ad-hoc transi
 \label{subsec:event-driven-architecture}
 
 The architecture is event-driven at component boundaries. Local game objects communicate via Godot signals, while multiplayer state changes are propagated through authority-managed synchronization paths. This split allows UI responsiveness without directly coupling UI events to transport internals.
-% TODO: [Artifact] Signal-flow map for one local interaction path and one multiplayer path.
-% TODO: [Purpose] Show emitter/listener relationships and where authority checks occur.
-% TODO: [Source Inputs] scenes/CardScene/scripts/card_manager.gd; scenes/Multiplayer/connection_manager.gd; scenes/Multiplayer/Lobby/multiplayer_lobby.gd.
-% TODO: [Placement] End of this subsection, before Section~\ref{sec:core-components}.
-% TODO: [Done Criteria] Include at least one local signal path and one connection/lobby event path with explicit event names.
-% TODO: [Cross-refs] Section~\ref{subsec:connection-management}; Chapter~\ref{ch:implementation}, Section~\ref{subsec:lobby-system}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/diagrams/event-driven-signal-flow}
+    \caption{Event-driven signal flow across local scene components and multiplayer synchronization paths}
+    \label{fig:event-driven-signal-flow}
+\end{figure}
 
 %-----------------------------------------------------------------------
 \section{Core Component Roles}
 \label{sec:core-components}
 
 Rather than duplicating full class implementations, this section summarizes architecture-critical component responsibilities.
-% TODO: [Artifact] Compact UML/component-inheritance diagram.
-% TODO: [Purpose] Document reusability-oriented class boundaries and extension points.
-% TODO: [Source Inputs] scenes/CardScene/scripts/card_manager.gd; scenes/Multiplayer/MultiplayerGame/multiplayer_card_manager.gd.
-% TODO: [Placement] After the Multiplayer Card Manager paragraph.
-% TODO: [Done Criteria] Show CardManager -> MultiplayerCardManager inheritance and manager responsibility split.
-% TODO: [Cross-refs] Chapter~\ref{ch:implementation}, Section~\ref{sec:impl-core-components}.
 
 \paragraph*{Card Component (Interaction Unit):}
 \label{subsec:card-component}
@@ -113,6 +107,13 @@ Rather than duplicating full class implementations, this section summarizes arch
     \item Enforces shared/private visibility semantics across peers.
 \end{itemize}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.86\textwidth]{figures/diagrams/component-inheritance-overview}
+    \caption{Component and inheritance overview showing reuse boundary between \texttt{CardManager} and \texttt{MultiplayerCardManager}}
+    \label{fig:component-inheritance-overview}
+\end{figure}
+
 %-----------------------------------------------------------------------
 \section{Multiplayer Architecture}
 \label{sec:multiplayer-architecture}
@@ -122,18 +123,19 @@ Rather than duplicating full class implementations, this section summarizes arch
 \label{subsec:network-topology}
 
 The implemented multiplayer topology uses browser-compatible relay patterns for session events and state updates. This avoids assumptions that are unstable in browser-exported runtime contexts.
-% TODO: [Artifact] Deployment/context diagram with authority boundaries.
-% TODO: [Purpose] Distinguish in-process signal communication from inter-client relay communication.
-% TODO: [Source Inputs] figures/diagrams/http-sse-architecture.png; scenes/Multiplayer/connection_manager.gd; scenes/Multiplayer/GDSyncWebPatch/local_server_signaling.gd.
-% TODO: [Placement] Near Figure~\ref{fig:http-sse-architecture}, as a companion context figure.
-% TODO: [Done Criteria] Show browser clients, signaling/relay server, host authority decision point, and shared/private state propagation boundary.
-% TODO: [Cross-refs] Chapter~\ref{ch:problems}, Section~\ref{subsec:web-patch-case-study}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.82\textwidth]{figures/diagrams/http-sse-architecture.png}
     \caption{HTTP/SSE relay-oriented architecture used for web-first multiplayer synchronization}
     \label{fig:http-sse-architecture}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/diagrams/deployment-authority-boundary}
+    \caption{Runtime deployment context with host authority and shared/private synchronization boundaries}
+    \label{fig:deployment-authority-boundary}
 \end{figure}
 
 %-----------------------------------------------------------------------
@@ -146,7 +148,7 @@ Two synchronization patterns are central:
     \item \textbf{Host broadcast reconciliation}: final shared state is re-broadcast to all peers to converge state.
 \end{itemize}
 
-\begin{lstlisting}[language=Python, caption={Architectural pattern: host-authoritative move confirmation}]
+\begin{lstlisting}[language={}, caption={Architectural pattern: host-authoritative move confirmation (pseudocode)}]
 # Client proposes move -> host validates -> host broadcasts canonical state
 on_client_move(card_id, target_slot):
     if host_validate(card_id, target_slot):
@@ -171,7 +173,7 @@ The web-export signaling patch details are intentionally analyzed in Chapter~\re
 % TODO: [Done Criteria] Excerpt shows sync entrypoint delegating into manager logic and where authority is enforced.
 % TODO: [Cross-refs] Chapter~\ref{ch:problems}, Section~\ref{subsec:web-patch-case-study}.
 
-\begin{lstlisting}[language=Python, caption={Architectural boundary: sync wrapper delegates to game manager}]
+\begin{lstlisting}[language={}, caption={Architectural boundary: sync wrapper delegates to game manager (pseudocode)}]
 @GDSync.rpc(call_local=true)
 func sync_move(card_id: int, target_id: int):
     multiplayer_manager.apply_authoritative_move(card_id, target_id)
@@ -199,14 +201,14 @@ The architecture explicitly distinguishes:
 \end{itemize}
 
 This model is central to the OpenMP analogy: all participants can access shared memory, while local buffer state remains private.
-% TODO: [Artifact] Card-move sequence/data-flow diagram.
-% TODO: [Purpose] Show end-to-end state transition from user action to converged visibility state.
-% TODO: [Source Inputs] scenes/Multiplayer/MultiplayerGame/multiplayer_card_manager.gd; scenes/CardScene/scripts/card_manager.gd.
-% TODO: [Placement] Directly after this paragraph and before the visibility listing.
-% TODO: [Done Criteria] Must include propose -> validate -> authoritative apply -> broadcast -> visibility-gate update and identify shared vs private divergence points.
-% TODO: [Cross-refs] Section~\ref{subsec:state-sync-patterns}; Chapter~\ref{ch:results}, Section~\ref{subsec:learner-messages}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/diagrams/card-move-sequence-flow.png}
+    \caption{Card move data flow from proposal to authoritative application and visibility update}
+    \label{fig:card-move-sequence-flow}
+\end{figure}
 
-\begin{lstlisting}[language=Python, caption={Architectural mechanism: private buffer visibility gate}]
+\begin{lstlisting}[language={}, caption={Architectural mechanism: private buffer visibility gate (pseudocode)}]
 if card.in_private_buffer():
     card.visible = (card.buffer_owner_id == local_player_id)
 else:
@@ -260,12 +262,12 @@ UI architecture prioritizes interpretable interaction under constrained viewport
 \label{subsec:ui-layering}
 
 Overlay and inspection elements are separated from gameplay nodes to minimize accidental coupling between debug/auxiliary UI and gameplay transforms. This layering approach supports live inspection tooling while preserving gameplay interaction consistency.
-% TODO: [Artifact] Node-tree snapshot and short explanatory caption for UI layering.
-% TODO: [Purpose] Clarify why CanvasLayer-based overlays do not interfere with gameplay-space nodes.
-% TODO: [Source Inputs] scenes/MainMenuScene/menu_scene.tscn (CanvasLayer, VarTreeMainMenu).
-% TODO: [Placement] In this subsection as a compact figure or annotated listing.
-% TODO: [Done Criteria] Clearly shows gameplay nodes vs overlay/debug nodes and the isolation rationale.
-% TODO: [Cross-refs] Chapter~\ref{ch:implementation}, Section~\ref{subsec:vartree}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.82\textwidth]{figures/diagrams/ui-layering-node-tree}
+    \caption{UI layering with CanvasLayer-based overlays separated from gameplay-space nodes}
+    \label{fig:ui-layering-node-tree}
+\end{figure}
 
 A playful evasive hover animation is also present in the main menu as a non-critical engagement microinteraction; its reception in early tests is discussed in Chapter~\ref{ch:results}, Section~\ref{subsec:engagement-effects}.
 
@@ -283,7 +285,113 @@ Architecture-level performance strategies include:
 Observed constraints and measured outcomes are discussed in Chapter~\ref{ch:results}.
 
 %-----------------------------------------------------------------------
+\section{Algorithm-Agnostic Design: Supporting Parallel Sorting Strategies}
+\label{sec:algorithm-mode-extensibility}
+
+The game does not enforce a specific sorting algorithm. Instead, its architecture provides general-purpose mechanics---a shared card container, private player buffers, and barrier synchronization---that naturally accommodate \emph{any} parallel sorting strategy a player (or instructor) chooses to employ. This section demonstrates how two well-known parallel algorithms, \textbf{Parallel Merge Sort} and \textbf{Parallel Quicksort} \citep{sanders2019sequential}, can be carried out within the existing tool without any code changes.
+
+%-----------------------------------------------------------------------
+\subsection{How the Existing Mechanics Support Any Algorithm}
+\label{subsec:algo-mode-arch-support}
+
+Three existing architectural components form a general-purpose substrate for parallel sorting strategies:
+
+\begin{description}
+    \item[Shared card container (shared memory).] All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative partitioning (quicksort), independent sub-array sorting (merge sort), or any other rearrangement strategy.
+
+    \item[Private player buffers (thread-local storage).] Each player has private buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
+
+    \item[Barrier synchronization (\texttt{\#pragma omp barrier}).] The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging, or after partitioning before recursing into sub-arrays. The main-thread selection mechanism models coordinator election.
+\end{description}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/diagrams/algorithm-mode-class-extension.png}
+    \caption{Existing component architecture and how it supports parallel sorting strategies: \texttt{CardManager} provides card logic, \texttt{MultiplayerCardManager} adds synchronization, \texttt{BarrierManager} provides coordination, and \texttt{CardBuffer} provides thread-local storage---together enabling any sorting algorithm}
+    \label{fig:algorithm-mode-class-extension}
+\end{figure}
+
+%-----------------------------------------------------------------------
+\subsection{Performing Parallel Merge Sort with the Tool}
+\label{subsec:merge-sort-mode}
+
+Players can execute a parallel merge sort strategy using the existing mechanics (Figure~\ref{fig:parallel-mergesort-game-flow}):
+
+\begin{enumerate}
+    \item \textbf{Divide}: Players informally agree to each ``own'' a contiguous segment of the card deck (e.g., with 4 players and 20 cards, each player takes cards 1--5, 6--10, etc.).
+    \item \textbf{Local sort}: Each player moves their assigned cards into their private buffer, sorts them locally, then returns them to the shared container in sorted order. All players do this simultaneously---embarrassingly parallel work with no inter-player communication.
+    \item \textbf{Merge}: Players use the barrier to synchronize. One player (the ``main thread'') merges two adjacent sorted runs while the other player watches. Subsequent barrier rounds merge progressively larger runs until the full array is sorted.
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/diagrams/parallel-mergesort-game-flow}
+    \caption{How players perform parallel merge sort using the existing tool: divide cards among players, sort locally in private buffers, then merge sorted runs through barrier-gated rounds}
+    \label{fig:parallel-mergesort-game-flow}
+\end{figure}
+
+The pedagogical mappings that emerge naturally from this strategy:
+\begin{itemize}
+    \item \emph{Data decomposition}: players divide cards among themselves $\equiv$ \texttt{\#pragma omp parallel for} static scheduling
+    \item \emph{Embarrassingly parallel local sort}: independent work in private buffers $\equiv$ no inter-thread communication
+    \item \emph{Barrier-gated merge rounds}: using the barrier between merge phases $\equiv$ \texttt{\#pragma omp barrier}
+    \item \emph{Idle threads}: non-merger players blocked at barrier $\equiv$ synchronization overhead
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Performing Parallel Quicksort with the Tool}
+\label{subsec:quicksort-mode}
+
+Players can execute a parallel quicksort strategy using the same mechanics (Figure~\ref{fig:parallel-quicksort-game-flow}):
+
+\begin{enumerate}
+    \item \textbf{Pivot selection}: Players agree on a pivot card (e.g., the median of three randomly chosen cards, or simply a card chosen by the ``coordinator'').
+    \item \textbf{Collaborative partition}: All players simultaneously rearrange cards in the shared container so that values $\leq$ pivot are on the left and values $>$ pivot are on the right.
+    \item \textbf{Recursive split}: Players informally divide into sub-groups---one group works on the left partition, the other on the right. Each sub-group repeats the process on their sub-array until all cards are sorted.
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/diagrams/parallel-quicksort-game-flow}
+    \caption{How players perform parallel quicksort using the existing tool: select a pivot, collaboratively partition cards around it, then split into sub-groups for recursive sorting}
+    \label{fig:parallel-quicksort-game-flow}
+\end{figure}
+
+The pedagogical mappings that emerge naturally from this strategy:
+\begin{itemize}
+    \item \emph{Pivot quality $\to$ load balance}: a poor pivot creates unequal sub-arrays, visually demonstrating workload imbalance
+    \item \emph{Collaborative partitioning}: multiple players moving cards simultaneously $\equiv$ parallel partition step
+    \item \emph{Task-based parallelism}: player sub-groups independently working on sub-arrays $\equiv$ \texttt{\#pragma omp task}
+    \item \emph{Communication overhead}: time spent agreeing on pivots and coordinating partitions $\equiv$ inter-thread communication cost
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Comparison of Strategies Within the Tool}
+\label{subsec:algo-mode-comparison}
+
+Table~\ref{tab:algo-mode-comparison} summarizes how the two strategies differ in their use of existing game components and the HPC concepts they make visible to players.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Comparison of parallel sorting strategies playable within the existing tool}
+    \label{tab:algo-mode-comparison}
+    \begin{tabular}{@{}p{3.8cm}p{5.2cm}p{5.2cm}@{}}
+        \toprule
+        \textbf{Aspect}    & \textbf{Merge Sort Strategy}             & \textbf{Quicksort Strategy}                \\
+        \midrule
+        Parallelism model  & Data parallelism (equal partitions)      & Task parallelism (recursive fork)          \\
+        Barrier usage      & Heavy---between every merge round        & Light---coordination at partition steps    \\
+        Buffer usage       & Heavy---local sorting in private buffers & Light---partition done in shared container \\
+        Load balance       & Always balanced (equal partitions)       & Variable---depends on pivot quality        \\
+        Primary HPC lesson & Barrier sync, reduction pattern          & Load imbalance, task creation              \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The tool's algorithm-agnostic design means instructors can assign different strategies to different groups and have students compare their experiences---e.g., observing that merge sort leads to more barrier usage while quicksort exposes load-imbalance issues. This flexibility is a direct consequence of the general-purpose shared-container, private-buffer, and barrier architecture.
+
+%-----------------------------------------------------------------------
 \section{Summary}
 \label{sec:architecture-summary}
 
-This chapter documented architectural decisions that made the tool technically feasible and pedagogically interpretable in a web-first multiplayer context. The focus was on synchronization boundaries, state visibility semantics, and authority patterns rather than exhaustive implementation detail. Detailed implementation evidence is provided in Chapter~\ref{ch:implementation}, while educational and operational effectiveness is evaluated in Chapter~\ref{ch:results}.
+This chapter documented architectural decisions that made the tool technically feasible and pedagogically interpretable in a web-first multiplayer context. The focus was on synchronization boundaries, state visibility semantics, and authority patterns rather than exhaustive implementation detail. Section~\ref{sec:algorithm-mode-extensibility} demonstrated that the existing architecture---the shared card container, private player buffers, and barrier synchronization---is algorithm-agnostic: players can execute parallel merge sort, quicksort, or any other sorting strategy without requiring tool modifications. Detailed implementation evidence is provided in Chapter~\ref{ch:implementation}, while educational and operational effectiveness is evaluated in Chapter~\ref{ch:results}.

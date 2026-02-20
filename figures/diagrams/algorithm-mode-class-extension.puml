@@ -1,0 +1,118 @@
+@startuml algorithm-mode-class-extension
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam ClassBackgroundColor #F0F8FF
+skinparam ClassBorderColor #4682B4
+skinparam ClassAttributeFontSize 11
+skinparam ClassFontSize 13
+
+title Algorithm-Agnostic Architecture — How Existing Components Support Sorting Strategies
+
+package "Existing Architecture" #FAFAFA {
+
+    class CardManager <<Base>> #LightBlue {
+        -- **Card Logic (705 lines)** --
+        + values: Array
+        + sorted_all: Array
+        + cards_array: Array[Card]
+        + slots: Array[CardBuffer]
+        + move_count: int
+        --
+        + generate_random_values()
+        + generate_completed_card_array()
+        + fill_card_container()
+        + create_buffer_slots()
+        + check_sorting_order(): bool
+        + check_player_buffer_contiguity(): bool
+        --
+        <i>Reused by all modes</i>
+    }
+
+    class MultiplayerCardManager <<Multiplayer>> #LightGreen {
+        -- **Sync Protocol (1143 lines)** --
+        + is_host: bool
+        + my_client_id: int
+        + game_state_synced: bool
+        --
+        + setup_multiplayer_sync()
+        + broadcast_initial_game_state()
+        + sync_card_moved()
+        + sync_card_entered_buffer()
+        + sync_card_left_buffer()
+        --
+        <i>extends card_manager.gd</i>
+    }
+
+    class BarrierManager <<RefCounted>> #LightYellow {
+        -- **3-State FSM (113 lines)** --
+        + current_state: BarrierState
+        + threads_at_barrier: Dictionary
+        + main_thread_id: int
+        --
+        + enter_waiting_state()
+        + activate_barrier()
+        + release_barrier()
+        + determine_main_thread()
+        --
+        «enum» BarrierState
+        {RUNNING, WAITING_AT_BARRIER,
+         BARRIER_ACTIVE}
+    }
+
+    class CardBuffer <<UI Component>> #Wheat {
+        + occupied_by: Card
+        + slot_index: int
+        --
+        + place_card(card: Card)
+        + remove_card(): Card
+        + is_empty(): bool
+    }
+}
+
+package "Supported Strategies (no code changes)" #FFFFF0 {
+
+    note as MergeSortNote #PaleGreen
+      **Parallel Merge Sort Strategy**
+      ────────────────────────────
+      Players use existing mechanics:
+      • Divide cards among players (informal agreement)
+      • Each player sorts locally using private buffers
+      • Barrier synchronization between merge rounds
+      • Main thread merges adjacent sorted runs
+      ────────────────────────────
+      **Uses:** Buffers (heavy), Barriers (heavy)
+      **Teaches:** Data decomposition, reduction
+    end note
+
+    note as QuicksortNote #MistyRose
+      **Parallel Quicksort Strategy**
+      ────────────────────────────
+      Players use existing mechanics:
+      • Agree on a pivot card
+      • Collaboratively partition in shared container
+      • Split into sub-groups for recursive sorting
+      • Repeat until all sub-arrays sorted
+      ────────────────────────────
+      **Uses:** Shared container (heavy), Barriers (light)
+      **Teaches:** Load imbalance, task parallelism
+    end note
+}
+
+' Inheritance chain
+CardManager <|-- MultiplayerCardManager : extends\n(path-based)
+
+' Composition
+MultiplayerCardManager *-- BarrierManager : barrier_manager
+CardManager *-- "0..*" CardBuffer : slots
+
+' Strategy support arrows
+MultiplayerCardManager ..> MergeSortNote : supports via\nbuffers + barriers
+MultiplayerCardManager ..> QuicksortNote : supports via\nshared container
+BarrierManager ..> MergeSortNote : merge-round\nsynchronization
+CardBuffer ..> MergeSortNote : local sorting\nphase
+CardBuffer ..> QuicksortNote : optional staging\nduring partition
+
+center footer Existing architecture supports any parallel sorting strategy without modifications
+
+@enduml

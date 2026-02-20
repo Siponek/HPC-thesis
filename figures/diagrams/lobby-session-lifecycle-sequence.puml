@@ -1,0 +1,72 @@
+@startuml lobby-session-lifecycle-sequence
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign center
+
+title Lobby and Session Lifecycle (Create/Join/Configure/Start)
+
+actor "Host Player" as Host
+actor "Joining Player" as Peer
+participant "MultiplayerOptions\n(dialog)" as OptUI
+participant "ConnectionManager" as Conn
+participant "GDSync" as Sync
+participant "LocalServerSignaling" as LSS
+participant "Signaling Server\n(HTTP/SSE)" as Relay
+participant "MultiplayerLobby\n(window)" as LobbyUI
+
+== Host creates session ==
+Host -> OptUI : enter lobby name, press Host
+OptUI -> Conn : start_hosting_lobby(lobby_name)
+Conn -> Sync : lobby_create(lobby_name)
+Sync -> LSS : create lobby command
+LSS -> Relay : POST /api/lobby/create
+Relay --> LSS : room_code + host identity
+LSS --> Sync : lobby_created event
+Sync --> Conn : lobby_created signal
+Conn --> OptUI : lobby_created_successfully
+
+OptUI -> LobbyUI : instantiate + popup_centered()
+OptUI -> Conn : join_existing_lobby(lobby_id)
+note right of OptUI: Host also joins\nthe lobby it created
+
+== Peer joins session ==
+Peer -> OptUI : enter room code, press Join
+OptUI -> Conn : join_existing_lobby(code)
+Conn -> Sync : lobby_join(code)
+Sync -> LSS : join lobby command
+LSS -> Relay : POST /api/lobby/join
+Relay --> LSS : join accepted + player list
+Relay -> LSS : SSE peer_joined (to host)
+LSS --> Sync : lobby_joined / client_joined
+Sync --> Conn : client_joined / lobby_joined signals
+Conn --> LobbyUI : player_list_updated
+
+OptUI -> LobbyUI : instantiate + popup_centered()
+
+== Host configures and starts game ==
+Host -> LobbyUI : set game options\n(buffer_size, cards, range, barrier_mode)
+Host -> LobbyUI : press Start Game
+LobbyUI -> Sync : GDSync.call_func(sync_game_settings, [...])
+note right of LobbyUI: broadcast settings to all peers
+LobbyUI -> Sync : GDSync.call_func(\nprepare_for_game_transition, [...])
+LobbyUI -> Sync : GDSync.call_func(\ntransition_to_multiplayer_game)
+
+Sync -> LSS : relay packets to all
+LSS -> Relay : HTTP POST broadcast
+Relay -> LSS : SSE events to all clients
+
+LSS -> Sync : deliver to all peers
+Sync --> LobbyUI : transition_to_multiplayer_game()\non all clients
+
+LobbyUI -> LobbyUI : SceneManager.goto_scene(\nMULTIPLAYER_GAME_SCENE)
+
+note right of LobbyUI
+No per-player ready state exists.
+The host directly starts the game.
+Timing-sensitive: settings must arrive
+before the scene transition triggers.
+end note
+
+@enduml
+

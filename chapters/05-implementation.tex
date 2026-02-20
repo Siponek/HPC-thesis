@@ -197,8 +197,12 @@ The lobby manages session creation/joining and readiness transitions before game
     \item Host starts game, triggering scene transition to multiplayer gameplay
 \end{enumerate}
 
-% TODO: [Artifact] Lobby/session lifecycle sequence diagram.
-% TODO: [Placement] Immediately below this list.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/diagrams/lobby-session-lifecycle-sequence}
+    \caption{Lobby and session lifecycle from room creation/join to synchronized game start}
+    \label{fig:lobby-session-lifecycle-sequence}
+\end{figure}
 
 %-----------------------------------------------------------------------
 \subsection{GDSync Function Exposure}

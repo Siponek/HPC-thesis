@@ -1,0 +1,73 @@
+@startuml scene-transition-lifecycle
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam state {
+  BackgroundColor #f8f8f8
+  BorderColor #333333
+}
+
+title Scene Transition Lifecycle (Pedagogical Intent Annotated)
+
+[*] --> MainMenu : app start
+
+state MainMenu
+note right of MainMenu
+Entry and mode selection.
+Students choose sequential or collaborative path.
+end note
+
+state SPOptionsDialog : Singleplayer Options\n(popup Window)
+note left of SPOptionsDialog
+Configure card count, value range,
+buffer size, and start game.
+end note
+
+state SinglePlayer
+note right of SinglePlayer
+Sequential baseline (T1).
+Single student manipulates full card set.
+end note
+
+state MPOptionsDialog : Multiplayer Options\n(popup Window)
+note left of MPOptionsDialog
+Connect to GDSync, host or join lobby.
+Enter room code or browse public lobbies.
+end note
+
+state MultiplayerLobby : Multiplayer Lobby\n(popup Window)
+note right of MultiplayerLobby
+Session setup and player discovery.
+Host configures settings (buffer, cards, barrier mode).
+Players join and appear in player list.
+end note
+
+state MultiplayerGame
+note right of MultiplayerGame
+OpenMP-style collaborative mode.
+Shared container + private buffers + barrier sync.
+end note
+
+state Completion : Completion / Results
+note right of Completion
+Time/moves feedback.
+Used for speedup and coordination discussion.
+end note
+
+MainMenu --> SPOptionsDialog : "Singleplayer" button\n(opens dialog)
+SPOptionsDialog --> SinglePlayer : SceneManager.goto_scene()
+
+MainMenu --> MPOptionsDialog : "Multiplayer" button\n(opens dialog)
+MPOptionsDialog --> MultiplayerLobby : on lobby created/joined\n(opens lobby window)
+MultiplayerLobby --> MultiplayerGame : host presses Start Game\n(GDSync broadcast to all clients)
+
+SinglePlayer --> Completion : sorted && validated
+MultiplayerGame --> Completion : globally sorted && synchronized
+
+Completion --> MainMenu : return to menu / replay choice
+SinglePlayer --> MainMenu : back action
+MultiplayerLobby --> MainMenu : leave lobby / close window
+MultiplayerGame --> MainMenu : exit / disconnect handling
+
+@enduml
+

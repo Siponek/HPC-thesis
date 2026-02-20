@@ -37,6 +37,37 @@ compile-diagrams-png:
   plantuml -tpng *.puml
   Write-Host "All PlantUML diagrams compiled to PNG!"
 
+# Compile all Mermaid diagrams to PDF
+[group("thesis")]
+compile-mermaid:
+  #!pwsh
+  Set-Location '{{diagrams_dir}}'
+  Write-Host "Compiling Mermaid diagrams to PDF..."
+  Get-ChildItem -Path . -Filter *.mmd | ForEach-Object {
+    mmdc -i $_.Name -o "$($_.BaseName).pdf"
+  }
+  Write-Host "All Mermaid diagrams compiled!"
+
+# Compile Mermaid diagrams to PNG
+[group("thesis")]
+compile-mermaid-png:
+  #!pwsh
+  Set-Location '{{diagrams_dir}}'
+  Write-Host "Compiling Mermaid diagrams to PNG..."
+  Get-ChildItem -Path . -Filter *.mmd | ForEach-Object {
+    mmdc -i $_.Name -o "$($_.BaseName).png"
+  }
+  Write-Host "All Mermaid diagrams compiled to PNG!"
+
+# Compile a specific Mermaid diagram (usage: just compile-mermaid-diagram architecture)
+[group("thesis")]
+compile-mermaid-diagram name:
+  #!pwsh
+  Set-Location '{{diagrams_dir}}'
+  Write-Host "Compiling Mermaid diagram: {{name}}.mmd..."
+  mmdc -i '{{name}}.mmd' -o '{{name}}.pdf'
+  Write-Host "Diagram compiled: {{diagrams_dir}}/{{name}}.pdf"
+
 # Compile a specific PlantUML diagram (usage: just compile-diagram http-sse-architecture)
 [group("thesis")]
 compile-diagram name:
@@ -81,7 +112,7 @@ clean-all: clean-thesis clean-diagrams
 
 # Full rebuild: clean and compile everything
 [group("thesis")]
-rebuild: clean-all compile-diagrams compile-thesis
+rebuild: clean-all compile-diagrams compile-mermaid compile-thesis
   #!pwsh
   Write-Host "Full thesis rebuild complete!"
 

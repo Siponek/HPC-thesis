@@ -1,0 +1,43 @@
+@startuml ui-layering-node-tree
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+
+title UI Layering and Overlay Isolation (Menu Scene)
+
+package "Main Scene Tree" {
+  node "Control (root)" as Root
+  node "Background" as Bg
+  node "MainScreenLogo" as Logo
+  node "MainMenuButtons" as Buttons
+  node "CanvasLayer" as Layer
+  node "VarTreeMainMenu (debug tree)" as VarTree
+}
+
+Root --> Bg
+Root --> Logo
+Root --> Buttons
+Root --> Layer
+Layer --> VarTree
+
+note right of Buttons
+Primary interactive gameplay/menu controls.
+Subject to normal UI layout flow.
+end note
+
+note right of Layer
+Overlay plane separated from main UI flow.
+Useful for diagnostics/debug display without
+disturbing gameplay-space transform logic.
+end note
+
+legend right
+|= Node |= Role |
+| Control | Scene root and layout owner |
+| MainMenuButtons | Main interaction controls |
+| CanvasLayer | Overlay boundary |
+| VarTreeMainMenu | Runtime variable inspection UI |
+endlegend
+
+@enduml
+

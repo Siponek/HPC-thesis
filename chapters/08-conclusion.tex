@@ -7,7 +7,12 @@ This final chapter summarizes the contributions of this thesis, reflects on how 
 %-----------------------------------------------------------------------
 \section{Summary of Contributions}
 \label{sec:summary-contributions}
-% TODO: Add contributions summary figure (pedagogical mapping, technical architecture outcomes, and validation scope in one visual).
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/diagrams/contributions-summary-overview}
+    \caption{Overview of the three contribution areas and their interrelationships.}
+    \label{fig:contributions-summary}
+\end{figure}
 
 This thesis presented the design, implementation, and evaluation of the HPC Sorting Serious Game, a web-first educational tool for teaching parallel computing concepts through interactive card-sorting gameplay.
 
@@ -190,8 +195,14 @@ This work offers insights for developers of educational multiplayer games:
 \section{Future Work}
 \label{sec:future-work}
 
-Numerous opportunities exist for extending and improving this work.
-% TODO: Add roadmap diagram for future work (short-term, medium-term, long-term phases with dependencies).
+Numerous opportunities exist for extending and improving this work. Figure~\ref{fig:future-work-roadmap} presents a phased roadmap with dependency links between items.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/diagrams/future-work-roadmap}
+    \caption{Future work roadmap organized by time horizon, with dependencies between items.}
+    \label{fig:future-work-roadmap}
+\end{figure}
 
 %-----------------------------------------------------------------------
 \subsection{Short-Term Enhancements}
@@ -238,12 +249,31 @@ Enhancements requiring 3--6 months of development:
 \paragraph*{Additional Game Modes:}
 
 \begin{enumerate}
-    \item \textbf{Algorithm-Specific Modes}: Demonstrate specific parallel sorting algorithms
+    \item \textbf{Guided Algorithm Modes}: While the tool already supports any parallel sorting strategy through its algorithm-agnostic design (Chapter~\ref{ch:architecture}, Section~\ref{sec:algorithm-mode-extensibility}), future work could add \emph{guided} modes that walk students through specific algorithms step-by-step \citep{sanders2019sequential}:
           \begin{itemize}
-              \item Parallel merge sort
+              \item \textbf{Guided Parallel Merge Sort}: System-enforced phase progression (divide $\to$ local sort $\to$ merge rounds) with automatic partition assignment and barrier triggers, building on the strategy players can already execute freely.
+              \item \textbf{Guided Parallel Quicksort}: System-provided pivot selection UI, partition validation, and automatic sub-group assignment, adding structure to the quicksort strategy players can already perform manually.
               \item Sample sort (distributed-memory style, future MPI extension)
               \item Bitonic sort
           \end{itemize}
+
+          Table~\ref{tab:future-algo-mode-comparison} summarizes the pedagogical distinctions between the two primary strategies and what guided modes would add.
+
+          \begin{table}[htbp]
+              \centering
+              \caption{Parallel sorting strategies supported by the tool and potential guided-mode enhancements}
+              \label{tab:future-algo-mode-comparison}
+              \begin{tabular}{@{}p{3.5cm}p{5cm}p{5cm}@{}}
+                  \toprule
+                  \textbf{Aspect}   & \textbf{Merge Sort}                             & \textbf{Quicksort}                                     \\
+                  \midrule
+                  Already supported & Buffers for local sort, barriers for merge sync & Shared container for partition, sub-group coordination \\
+                  Guided mode adds  & Auto partition assignment, phase enforcement    & Pivot UI, partition validation, auto sub-group split   \\
+                  Primary lesson    & Barrier sync, reduction                         & Load imbalance, task fork                              \\
+                  Effort estimate   & Medium (3--4 weeks)                             & High (5--7 weeks)                                      \\
+                  \bottomrule
+              \end{tabular}
+          \end{table}
 
     \item \textbf{Advanced Concepts}: Introduce more HPC topics
           \begin{itemize}
@@ -464,17 +494,17 @@ The HPC Sorting Serious Game represents a step toward making High-Performance Co
 
 As parallel computing becomes increasingly fundamental to modern software engineering—from multicore CPUs to cloud computing to AI/ML workloads—innovative educational approaches are essential to prepare the next generation of computing professionals. Serious games, when thoughtfully designed and rigorously evaluated, can play a valuable role in this educational mission.
 
-The author hopes this work inspires further research and development in educational technologies for HPC and serves as a useful resource for educators, students, and game developers interested in the serious games domain.
+It is hoped that this work inspires further research and development in educational technologies for HPC and serves as a useful resource for educators, students, and game developers interested in the serious games domain.
 
 %-----------------------------------------------------------------------
 \section{Final Thoughts}
 \label{sec:final-thoughts}
 
-Teaching parallel computing remains challenging, but it need not be boring or inaccessible. By combining pedagogical insight, technical innovation, and game design principles, we can create learning experiences that are both effective and enjoyable.
+Teaching parallel computing remains challenging, but it need not be boring or inaccessible. By combining pedagogical insight, technical innovation, and game design principles, it is possible to create learning experiences that are both effective and enjoyable.
 
 The journey from physical card-sorting experiments in a classroom to a digital multiplayer web-based educational tool demonstrates the potential for technology to scale and extend proven teaching methods. While the game developed in this thesis is far from perfect, it represents a meaningful contribution to the ongoing effort to make HPC education more engaging and accessible.
 
-As we look to the future, the convergence of mobile computing, cloud infrastructure, and educational research offers exciting possibilities for serious games in computing education. The author looks forward to seeing how this work evolves, inspires further innovations, and ultimately contributes to better outcomes for students learning parallel computing.
+Looking ahead, the convergence of mobile computing, cloud infrastructure, and educational research offers exciting possibilities for serious games in computing education. The potential for this work to evolve, inspire further innovations, and ultimately contribute to better outcomes for students learning parallel computing remains a motivating prospect.
 
 \vspace{1cm}
 

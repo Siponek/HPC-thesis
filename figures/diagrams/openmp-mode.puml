@@ -1,0 +1,58 @@
+@startuml openmp-mode
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam nodesep 80
+skinparam ranksep 60
+skinparam roundcorner 10
+skinparam ArrowThickness 2
+top to bottom direction
+
+title Game Mode 2: OpenMP Shared-Memory Parallelism
+
+node "Memory Spaces" as MEM_SPACE #transparent {
+    rectangle "<b>Shared Card Container</b>\n<i>(OpenMP Shared Memory Space)</i>\n----" as SHARED_MEM #White {
+        card "12" as oc1
+        card "18" as oc2
+        card "15" as oc3
+        card "22" as oc4
+    }
+    together {
+        rectangle "<b>P1 Private Buffer</b>\n<i>(Thread-Local Storage)</i>\n----" as P1_BUF #PaleGreen {
+            card "1" as b1
+            card "3" as b2
+        }
+
+        rectangle "<b>P2 Private Buffer</b>\n<i>(Thread-Local Storage)</i>\n----" as P2_BUF #PeachPuff {
+            card "7" as b3
+            card "9" as b4
+        }
+    }
+}
+
+' Grouping players to align them horizontally beneath the shared memory
+together {
+    actor "<b>Player 1</b>\n(Thread 0)" as P1 #PaleGreen
+    actor "<b>Player 2</b>\n(Thread 1)" as P2 #PeachPuff
+}
+
+' Grouping private buffers to align them beneath their respective players
+
+' Upward arrows to shared memory (Global Scope)
+P1 -up-> SHARED_MEM : <b>Shared Access</b>\n(Concurrent)
+P2 -up-> SHARED_MEM : <b>Shared Access</b>\n(Concurrent)
+
+' Downward arrows to private memory (Local Scope)
+P1 -down-> P1_BUF : <b>Public Access</b>
+P2 -down-> P2_BUF : <b>Public Access</b>
+
+'note bottom of SHARED_MEM
+'  <b>Pedagogical Mapping: OpenMP Architecture</b>
+'  * <b>Players</b> = Concurrent threads working together on a single task.
+'  * <b>Shared Container</b> = Globally accessible memory space. Introduces concepts
+'    like race conditions and the need for synchronization (locks/barriers).
+'  * <b>Private Buffers</b> = Variables declared as private or threadprivate,
+'    allowing lock-free local sorting before merging back to shared space.
+'end note
+
+@enduml

@@ -206,26 +206,26 @@ Web export introduced a mismatch between prototype-era assumptions and browser r
     \item \texttt{scenes/Multiplayer/GDSyncWebPatch/signaling\_client.gd}: HTTP/SSE signaling client behavior.
 \end{itemize}
 
-% TODO: [Artifact] Before/after architecture diff figure (prototype path vs patched web path).
-% TODO: [Purpose] Show exactly what was intercepted/replaced and what remained unchanged at gameplay-manager level.
-% TODO: [Source Inputs] scenes/Multiplayer/GDSyncWebPatch/gdsync_web_patch.gd; scenes/Multiplayer/GDSyncWebPatch/local_server_signaling.gd; scenes/Multiplayer/GDSyncWebPatch/signaling_client.gd.
-% TODO: [Placement] First figure in this subsection.
-% TODO: [Done Criteria] Must identify replaced local-server component, preserved manager API surface, and browser-compatible relay path.
-% TODO: [Cross-refs] Chapter~\ref{ch:architecture}, Section~\ref{subsec:gdsync-integration}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/diagrams/web-patch-before-after}
+    \caption{Prototype-to-web architecture diff showing LocalServer interception and relay-based replacement}
+    \label{fig:web-patch-before-after}
+\end{figure}
 
-% TODO: [Artifact] Packet/event-path sequence diagram for the patched flow.
-% TODO: [Purpose] Explain request lifecycle from gameplay event to signaling relay and synchronized client update.
-% TODO: [Source Inputs] local_server_signaling.gd process loop and signaling_client.gd SSE/HTTP event handling.
-% TODO: [Placement] After architecture diff figure.
-% TODO: [Done Criteria] Include prototype-era call intent, interception point, server relay, and returned event propagation.
-% TODO: [Cross-refs] Chapter~\ref{ch:implementation}, Section~\ref{subsec:lobby-system}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/diagrams/web-patch-packet-event-sequence}
+    \caption{Patched web signaling event sequence from gameplay call intent to synchronized client update}
+    \label{fig:web-patch-packet-event-sequence}
+\end{figure}
 
-% TODO: [Artifact] "Cost of patching" summary table.
-% TODO: [Purpose] Make trade-offs explicit (complexity, maintenance, and fork dependency).
-% TODO: [Source Inputs] Patch maintenance notes, fork/PR status, debugging effort observations.
-% TODO: [Placement] End of this subsection.
-% TODO: [Done Criteria] At minimum include extra complexity, maintenance burden, and temporary fork dependency with one mitigation each.
-% TODO: [Cross-refs] Chapter~\ref{ch:methodology}, Section~\ref{subsec:toolchain-summary}.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/diagrams/web-patch-cost-summary}
+    \caption{Cost of web-patch strategy: added complexity, maintenance burden, and temporary fork dependency}
+    \label{fig:web-patch-cost-summary}
+\end{figure}
 
 The patch enabled continuity of the existing gameplay integration model but increased maintenance overhead, which is why a fork-plus-PR strategy was used as an interim operational path.
 
@@ -372,7 +372,7 @@ Displaying 50--200 cards on screen (particularly on smaller browser viewports or
               \item Cons: Hard to see linear order, scrolling still required
           \end{itemize}
 
-    \item \textbf{Scrollable Row}: Single row with horizontal scrolling
+    \item \textbf{Scrollable Row (Selected Direction)}: Single row with horizontal scrolling
           \begin{itemize}
               \item Pros: Linear order visible, simple interaction
               \item Cons: Requires substantial scrolling with many cards
@@ -384,12 +384,11 @@ Displaying 50--200 cards on screen (particularly on smaller browser viewports or
               \item Cons: Complex interaction, easy to get lost
           \end{itemize}
 
-    \item \textbf{Hybrid Approach (Final Solution)}:
+    \item \textbf{Hybrid Approach (Selected Direction)}:
           \begin{itemize}
               \item Grid layout with intelligent sizing
               \item Vertical scrolling for overflow
-              \item Zoom controls for adjusting card size
-              \item Mini-map showing overall progress
+              \item Zoom controls for adjusting card size were explored but not fully implemented in the current version
           \end{itemize}
 \end{enumerate}
 
@@ -433,14 +432,13 @@ Not all students have high-end hardware. The game needed to run acceptably acros
     \item Battery life concerns
 \end{itemize}
 
-\paragraph*{Optimization Strategies:}
+\paragraph*{Optimization Strategies Considered:}
 
+The following strategies were evaluated; not all were fully implemented in the current version:
 \begin{itemize}
     \item Reduce draw calls through batching
-    \item Use texture atlases to minimize state changes
-    \item Implement level-of-detail (LOD) for distant cards
-    \item Viewport culling to avoid rendering off-screen cards
-    \item Adjustable quality settings (card detail, effects)
+    \item Viewport culling to avoid rendering off-screen cards (partially implemented via Godot's built-in culling)
+    \item Texture atlases, level-of-detail (LOD), and adjustable quality settings were considered but deferred as profiling showed rendering bottlenecks were manageable for the target card counts (see Chapter~\ref{ch:results}, Section~\ref{subsec:framerate})
 \end{itemize}
 
 %-----------------------------------------------------------------------

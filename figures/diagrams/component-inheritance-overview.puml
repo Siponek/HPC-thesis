@@ -1,0 +1,90 @@
+@startuml component-inheritance-overview
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+
+title Core Component Relationships and Reuse Boundaries
+
+package "Card Domain" {
+  class Card <<Control>> {
+    +value : int
+    +card_color : Color
+    +original_index : int
+    +interactive : bool
+    +can_drag : bool
+    --
+    signal card_grabbed(card)
+    signal card_dropped(card, drop_position)
+  }
+
+  class CardBuffer <<VBoxContainer>> {
+    +slot_text : String
+    +occupied_by : Card
+    --
+    signal card_placed_in_slot(card, slot)
+    signal card_removed(card, slot)
+  }
+
+  class CardManager <<Control>> {
+    +sorting validation
+    +buffer/slot orchestration
+    +completion checks
+    +timer and move counting
+  }
+
+  class MultiplayerCardManager <<Control>> {
+    +host-authoritative sync behavior
+    +private buffer visibility rules
+    +barrier synchronization (BarrierManager)
+    +multiplayer state reconciliation
+  }
+
+  class BarrierManager <<RefCounted>> {
+    +state : {RUNNING, WAITING, ACTIVE}
+    +barrier_mode : int
+    --
+    signal barrier_state_changed
+    signal thread_reached_barrier
+    signal main_thread_assigned
+  }
+
+  CardManager <|-- MultiplayerCardManager : extends (path-based)
+  CardManager "1" o-- "*" Card : manages
+  CardManager "1" o-- "*" CardBuffer : orchestrates
+  MultiplayerCardManager "1" *-- "1" BarrierManager : owns
+}
+
+package "Session/Connection Domain" {
+  class ConnectionManager <<Node, Autoload>> {
+    +lobby lifecycle state
+    +player list updates
+    +signal re-emission layer (inner Signals class)
+  }
+
+  class "GDSync (Autoload)" as GDSync {
+    +call_func() / expose_func()
+    +lobby_create() / lobby_join()
+    +framework integration boundary
+  }
+
+  class SceneManager <<Node, Autoload>> {
+    +goto_scene(res_path)
+    +centralized scene transition
+  }
+}
+
+MultiplayerCardManager --> GDSync : GDSync.call_func()\n(sync_card_moved, etc.)
+ConnectionManager --> GDSync : subscribes to\nconnection/lobby signals
+MultiplayerCardManager ..> ConnectionManager : reads host/client state
+SceneManager <.. ConnectionManager : lobby scenes call\nSceneManager.goto_scene()
+
+note right of MultiplayerCardManager
+Extension-over-duplication strategy:
+base rules remain in CardManager,
+multiplayer concerns added in subclass
+via path-based inheritance.
+end note
+
+@enduml
+

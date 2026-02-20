@@ -1,0 +1,48 @@
+@startuml development-timeline-phases
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+
+title Development Timeline (Phases 1--5)
+
+' Gantt chart
+projectscale weekly
+Project starts 2025-01-06
+
+-- Phase 1: Concept & Prototyping --
+[Define core mechanics] starts 2025-01-06 and lasts 1 weeks
+[Paper prototypes & mockups] starts 2025-01-13 and lasts 1 weeks
+[Technology evaluation] starts 2025-01-13 and lasts 1 weeks
+[Minimal card-rendering prototype] starts 2025-01-20 and lasts 1 weeks
+
+-- Phase 2: Single-Player Implementation --
+[Card generation & shuffling] starts 2025-01-27 and lasts 1 weeks
+[Drag-and-drop mechanics] starts 2025-02-03 and lasts 1 weeks
+[Buffer zones (private storage)] starts 2025-02-10 and lasts 1 weeks
+[Sorting validation & completion] starts 2025-02-17 and lasts 1 weeks
+
+-- Phase 3: Multiplayer Foundation --
+[HTTP/SSE relay server] starts 2025-02-24 and lasts 2 weeks
+[Lobby system] starts 2025-03-10 and lasts 1 weeks
+[GDSync integration + web patch] starts 2025-03-17 and lasts 2 weeks
+[Connection testing & stability] starts 2025-03-31 and lasts 1 weeks
+
+-- Phase 4: Multiplayer Refinement --
+[Card visibility (private buffers)] starts 2025-04-07 and lasts 1 weeks
+[Host-authoritative state mgmt] starts 2025-04-14 and lasts 1 weeks
+[Barrier synchronization] starts 2025-04-21 and lasts 1 weeks
+[GDSync protected-mode fix] starts 2025-04-28 and lasts 1 weeks
+
+-- Phase 5: Polish & Testing --
+[UI/UX web improvements] starts 2025-05-05 and lasts 1 weeks
+[Performance optimization] starts 2025-05-12 and lasts 1 weeks
+[Cross-browser testing] starts 2025-05-19 and lasts 1 weeks
+[Documentation & thesis prep] starts 2025-05-26 and lasts 1 weeks
+
+' Decision pivots (milestones)
+[Godot engine selected] happens at 2025-01-17
+[GDSync chosen over raw WebSocket] happens at 2025-03-14
+[WebRTC abandoned -> HTTP/SSE relay] happens at 2025-03-07
+[GDSync fork for web export fix] happens at 2025-04-25
+
+@enduml

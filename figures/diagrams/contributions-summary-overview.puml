@@ -1,0 +1,53 @@
+@startuml contributions-summary-overview
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+
+title Thesis Contributions Summary
+
+rectangle "**Pedagogical Mapping\nContribution**" as PED #D5F5E3 {
+  note as PED_N
+  * Digital transformation of physical
+    classroom card-sorting experiments
+  * Systematic HPC-to-game-mechanic mapping
+    (threads -> players, shared memory ->
+    shared container, TLS -> private buffers)
+  * Serious game as icebreaker for
+    abstract parallel computing concepts
+  end note
+}
+
+rectangle "**Technical Architecture\nContribution**" as ARCH #D4E6F1 {
+  note as ARCH_N
+  * Extension-based architecture
+    (CardManager -> MultiplayerCardManager)
+  * HTTP/SSE relay for browser-first
+    multiplayer (no WebRTC dependency)
+  * GDSync web-export patch strategy
+    (intercept + replace transport layer)
+  * Barrier synchronization game mechanic
+  end note
+}
+
+rectangle "**Validation & Evaluation\nContribution**" as EVAL #FCF3CF {
+  note as EVAL_N
+  * Classroom deployment with
+    undergraduate students
+  * Usability evaluation (SUS/Likert)
+  * Engagement evidence collection
+  * Cross-browser performance testing
+  * Open-source artifact for reuse
+  end note
+}
+
+PED -[#27AE60,bold]-> ARCH : pedagogical\nrequirements\nshaped architecture
+ARCH -[#2E86C1,bold]-> EVAL : technical artifact\nenabled validation
+EVAL -[#F39C12,bold,dashed]-> PED : feedback informs\nfuture iterations
+
+note bottom
+All three contribution areas converge in the
+HPC Sorting Serious Game: a web-first educational
+tool for teaching parallel computing through play.
+end note
+
+@enduml

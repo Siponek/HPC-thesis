@@ -1,0 +1,48 @@
+@startuml future-work-roadmap
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+
+title Future Work Roadmap
+
+rectangle "**Short-Term (1--3 months)**" as SHORT #D5F5E3 {
+  rectangle "Onboarding Tutorial" as ST1 #White
+  rectangle "Educational Overlay\n(concept tooltips)" as ST2 #White
+  rectangle "Enhanced Feedback\n(player activity indicators)" as ST3 #White
+  rectangle "iOS Support" as ST4 #White
+}
+
+rectangle "**Medium-Term (3--6 months)**" as MED #FCF3CF {
+  rectangle "Algorithm-Specific Modes\n(merge sort, bitonic sort)" as MT1 #White
+  rectangle "Advanced HPC Concepts\n(race conditions, load balancing)" as MT2 #White
+  rectangle "Competitive Modes\n(leaderboards, team vs team)" as MT3 #White
+  rectangle "Enhanced Analytics\n(speedup, efficiency metrics)" as MT4 #White
+  rectangle "Instructor Dashboard" as MT5 #White
+  rectangle "LMS Integration\n(Moodle, Canvas)" as MT6 #White
+}
+
+rectangle "**Long-Term (6+ months)**" as LONG #FADBD8 {
+  rectangle "Formal Educational Evaluation\n(pre/post-test study, SIGCSE)" as LT1 #White
+  rectangle "Learning Analytics\n(predictive models, personalization)" as LT2 #White
+  rectangle "GPU Parallelism Extension\n(CUDA/OpenCL concepts)" as LT3 #White
+  rectangle "MPI Distributed Memory\n(message passing simulation)" as LT4 #White
+}
+
+' Dependencies
+ST1 -[#27AE60]-> MT1 : tutorials enable\ncomplex modes
+ST2 -[#27AE60]-> MT2 : overlay explains\nnew concepts
+ST3 -[#27AE60]-> MT4 : feedback extends\nto analytics
+
+MT1 -[#F39C12]-> LT3 : algorithmic foundation\nfor GPU modes
+MT4 -[#F39C12]-> LT2 : analytics pipeline\nfeeds learning models
+MT5 -[#F39C12]-> LT1 : dashboard supports\nformal study design
+MT2 -[#F39C12]-> LT4 : shared-memory concepts\nextend to MPI
+
+legend right
+|= Horizon |= Scope |
+| Short-term | Immediate usability improvements |
+| Medium-term | New game modes and analytics |
+| Long-term | Research directions and publications |
+endlegend
+
+@enduml

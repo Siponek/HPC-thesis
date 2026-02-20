@@ -1,0 +1,63 @@
+@startuml deployment-authority-boundary
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+
+title Deployment Context and Authority Boundaries (Web-First Multiplayer)
+
+node "Browser Client A\n(Host authority)" as Host {
+  component "Game Scenes\n(UI + Card logic)" as HostUI
+  component "MultiplayerCardManager" as HostMCM
+  component "ConnectionManager" as HostConn
+  component "GDSync + LocalServerSignaling" as HostSync
+}
+
+node "Browser Client B\n(Peer)" as Peer1 {
+  component "Game Scenes\n(UI + Card logic)" as PeerUI
+  component "MultiplayerCardManager" as PeerMCM
+  component "ConnectionManager" as PeerConn
+  component "GDSync + LocalServerSignaling" as PeerSync
+}
+
+node "Browser Client C\n(Peer)" as Peer2 {
+  component "Game Scenes\n(UI + Card logic)" as Peer2UI
+  component "MultiplayerCardManager" as Peer2MCM
+  component "ConnectionManager" as Peer2Conn
+  component "GDSync + LocalServerSignaling" as Peer2Sync
+}
+
+cloud "Signaling/Relay Server\n(Python HTTP/SSE)" as Relay
+
+HostSync --> Relay : HTTP actions\n(connect/create/join/broadcast)
+PeerSync --> Relay : HTTP actions
+Peer2Sync --> Relay : HTTP actions
+
+Relay --> HostSync : SSE events
+Relay --> PeerSync : SSE events
+Relay --> Peer2Sync : SSE events
+
+HostMCM -[#green,bold]-> HostMCM : authoritative validation\nand canonical updates
+PeerMCM -[#gray,dashed]-> HostMCM : proposes move intent\n(via relay path)
+Peer2MCM -[#gray,dashed]-> HostMCM : proposes move intent\n(via relay path)
+
+rectangle "In-process boundary\n(signals/local callbacks)" as InProc #E6F4EA
+rectangle "Inter-client boundary\n(HTTP/SSE relay)" as InterNet #FFF4E6
+
+InProc .. HostConn
+InProc .. HostMCM
+InProc .. PeerConn
+InProc .. PeerMCM
+InProc .. Peer2Conn
+InProc .. Peer2MCM
+
+InterNet .. Relay
+
+legend right
+|= Boundary |= Meaning |
+| Host authority | Final move validation and state convergence |
+| In-process signals | Local component communication inside one client |
+| HTTP/SSE relay | Cross-client event propagation for web deployment |
+endlegend
+
+@enduml
+

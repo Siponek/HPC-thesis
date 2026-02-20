@@ -1,0 +1,107 @@
+@startuml parallel-mergesort-game-flow
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam ActivityDiamondBackgroundColor #FFFFCC
+skinparam ActivityBackgroundColor #F0F8FF
+skinparam PartitionBackgroundColor #FAFAFA
+
+title Performing Parallel Merge Sort with the Existing Tool
+
+|#LightBlue| System |
+|#LightGreen| All Players |
+|#LightYellow| Merger (Main Thread) |
+|#LightPink| Non-Merger (Blocked) |
+
+|System|
+start
+:Generate **n** shuffled cards\nin shared container;
+:Divide cards into **p** equal\npartitions (one per player);
+note right
+  Partition dividers appear
+  in the shared container.
+  Each zone highlighted
+  in a player's color.
+end note
+:Assign each partition\nto a player;
+
+|All Players|
+partition "**Phase 1 — Local Sort** (parallel, independent)" {
+    fork
+        :Player 1 sorts\npartition 1\nusing private buffer;
+    fork again
+        :Player 2 sorts\npartition 2\nusing private buffer;
+    fork again
+        :Player **p** sorts\npartition **p**\nusing private buffer;
+    end fork
+    note right
+      Each player works **only**
+      on their assigned zone.
+      Buffer contiguity check
+      enforces coherent subsets.
+      ——
+      **Maps to:** embarrassingly
+      parallel local computation
+    end note
+    :Each player clicks\n"Local Sort Done";
+}
+
+|System|
+:All local sorts validated;\n→ **Barrier activates**;
+note right
+  Reuses existing
+  **BarrierManager** FSM:
+  RUNNING → WAITING
+  → BARRIER_ACTIVE
+end note
+
+partition "**Phase 2 — Merge Rounds** (⌈log₂ p⌉ rounds)" {
+    repeat
+        :Pair adjacent players\nfor this merge round;
+        note right
+          Round **k**: merge
+          2^(k-1)-size sorted runs
+          into 2^k-size runs
+        end note
+
+        fork
+            |Merger (Main Thread)|
+            :Merge two adjacent\nsorted runs into one;
+            note right
+              Merger interacts with
+              shared container.
+              Other player's cards
+              become visible.
+              ——
+              **Maps to:** reduction /
+              tree-based merging
+            end note
+        fork again
+            |Non-Merger (Blocked)|
+            :See lock overlay\n(barrier active);
+            note right
+              **Maps to:** thread
+              idle time / sync cost
+            end note
+        end fork
+
+        |System|
+        :Validate merged run\nis sorted;
+        :Release barrier\n→ next round;
+    repeat while (More merge rounds?) is (yes)
+    -> no;
+}
+
+|System|
+:All cards in ascending order\n→ **Game complete!**;
+note right
+  Single fully sorted array
+  in shared container.
+  Show completion stats:
+  time, moves, rounds.
+end note
+stop
+
+center footer Players perform Parallel Merge Sort using existing shared container, buffers, and barriers
+
+@enduml
