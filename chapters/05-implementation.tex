@@ -482,12 +482,14 @@ A custom \texttt{ColorfulLogger} class provides per-component categorized loggin
 \begin{lstlisting}[caption={Logger instantiation pattern}]
 @onready var logger := CustomLogger.get_logger(self)
 \end{lstlisting}
+% TODO add screenshot of logger output with multiple components
 
 This pattern tags every log line with the emitting node's name and supports \texttt{log\_info}, \texttt{log\_warning}, \texttt{log\_error}, and \texttt{log\_debug} levels. During multiplayer debugging, these structured logs were essential for correlating events across multiple browser instances, exposing timing/order failures that were otherwise hard to reproduce (Chapter~\ref{ch:problems}, Section~\ref{subsec:multiplayer-debugging}).
 
 %-----------------------------------------------------------------------
 \subsection{Runtime Variable Inspection}
 \label{subsec:vartree}
+% TODO add screenshot of logger output with multiple components
 
 The VarTree plugin \citep{vartree_asset} allows real-time inspection and modification of variables during gameplay. The card manager mounts debug variables that update every frame:
 
