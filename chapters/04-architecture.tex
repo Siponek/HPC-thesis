@@ -299,7 +299,7 @@ Three existing architectural components form a general-purpose substrate for par
 \begin{description}
     \item[Shared card container (shared memory).] All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative partitioning (quicksort), independent sub-array sorting (merge sort), or any other rearrangement strategy.
 
-    \item[Public player buffers (thread-local storage).] Each player has public buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
+    \item[Public player buffers (partitioned shared memory).] Each player has public buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
 
     \item[Barrier synchronization (\texttt{\#pragma omp barrier}).] The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging, or after partitioning before recursing into sub-arrays. The main-thread selection mechanism models coordinator election.
 \end{description}
@@ -307,7 +307,7 @@ Three existing architectural components form a general-purpose substrate for par
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/diagrams/algorithm-mode-class-extension.png}
-    \caption{Existing component architecture and how it supports parallel sorting strategies: \texttt{CardManager} provides card logic, \texttt{MultiplayerCardManager} adds synchronization, \texttt{BarrierManager} provides coordination, and \texttt{CardBuffer} provides thread-local storage---together enabling any sorting algorithm}
+    \caption{Existing component architecture and how it supports parallel sorting strategies: \texttt{CardManager} provides card logic, \texttt{MultiplayerCardManager} adds synchronization, \texttt{BarrierManager} provides coordination, and \texttt{CardBuffer} provides per-thread work areas---together enabling any sorting algorithm}
     \label{fig:algorithm-mode-class-extension}
 \end{figure}
 

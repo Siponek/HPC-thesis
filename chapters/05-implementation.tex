@@ -81,7 +81,7 @@ This mechanism provides a deterministic completion criterion independent of UI a
 \subsection{Buffer Contiguity Check}
 \label{subsec:buffer-contiguity}
 
-Players use public buffer zones (simulating thread-local storage) to temporarily hold cards during sorting. A buffer contiguity check validates that cards in the buffer form a contiguous subsequence of the sorted target:
+Players use public buffer zones (simulating partitioned shared memory) to temporarily hold cards during sorting. A buffer contiguity check validates that cards in the buffer form a contiguous subsequence of the sorted target:
 
 \begin{lstlisting}[caption={Buffer contiguity validation (card\_manager.gd, line 693)}]
 func check_player_buffer_contiguity() -> bool:

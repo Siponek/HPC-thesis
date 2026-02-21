@@ -18,12 +18,12 @@ node "Memory Spaces" as MEM_SPACE #transparent {
         card "22" as oc4
     }
     together {
-        rectangle "<b>P1 Private Buffer</b>\n<i>(Thread-Local Storage)</i>\n----" as P1_BUF #PaleGreen {
+        rectangle "<b>P1 Private Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P1_BUF #PaleGreen {
             card "1" as b1
             card "3" as b2
         }
 
-        rectangle "<b>P2 Private Buffer</b>\n<i>(Thread-Local Storage)</i>\n----" as P2_BUF #PeachPuff {
+        rectangle "<b>P2 Private Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P2_BUF #PeachPuff {
             card "7" as b3
             card "9" as b4
         }
