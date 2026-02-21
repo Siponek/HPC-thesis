@@ -55,7 +55,7 @@ The scene model is intentionally concise: a menu/lobby entry path and two gamepl
 \paragraph*{Architectural Intent:}
 \begin{itemize}
     \item Single-player provides the sequential baseline for speedup interpretation.
-    \item Multiplayer preserves shared container semantics while enforcing private buffer visibility.
+    \item Multiplayer preserves shared container semantics while enforcing public buffer visibility.
     \item Lobby separates session orchestration from gameplay state transitions.
 \end{itemize}
 
@@ -197,7 +197,7 @@ Connection handling is split into phases:
 The architecture explicitly distinguishes:
 \begin{itemize}
     \item \textbf{Shared-visible state}: container cards and game-level counters.
-    \item \textbf{Player-private state}: cards in private buffers hidden from other players.
+    \item \textbf{Player-private state}: cards in public buffers hidden from other players.
 \end{itemize}
 
 This model is central to the OpenMP analogy: all participants can access shared memory, while local buffer state remains private.
@@ -208,7 +208,7 @@ This model is central to the OpenMP analogy: all participants can access shared 
     \label{fig:card-move-sequence-flow}
 \end{figure}
 
-\begin{lstlisting}[language={}, caption={Architectural mechanism: private buffer visibility gate (pseudocode)}]
+\begin{lstlisting}[language={}, caption={Architectural mechanism: public buffer visibility gate (pseudocode)}]
 if card.in_private_buffer():
     card.visible = (card.buffer_owner_id == local_player_id)
 else:
@@ -288,7 +288,7 @@ Observed constraints and measured outcomes are discussed in Chapter~\ref{ch:resu
 \section{Algorithm-Agnostic Design: Supporting Parallel Sorting Strategies}
 \label{sec:algorithm-mode-extensibility}
 
-The game does not enforce a specific sorting algorithm. Instead, its architecture provides general-purpose mechanics---a shared card container, private player buffers, and barrier synchronization---that naturally accommodate \emph{any} parallel sorting strategy a player (or instructor) chooses to employ. This section demonstrates how two well-known parallel algorithms, \textbf{Parallel Merge Sort} and \textbf{Parallel Quicksort} \citep{sanders2019sequential}, can be carried out within the existing tool without any code changes.
+The game does not enforce a specific sorting algorithm. Instead, its architecture provides general-purpose mechanics---a shared card container, public player buffers, and barrier synchronization---that naturally accommodate \emph{any} parallel sorting strategy a player (or instructor) chooses to employ. This section demonstrates how two well-known parallel algorithms, \textbf{Parallel Merge Sort} and \textbf{Parallel Quicksort} \citep{sanders2019sequential}, can be carried out within the existing tool without any code changes.
 
 %-----------------------------------------------------------------------
 \subsection{How the Existing Mechanics Support Any Algorithm}
@@ -299,7 +299,7 @@ Three existing architectural components form a general-purpose substrate for par
 \begin{description}
     \item[Shared card container (shared memory).] All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative partitioning (quicksort), independent sub-array sorting (merge sort), or any other rearrangement strategy.
 
-    \item[Private player buffers (thread-local storage).] Each player has private buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
+    \item[Public player buffers (thread-local storage).] Each player has public buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
 
     \item[Barrier synchronization (\texttt{\#pragma omp barrier}).] The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging, or after partitioning before recursing into sub-arrays. The main-thread selection mechanism models coordinator election.
 \end{description}
@@ -319,21 +319,21 @@ Players can execute a parallel merge sort strategy using the existing mechanics 
 
 \begin{enumerate}
     \item \textbf{Divide}: Players informally agree to each ``own'' a contiguous segment of the card deck (e.g., with 4 players and 20 cards, each player takes cards 1--5, 6--10, etc.).
-    \item \textbf{Local sort}: Each player moves their assigned cards into their private buffer, sorts them locally, then returns them to the shared container in sorted order. All players do this simultaneously---embarrassingly parallel work with no inter-player communication.
+    \item \textbf{Local sort}: Each player moves their assigned cards into their public buffer, sorts them locally, then returns them to the shared container in sorted order. All players do this simultaneously---embarrassingly parallel work with no inter-player communication.
     \item \textbf{Merge}: Players use the barrier to synchronize. One player (the ``main thread'') merges two adjacent sorted runs while the other player watches. Subsequent barrier rounds merge progressively larger runs until the full array is sorted.
 \end{enumerate}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.92\textwidth]{figures/diagrams/parallel-mergesort-game-flow}
-    \caption{How players perform parallel merge sort using the existing tool: divide cards among players, sort locally in private buffers, then merge sorted runs through barrier-gated rounds}
+    \caption{How players perform parallel merge sort using the existing tool: divide cards among players, sort locally in public buffers, then merge sorted runs through barrier-gated rounds}
     \label{fig:parallel-mergesort-game-flow}
 \end{figure}
 
 The pedagogical mappings that emerge naturally from this strategy:
 \begin{itemize}
     \item \emph{Data decomposition}: players divide cards among themselves $\equiv$ \texttt{\#pragma omp parallel for} static scheduling
-    \item \emph{Embarrassingly parallel local sort}: independent work in private buffers $\equiv$ no inter-thread communication
+    \item \emph{Embarrassingly parallel local sort}: independent work in public buffers $\equiv$ no inter-thread communication
     \item \emph{Barrier-gated merge rounds}: using the barrier between merge phases $\equiv$ \texttt{\#pragma omp barrier}
     \item \emph{Idle threads}: non-merger players blocked at barrier $\equiv$ synchronization overhead
 \end{itemize}
@@ -377,21 +377,21 @@ Table~\ref{tab:algo-mode-comparison} summarizes how the two strategies differ in
     \label{tab:algo-mode-comparison}
     \begin{tabular}{@{}p{3.8cm}p{5.2cm}p{5.2cm}@{}}
         \toprule
-        \textbf{Aspect}    & \textbf{Merge Sort Strategy}             & \textbf{Quicksort Strategy}                \\
+        \textbf{Aspect}    & \textbf{Merge Sort Strategy}            & \textbf{Quicksort Strategy}                \\
         \midrule
-        Parallelism model  & Data parallelism (equal partitions)      & Task parallelism (recursive fork)          \\
-        Barrier usage      & Heavy---between every merge round        & Light---coordination at partition steps    \\
-        Buffer usage       & Heavy---local sorting in private buffers & Light---partition done in shared container \\
-        Load balance       & Always balanced (equal partitions)       & Variable---depends on pivot quality        \\
-        Primary HPC lesson & Barrier sync, reduction pattern          & Load imbalance, task creation              \\
+        Parallelism model  & Data parallelism (equal partitions)     & Task parallelism (recursive fork)          \\
+        Barrier usage      & Heavy---between every merge round       & Light---coordination at partition steps    \\
+        Buffer usage       & Heavy---local sorting in public buffers & Light---partition done in shared container \\
+        Load balance       & Always balanced (equal partitions)      & Variable---depends on pivot quality        \\
+        Primary HPC lesson & Barrier sync, reduction pattern         & Load imbalance, task creation              \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-The tool's algorithm-agnostic design means instructors can assign different strategies to different groups and have students compare their experiences---e.g., observing that merge sort leads to more barrier usage while quicksort exposes load-imbalance issues. This flexibility is a direct consequence of the general-purpose shared-container, private-buffer, and barrier architecture.
+The tool's algorithm-agnostic design means instructors can assign different strategies to different groups and have students compare their experiences---e.g., observing that merge sort leads to more barrier usage while quicksort exposes load-imbalance issues. This flexibility is a direct consequence of the general-purpose shared-container, public-buffer, and barrier architecture.
 
 %-----------------------------------------------------------------------
 \section{Summary}
 \label{sec:architecture-summary}
 
-This chapter documented architectural decisions that made the tool technically feasible and pedagogically interpretable in a web-first multiplayer context. The focus was on synchronization boundaries, state visibility semantics, and authority patterns rather than exhaustive implementation detail. Section~\ref{sec:algorithm-mode-extensibility} demonstrated that the existing architecture---the shared card container, private player buffers, and barrier synchronization---is algorithm-agnostic: players can execute parallel merge sort, quicksort, or any other sorting strategy without requiring tool modifications. Detailed implementation evidence is provided in Chapter~\ref{ch:implementation}, while educational and operational effectiveness is evaluated in Chapter~\ref{ch:results}.
+This chapter documented architectural decisions that made the tool technically feasible and pedagogically interpretable in a web-first multiplayer context. The focus was on synchronization boundaries, state visibility semantics, and authority patterns rather than exhaustive implementation detail. Section~\ref{sec:algorithm-mode-extensibility} demonstrated that the existing architecture---the shared card container, public player buffers, and barrier synchronization---is algorithm-agnostic: players can execute parallel merge sort, quicksort, or any other sorting strategy without requiring tool modifications. Detailed implementation evidence is provided in Chapter~\ref{ch:implementation}, while educational and operational effectiveness is evaluated in Chapter~\ref{ch:results}.

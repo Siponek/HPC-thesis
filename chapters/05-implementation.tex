@@ -81,7 +81,7 @@ This mechanism provides a deterministic completion criterion independent of UI a
 \subsection{Buffer Contiguity Check}
 \label{subsec:buffer-contiguity}
 
-Players use private buffer zones (simulating thread-local storage) to temporarily hold cards during sorting. A buffer contiguity check validates that cards in the buffer form a contiguous subsequence of the sorted target:
+Players use public buffer zones (simulating thread-local storage) to temporarily hold cards during sorting. A buffer contiguity check validates that cards in the buffer form a contiguous subsequence of the sorted target:
 
 \begin{lstlisting}[caption={Buffer contiguity validation (card\_manager.gd, line 693)}]
 func check_player_buffer_contiguity() -> bool:
@@ -180,7 +180,7 @@ class CardState:
         )
 \end{lstlisting}
 
-\texttt{CardState} captures whether a card is in the shared container or in a player's private buffer, and who owns it. This explicit serialization boundary ensures that network payloads are minimal and self-describing, and that deserialization on the receiving client produces a deterministic scene state.
+\texttt{CardState} captures whether a card is in the shared container or in a player's public buffer, and who owns it. This explicit serialization boundary ensures that network payloads are minimal and self-describing, and that deserialization on the receiving client produces a deterministic scene state.
 
 %-----------------------------------------------------------------------
 \subsection{Lobby and Session Lifecycle}
@@ -284,7 +284,7 @@ func sync_card_moved(
 \subsection{Visibility Management}
 \label{subsec:visibility-management}
 
-In multiplayer mode (OpenMP simulation), players should not see cards in other players' private buffers, representing thread-private data. When a card enters another player's buffer, it is tracked locally and removed from the container:
+In multiplayer mode (OpenMP simulation), players should not see cards in other players' public buffers, representing thread-public data. When a card enters another player's buffer, it is tracked locally and removed from the container:
 
 \begin{lstlisting}[caption={Buffer entry notification (multiplayer\_card\_manager.gd)}]
 func sync_card_entered_buffer(card_value: int, entering_player_id: int):

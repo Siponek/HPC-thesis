@@ -41,7 +41,7 @@ Students should understand:
 
 \begin{enumerate}
     \item Multiple threads share a common memory space
-    \item Each thread can have private (local) data in buffers
+    \item Each thread can have public (local) data in buffers
     \item Threads work collaboratively on shared data
     \item Synchronization occurs through shared container access
     \item Work is divided among threads for parallel execution
@@ -96,7 +96,7 @@ Bridge from game to formal concepts:
     \item How does single-player mode relate to sequential (single-threaded) execution?
     \item How does multiplayer mode relate to shared-memory parallel programming (OpenMP)?
     \item What real-world computing problems benefit from parallelism?
-    \item What role does the shared container play compared to private buffers?
+    \item What role does the shared container play compared to public buffers?
     \item When might coordination overhead outweigh parallelism benefits?
 \end{enumerate}
 
@@ -259,7 +259,7 @@ Play multiplayer mode and try two different strategies:
         Single-player mode            & Sequential execution        & Single-threaded program        \\
         Multiplayer session           & Parallel region             & \texttt{\#pragma omp parallel} \\
         Main card container           & Shared array                & \texttt{shared(array)}         \\
-        Private buffer zones          & Thread-private storage      & \texttt{private(buffer)}       \\
+        public buffer zones           & Thread-public storage       & \texttt{public(buffer)}        \\
         Players working independently & Independent threads         & No explicit synchronization    \\
         Sorting within buffer         & Local computation           & Serial code in parallel region \\
         Merging back to main          & Critical section            & \texttt{\#pragma omp critical} \\

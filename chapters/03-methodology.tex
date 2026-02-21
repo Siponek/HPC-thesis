@@ -120,8 +120,8 @@ Functional requirements specify what the system must do:
     \item Provide lobby for matchmaking and game configuration
     \item Display shared container visible to all players (OpenMP shared memory)
     \item Synchronize card movements across all clients
-    \item Provide private buffers for each player (thread-local storage)
-    \item Hide cards in other players' private buffers (thread-private data)
+    \item Provide public buffers for each player (thread-local storage)
+    \item Hide cards in other players' public buffers (thread-private data)
     \item Handle player disconnections gracefully
 \end{itemize}
 
@@ -169,14 +169,14 @@ The game presents players with a deck of numbered cards that must be sorted in a
 
 \paragraph*{Single-Player Mode (Sequential Execution):} Represents traditional sequential algorithm execution where a single process sorts all data. The player works alone with all cards visible, performing the entire sorting task independently.
 
-\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses private buffer zones for local sorting (representing thread-local storage), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
+\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses public buffer zones for local sorting (representing thread-local storage), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
 
 The complete architecture and pedagogical mapping are detailed in Chapter~\ref{ch:architecture}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.65\textwidth]{figures/diagrams/sequential-mode.png}
-    \caption{Game Mode~1: Sequential Execution (Baseline). A single player (main thread) sorts the entire dataset alone, accessing both the main container (main memory) and a private work buffer (local variables).}
+    \caption{Game Mode~1: Sequential Execution (Baseline). A single player (main thread) sorts the entire dataset alone, accessing both the main container (main memory) and a public work buffer (local variables).}
     \label{fig:sequential-mode}
 
     \vspace{0.3em}
@@ -188,12 +188,12 @@ The complete architecture and pedagogical mapping are detailed in Chapter~\ref{c
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/diagrams/openmp-mode.png}
-    \caption{Game Mode~2: OpenMP Shared-Memory Parallelism. Multiple players (threads) access a shared card container concurrently and use private buffers for thread-local sorting.}
+    \caption{Game Mode~2: OpenMP Shared-Memory Parallelism. Multiple players (threads) access a shared card container concurrently and use public buffers for thread-local sorting.}
     \label{fig:openmp-mode}
 
     \vspace{0.3em}
     \begin{description}
-        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{Private buffers} correspond to variables declared as \texttt{private} or \texttt{threadprivate}, allowing lock-free local sorting before merging back to shared space.
+        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{public buffers} correspond to variables declared as \texttt{private} or \texttt{threadprivate}, allowing lock-free local sorting before merging back to shared space.
     \end{description}
 \end{figure}
 
@@ -533,7 +533,7 @@ The game development followed an iterative, incremental approach spanning approx
 
 \paragraph*{Phase 4: Multiplayer Refinement (October -- December 2025)}
 \begin{itemize}
-    \item Implemented card visibility management (private buffers)
+    \item Implemented card visibility management (public buffers)
     \item Developed host-authoritative state management
     \item Added disconnection handling and recovery
     \item Refined synchronization for card movements
@@ -573,7 +573,7 @@ The core challenge was translating abstract parallel computing concepts into tan
         \midrule
         Shared Memory          & Desk visible to all students       & Shared card container                \\
         \midrule
-        Thread-Local Storage   & Student's private notebook         & Player's private buffer zones        \\
+        Thread-Local Storage   & Student's private notebook         & Player's public buffer zones         \\
         \midrule
         Parallel Execution     & Students work simultaneously       & Multiple players, no turn-taking     \\
         \midrule
