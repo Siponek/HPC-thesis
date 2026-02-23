@@ -10,7 +10,7 @@ skinparam nodesep 60
 skinparam ranksep 20
 
 together {
-  card "**Physical Classroom Experiment**\n\n<b>Description</b>\nStudents sort numbered cards\nat desks to simulate parallel\ncomputing paradigms\n\n<color:green><b>Strengths</b></color>\n+ Highly engaging\n+ Memorable hands-on experience\n+ Intuitive understanding\n+ Immediate feedback\n\n<color:red><b>Limitations</b></color>\n- Limited scalability\n- Requires physical presence\n- No automated metrics" as PHYS #LightBlue
+  card "**Physical Classroom Experiment**\n\n<b>Description</b>\nStudents sort numbered cards\nat desks to simulate parallel\ncomputing paradigms\n\n<color:green><b>Strengths</b></color>\n+ Highly engaging\n+ Memorable hands-on experience\n+ Intuitive understanding\n+ Immediate feedback\n\n<color:red><b>Limitations</b></color>\n- Limited scalability\n- Requires a large desk and space\n- No automated metrics" as PHYS #LightBlue
 
   card "**Digital Serious Game**\n\n<b>Description</b>\nWeb-based card sorting game\nwith real-time multiplayer\nvia HTTP/SSE relay\n\n<color:green><b>Strengths</b></color>\n+ Scalable to any class size\n+ Accessible anywhere, anytime\n+ Repeatable and measurable\n+ Automatic performance tracking\n\n<color:orange><b>Challenges Addressed</b></color>\n* State synchronization\n* Responsive UI design\n* Browser compatibility\n* Performance optimization" as DIGI #LightGreen
 }

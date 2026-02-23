@@ -23,29 +23,29 @@ Parallel computing is the simultaneous execution of multiple computational tasks
 
 Two primary paradigms dominate parallel computing education and practice: shared-memory parallelism and distributed-memory parallelism.
 
-\subsubsection{Shared-Memory Parallelism}
+\subsubsection*{Shared-Memory Parallelism}
 
 In shared-memory systems, multiple processors or cores access a common address space. All threads can read and write to the same memory locations, enabling efficient data sharing but requiring careful synchronization to prevent race conditions.
 
 \textbf{Characteristics:}
 \begin{itemize}
     \item All processors access the same physical memory
-    \item Communication occurs through shared variables
+    \item Communication between threads occurs through shared variables
     \item Synchronization primitives (locks, barriers, atomic operations) prevent conflicts
     \item Lower communication overhead compared to distributed memory
-    \item Limited scalability due to memory bandwidth constraints
+    \item Scalability typically limited to a single workstation (one multi-core node)
 \end{itemize}
 
 \textbf{Applications:} Shared-memory parallelism is ideal for problems requiring frequent communication between processing units, such as iterative algorithms, graph processing, and data analytics on multicore processors.
 
-\subsubsection{Distributed-Memory Parallelism}
+\subsubsection*{Distributed-Memory Parallelism}
 
 In distributed-memory systems, each processor has its own local memory. Processors communicate by explicitly sending and receiving messages over a network, requiring programmers to manage data distribution and communication patterns.
 
 \textbf{Characteristics:}
 \begin{itemize}
     \item Each processor has private memory space
-    \item Communication requires explicit message passing
+    \item Communication between processes requires explicit message passing
     \item Scalable to thousands or millions of processors
     \item Higher communication overhead and latency
     \item No shared state eliminates race conditions but complicates programming
@@ -60,13 +60,13 @@ In distributed-memory systems, each processor has its own local memory. Processo
 OpenMP (Open Multi-Processing) is a widely-used API for shared-memory parallel programming in C, C++, and Fortran. It uses compiler directives (pragmas) to specify parallel regions, enabling incremental parallelization of sequential code.
 
 \textbf{Core Concepts:}
-\begin{description}
-    \item[Parallel Regions] Code sections executed by multiple threads simultaneously
-    \item[Work-Sharing Constructs] Distribute loop iterations or tasks among threads
-    \item[Data Scoping] Variables can be shared (visible to all threads) or private (thread-local copies)
-    \item[Synchronization] Barriers, critical sections, and atomic operations coordinate thread execution
-    \item[Scheduling] Strategies (static, dynamic, guided) control how iterations are assigned to threads
-\end{description}
+\begin{enumerate}
+    \item \textbf{Parallel Regions}: Code sections executed by multiple threads simultaneously
+    \item \textbf{Work-Sharing Constructs}: Distribute loop iterations or tasks among threads
+    \item \textbf{Data Scoping}: Variables can be shared (visible to all threads) or private (thread-local copies)
+    \item \textbf{Synchronization}: Barriers, critical sections, and atomic operations coordinate thread execution
+    \item \textbf{Scheduling}: Strategies (static, dynamic, guided) control how iterations are assigned to threads
+\end{enumerate}
 
 \paragraph*{Example Code:}
 
@@ -167,7 +167,7 @@ Serious games—games designed primarily for purposes beyond entertainment—hav
 \subsection{Definition and Characteristics}
 \label{subsec:serious-games-definition}
 
-\citet{zyda2005visual} defines serious games as games that ``do not have entertainment, enjoyment, or fun as their primary purpose.'' These games leverage game design principles to achieve learning objectives, skill development, or behavioral change.
+\citet{zyda2005visual} defines a serious game as ``a mental contest, played with a computer in accordance with specific rules, that uses entertainment to further \textelp{} training, education, health, public policy, and strategic communication objectives.'' These games leverage game design principles to achieve learning objectives, skill development, or behavioral change.
 
 \textbf{Key Characteristics:}
 \begin{itemize}
@@ -185,17 +185,17 @@ Serious games—games designed primarily for purposes beyond entertainment—hav
 
 Game-based learning draws on several established educational theories:
 
-\subsubsection{Constructivism}
+\paragraph*{Constructivism:}
 
-Constructivist theory posits that learners actively construct knowledge through experience rather than passively receiving information. Games naturally support constructivist learning by placing players in problem-solving scenarios where they discover principles through experimentation.
+Constructivist theory \citep{piaget1970genetic} posits that learners actively construct knowledge through experience rather than passively receiving information. Games naturally support constructivist learning by placing players in problem-solving scenarios where they discover principles through experimentation.
 
-\subsubsection{Flow Theory}
+\paragraph*{Flow Theory:}
 
-\citet{csikszentmihalyi1990flow} describes ``flow'' as the optimal psychological state where challenge level matches skill level, producing deep engagement. Well-designed educational games maintain flow by dynamically adjusting difficulty, keeping learners in the zone of proximal development.
+\citet{csikszentmihalyi1990flow} describes ``flow'' as the optimal psychological state where challenge level matches skill level, producing deep engagement. Well-designed educational games maintain flow by dynamically adjusting difficulty, keeping learners challenged without overwhelming them.
 
-\subsubsection{Experiential Learning}
+\paragraph*{Experiential Learning:}
 
-Kolb's experiential learning cycle—concrete experience, reflective observation, abstract conceptualization, active experimentation—aligns perfectly with game mechanics. Players experience situations, observe outcomes, form hypotheses, and test them iteratively.
+\citet{kolb1984experiential}'s experiential learning cycle---concrete experience, reflective observation, abstract conceptualization, active experimentation---aligns naturally with game mechanics. Players experience situations, observe outcomes, form hypotheses, and test them iteratively.
 
 %-----------------------------------------------------------------------
 \subsection{Empirical Evidence}
@@ -205,7 +205,7 @@ Research consistently demonstrates the effectiveness of serious games for learni
 
 \paragraph*{\citet{connolly2012systematic} Meta-Analysis:}
 
-A systematic literature review of 129 papers found that serious games positively impact learning outcomes across multiple domains. Key findings include:
+A systematic literature review analysing 70 empirical studies found that serious games positively impact learning outcomes across multiple domains. Key findings include:
 
 \begin{itemize}
     \item Improved knowledge acquisition and retention
@@ -231,18 +231,18 @@ A study of digital game-based learning in high school computer science found tha
 \label{subsec:games-cs-education}
 
 Several successful serious games target computer science education.
-\textbf{CodeCombat} teaches programming through RPG-style gameplay in which players write real Python or JavaScript code to control characters; it is used in thousands of classrooms worldwide.
-\textbf{Lightbot} introduces sequencing, loops, and procedures through a visual puzzle interface that requires no programming syntax, making it accessible to young learners.
+\textbf{CodeCombat} \citep{codecombat} teaches programming through RPG-style gameplay in which players write real Python or JavaScript code to control characters; it is used in thousands of classrooms worldwide.
+\textbf{Lightbot} \citep{lightbot} introduces sequencing, loops, and procedures through a visual puzzle interface that requires no programming syntax, making it accessible to young learners.
 
 \paragraph*{Parallel Computing Games:}
 
-Few games specifically target parallel computing education. Notable exceptions include PARMACS Simulator (interactive visualization of parallel algorithms), ParSim (an educational tool for parallel algorithm design), and CUDA Learning Games (GPU programming challenges). However, these tools typically focus on visualization rather than hands-on, game-like interaction, and few provide multiplayer experiences.
+In contrast to introductory programming, very few serious games target advanced topics like parallel computing education. Instructors typically rely on traditional, non-gamified software visualizers or simulation tools to teach parallel algorithm design, highlighting a significant gap in the current game-based learning landscape for advanced computer science topics.
 
 %-----------------------------------------------------------------------
 \subsection{Serious Games for HPC Education}
 \label{subsec:serious-games-hpc}
 
-High-Performance Computing education faces unique challenges that serious games can address:
+High Performance Computing education faces unique challenges that serious games can address:
 
 \paragraph*{Why Games for HPC?}
 
@@ -326,7 +326,7 @@ Web browsers provide a universal platform for educational game deployment, elimi
 \label{subsec:web-game-engines}
 
 Several game engines support web deployment through HTML5/WebAssembly export, each with different trade-offs relevant to educational game development:
-
+%TODO add links!
 \begin{description}
     \item[Unity] offers a mature ecosystem with extensive documentation and asset store, but web exports tend to be large (50--100~MB) and the licensing model introduces constraints for open-source educational projects.
     \item[Unreal Engine] provides advanced rendering and networking capabilities; however, its focus on high-fidelity 3D and large export sizes make it less suited for lightweight 2D browser applications.
@@ -358,10 +358,10 @@ Multiplayer functionality is essential for simulating OpenMP shared-memory paral
         \toprule
         \textbf{Evaluation Criteria} & \textbf{Client-Server} & \textbf{P2P (WebRTC)} & \textbf{HTTP/SSE Relay} \\
         \midrule
-        Browser compatibility & Partial & Problematic & \textbf{Universal} \\
-        Infrastructure needs & High & Low (STUN/TURN) & \textbf{Minimal} \\
-        Implementation complexity & Medium & High & \textbf{Low} \\
-        Latency & Low & Lowest & Moderate \\
+        Browser compatibility        & Partial                & Problematic           & \textbf{Universal}      \\
+        Infrastructure needs         & High                   & Low (STUN/TURN)       & \textbf{Minimal}        \\
+        Implementation complexity    & Medium                 & High                  & \textbf{Low}            \\
+        Latency                      & Low                    & Lowest                & Moderate                \\
         \bottomrule
     \end{tabular}
 \end{table}

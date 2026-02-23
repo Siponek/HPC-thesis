@@ -3,19 +3,17 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-\paragraph*{Terminology Note}
-Throughout this thesis, the artifact is referred to as a \textbf{game}. For pedagogical precision, it can also be categorized as a \textbf{serious game} and used as an instructional tool in educational contexts.
-This terminology aligns with prior HPC educational activities explicitly framed as serious games~\citep{mullen2021teaching}.
+
 
 %-----------------------------------------------------------------------
 \section{Context and Motivation}
 \label{sec:context-motivation}
 
 %-----------------------------------------------------------------------
-\subsection{The Challenge of Teaching High-Performance Computing}
+\subsection{The Challenge of Teaching High Performance Computing}
 \label{subsec:hpc-challenge}
 
-High-Performance Computing (HPC) has become an indispensable tool in modern computational science, powering everything from weather forecasting and molecular dynamics simulations to machine learning and big data analytics. As computational problems grow in scale and complexity, the ability to write efficient parallel programs has transitioned from a specialized skill to a fundamental competency for software engineers and computational scientists.
+High Performance Computing (HPC) has become an indispensable tool in modern computational science, powering everything from weather forecasting and molecular dynamics simulations to machine learning and big data analytics. As computational problems grow in scale and complexity, the ability to write efficient parallel programs has transitioned from a specialized skill to a fundamental competency for software engineers and computational scientists.
 
 However, teaching parallel computing concepts presents unique pedagogical challenges. Students frequently find it difficult to visualize how multiple threads or processes interact, communicate, and coordinate to solve problems efficiently. The principal challenges include:
 
@@ -23,7 +21,7 @@ However, teaching parallel computing concepts presents unique pedagogical challe
     \item \textbf{Abstraction Gap}: Concepts like threads, processes, synchronization, and message passing are inherently abstract and difficult to visualize
     \item \textbf{Cognitive Load}: Understanding parallel algorithms requires simultaneous consideration of multiple execution flows, shared resources, and synchronization primitives
     \item \textbf{Limited Immediate Feedback}: Traditional HPC assignments involve slow compile-submit-debug cycles that impede learning
-    \item \textbf{Language Barriers}: HPC programming typically requires C/C++ or Fortran—languages with steep learning curves that can overshadow conceptual understanding. Students often struggle more with template errors and memory management than with parallelism itself due to the focus of C++ on keeping backwards compatibility as first priority
+    \item \textbf{Language Barriers}: HPC programming typically requires C/C++ or Fortran, languages with steep learning curves that can overshadow conceptual understanding. Students often struggle more with template errors and memory management than with parallelism itself due to the focus of C++ on keeping backwards compatibility as first priority
     \item \textbf{High Entry Barrier}: Setting up HPC environments and debugging distributed systems requires significant technical expertise that distracts from core concepts
 \end{itemize}
 
@@ -33,7 +31,7 @@ Traditional lecture-based approaches struggle to convey the dynamic, interactive
 \subsection{Serious Games as Educational Tools}
 \label{subsec:serious-games}
 
-\textbf{Serious games}---games designed with a primary purpose beyond entertainment---have emerged as powerful educational tools. By leveraging mechanics such as immediate feedback, progressive challenges, and interactive exploration, serious-game-based tools can make complex concepts more accessible and engaging.
+\textbf{Serious games}- Can be defined asgames designed with a primary purpose beyond entertainment - they have emerged as powerful educational tools. By leveraging mechanics such as immediate feedback, progressive challenges, and interactive exploration, serious-game-based tools can make complex concepts more accessible and engaging.
 
 \begin{itemize}
     \item \textbf{Active Learning}: Learners engage directly with concepts through interaction
@@ -43,11 +41,15 @@ Traditional lecture-based approaches struggle to convey the dynamic, interactive
     \item \textbf{Lower Entry Barrier}: Learners can focus on concepts before full programming complexity
 \end{itemize}
 
+\paragraph*{Terminology Note}
+Throughout this thesis, the artifact is referred to as a \textbf{game}. For pedagogical precision, it can also be categorized as a \textbf{serious game} and used as an instructional tool in educational contexts.
+This terminology aligns with prior HPC educational activities explicitly framed as serious games~\citep{mullen2021teaching}.
+
 %-----------------------------------------------------------------------
 \subsection{From Physical Experiments to Digital Tooling}
 \label{subsec:physical-experiments}
 
-The pedagogical approach underlying this thesis stems from classroom experiments conducted by Professor Daniele D'Agostino, where students physically sorted numbered cards to simulate parallel computing paradigms:
+The pedagogical approach underlying this thesis stems from classroom experiments conducted by Professor Daniele D'Agostino following the approach presented in \textit{Teaching and learning HPC through serious games}~\citep{mullen2021teaching}, where students physically sorted numbered cards to simulate parallel computing paradigms:
 
 \begin{itemize}
     \item \textbf{Sequential Execution}: A single student sorts all cards alone—demonstrating traditional sequential algorithms
@@ -72,7 +74,7 @@ This thesis aims to capture that pedagogical effectiveness in a scalable, digita
 This thesis addresses the following research problem:
 
 \begin{quote}
-    \textit{How can we design and implement an effective web-based serious-game educational tool that teaches fundamental High-Performance Computing concepts (specifically OpenMP shared-memory parallelism and sequential vs. parallel execution) through interactive card-sorting while overcoming technical challenges of multiplayer state synchronization and responsive UI/UX constraints?}
+    \textit{How can we design and implement an effective web-based serious-game educational tool that teaches fundamental High Performance Computing concepts (specifically OpenMP shared-memory parallelism and sequential vs. parallel execution) through interactive card-sorting while overcoming technical challenges of multiplayer state synchronization and responsive UI/UX constraints?}
 \end{quote}
 
 This overarching problem decomposes into three interrelated challenges:

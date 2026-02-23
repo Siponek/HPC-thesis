@@ -106,7 +106,6 @@ GDSync's "protected mode" (default) prevented RPC calls from being executed betw
 \begin{itemize}
     \item Card movement worked from host to clients but not between clients
     \item No error messages or warnings—calls simply failed silently
-    \item Debugging difficult due to lack of visibility into framework internals
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -162,8 +161,7 @@ The key lessons are tied to specific actions taken in this project:
 GDSync documentation covered basic use cases but lacked:
 \begin{itemize}
     \item Examples of complex synchronization scenarios
-    \item Explanation of internal mechanisms and limitations
-    \item Best practices for performance optimization
+    \item Explanation of internal mechanisms and limitations (These were added during the development of the thesis)
     \item Troubleshooting guides for common problems
     \item Migration guide from vanilla Godot networking
 \end{itemize}
@@ -192,9 +190,17 @@ GDSync documentation covered basic use cases but lacked:
 
 Web export introduced a mismatch between prototype-era assumptions and browser runtime constraints. During prototyping, GDSync calls were integrated directly; in browser deployment, this path required an interception/replacement layer to keep the original integration style while using a signaling-server-compatible transport flow.
 
+
+% TODO add links to the relevant issue and PR for this patch in the GDSync repository, along with a short excerpt from the issue discussion and the PR description to show how the problem was identified, mitigated, and communicated to maintainers.
+% E.g. the problem with exposing funcitons was that it was not alerting user when using not exposed functions
+%  Issue on GDSync repo:
+% https://github.com/GD-Sync/GD-Sync/issues/20#issuecomment-3620911143 - [Bug] Multiplayer doesn't work on browser (web export)
+% https://github.com/GD-Sync/GD-Sync/issues/107 - [Bug] Web Export Fails with LOCAL_PORT_ERROR - UDP/ENet Not Supported in Browsers  - BY ME
+% https://github.com/GD-Sync/GD-Sync/issues/58 - [Help needed] Cannot update remote clients view - BY ME, problem with awaiting frames due to internals of GDSync to instantiate things on other clients
+% https://github.com/GD-Sync/GD-Sync/issues/71 - [Help needed] Cannot call functions on remote nodes - BY ME, problem with exposing functions to be called remotely, which is required in protected mode
 \textbf{Why this became necessary:}
 \begin{itemize}
-    \item Browser runtime constraints and export behavior invalidated assumptions from local prototype networking paths.
+    \item Browser runtime constraints and export behavior invalidated assumptions from local prototype networking paths.  GDSync uses ENetMultiplayerPeer, which does not work in HTML5 exports at the time of development.
     \item Maintaining thesis velocity favored a compatibility patch over rewriting all synchronization call sites.
     \item The resulting approach replaced/intercepted the local-server path while preserving higher-level game-manager usage of GDSync abstractions.
 \end{itemize}
