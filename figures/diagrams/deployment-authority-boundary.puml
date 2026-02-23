@@ -1,7 +1,6 @@
 @startuml deployment-authority-boundary
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 title Deployment Context and Authority Boundaries (Web-First Multiplayer)
 

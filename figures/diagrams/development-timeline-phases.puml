@@ -1,7 +1,6 @@
 @startgantt development-timeline-phases
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 ' Explicitly style the Gantt chart to show vertical grid lines and clean task boxes
 <style>

@@ -1,58 +1,85 @@
 @startuml openmp-mode
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
+scale 1.3
+
+' Increased nodesep creates a wide "channel" in the middle for the shared bus
 skinparam nodesep 80
-skinparam ranksep 60
-skinparam roundcorner 10
-skinparam ArrowThickness 2
-top to bottom direction
+skinparam ranksep 70
+skinparam linetype ortho
 
-title Game Mode 2: OpenMP Shared-Memory Parallelism
+title Game Mode 2: OpenMP Shared-Memory Parallelism\n
 
-node "Memory Spaces" as MEM_SPACE #transparent {
-    rectangle "<b>Shared Card Container</b>\n<i>(OpenMP Shared Memory Space)</i>\n----" as SHARED_MEM #White {
-        card "12" as oc1
-        card "18" as oc2
-        card "15" as oc3
-        card "22" as oc4
-    }
-    together {
-        rectangle "<b>P1 Private Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P1_BUF #PaleGreen {
-            card "1" as b1
-            card "3" as b2
-        }
-
-        rectangle "<b>P2 Private Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P2_BUF #PeachPuff {
-            card "7" as b3
-            card "9" as b4
-        }
-    }
-}
-
-' Grouping players to align them horizontally beneath the shared memory
+' 1. Top Level: Players AND the Merge Junction
 together {
     actor "<b>Player 1</b>\n(Thread 0)" as P1 #PaleGreen
+    
+    ' The "solder dot" / connection point sits directly between them
+    circle " " as JOIN #0055BB;line:0055BB
+    
     actor "<b>Player 2</b>\n(Thread 1)" as P2 #PeachPuff
+    'P1 -[hidden]right- P2
 }
 
-' Grouping private buffers to align them beneath their respective players
+' Force them to line up perfectly left-to-right at the top
+P1 -[hidden]right- JOIN
+JOIN -[hidden]right- P2
 
-' Upward arrows to shared memory (Global Scope)
-P1 -up-> SHARED_MEM : <b>Shared Access</b>\n(Concurrent)
-P2 -up-> SHARED_MEM : <b>Shared Access</b>\n(Concurrent)
+' 2. Memory Spaces
+node "Memory Spaces  " as MEM_SPACE #transparent {
+    
+    ' Middle Rank: Private Buffers
+    together {
+        rectangle "<b>P1 Public Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P1_BUF #PaleGreen {
+            card " 1 " as b1
+            card " 3 " as b2
+            b1 -[hidden]right- b2
+        }
 
-' Downward arrows to private memory (Local Scope)
-P1 -down-> P1_BUF : <b>Public Access</b>
-P2 -down-> P2_BUF : <b>Public Access</b>
+        rectangle "<b>P2 Public Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P2_BUF #PeachPuff {
+            card " 7 " as b3
+            card " 9 " as b4
+            b3 -[hidden]right- b4
+        }
+    }
+    
+    ' Force the buffers apart so the central arrow can pass between them
+    P1_BUF -[hidden]right- P2_BUF
 
-'note bottom of SHARED_MEM
-'  <b>Pedagogical Mapping: OpenMP Architecture</b>
-'  * <b>Players</b> = Concurrent threads working together on a single task.
-'  * <b>Shared Container</b> = Globally accessible memory space. Introduces concepts
-'    like race conditions and the need for synchronization (locks/barriers).
-'  * <b>Private Buffers</b> = Variables declared as private or threadprivate,
-'    allowing lock-free local sorting before merging back to shared space.
-'end note
+    ' Bottom Rank: Shared Memory Space
+    rectangle "<b>Shared Card Container</b>\n<i>(OpenMP Shared Memory Space)</i>\n----" as SHARED_MEM #White {
+        card " 12 " as oc1
+        card " 18 " as oc2
+        card " 15 " as oc3
+        card " 22 " as oc4
+        
+        oc1 -[hidden]right- oc2
+        oc3 -[hidden]right- oc4
+        oc1 -[hidden]down- oc3
+    }
+    
+    ' Pin the Shared Memory inside the box, below the buffers
+    P1_BUF -[hidden]up- SHARED_MEM
+    P2_BUF -[hidden]up- SHARED_MEM
+}
+
+' Pinning the top junction exactly above the Shared Memory space
+JOIN -[hidden]down- SHARED_MEM
+
+' ==========================================
+' ARROW CONNECTIONS
+' ==========================================
+
+' Downward arrows to private memory (Solid Black)
+P1 -[#black]down-> P1_BUF : "<back:white>  <b>Public Access</b>  </back>"
+P2 -[#black]down-> P2_BUF : "<back:white>  <b>Public Access</b>  </back>"
+
+' THE EARLY MERGE (Shared Bus)
+' 1. Both players branch into the central junction IMMEDIATELY (no arrowheads)
+P1 -[#0055BB,dashed]down- JOIN 
+P2 -[#0055BB,dashed]down- JOIN 
+
+' 2. A single, unified arrow drops from the junction straight down the middle to Shared Memory
+JOIN -[#0055BB,dashed]down-> SHARED_MEM : "<back:white><color:#0055BB>  <b>Shared Access</b>  </color></back>\n<back:white><color:#0055BB>  (Concurrent)  </color></back>"
 
 @enduml

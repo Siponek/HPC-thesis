@@ -1,73 +1,120 @@
 @startuml scene-transition-lifecycle
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!import ../shared/theme.puml
+
 skinparam state {
   BackgroundColor #f8f8f8
   BorderColor #333333
 }
+skinparam backgroundColor white
+skinparam defaultFontName "Computer Modern"
+skinparam padding 10
+skinparam DefaultFontSize 34
+skinparam TitleFontSize 38
 
-title Scene Transition Lifecycle (Pedagogical Intent Annotated)
+' You can also add other global settings here later!
+' skinparam roundcorner 10
+skinparam ArrowThickness 2
+skinparam ArrowColor #555555
+skinparam linetype ortho
+skinparam nodesep 90
+skinparam ranksep 180
+skinparam StateFontSize 28
+skinparam StateFontName "Computer Modern"
+skinparam StateBorderThickness 2
+skinparam NoteFontSize 28
+skinparam NoteFontName "Computer Modern"
+skinparam NoteBorderThickness 1
+skinparam LabelFontSize 28
+skinparam ArrowFontSize 28
+skinparam LabelFontName "Computer Modern"
 
-[*] --> MainMenu : app start
 
-state MainMenu
-note right of MainMenu
-Entry and mode selection.
-Students choose sequential or collaborative path.
+title Scene Transition Lifecycle
+
+[*] -down-> MainMenu : app start
+
+' THE TRANSPARENT TEXT TRICK
+' The underscores are drawn to stretch the box, but are completely invisible!
+state "<color:transparent>__________________________________________________________________________________________________________________________________________________________________</color>MainMenu<color:transparent>__________________________________________________________________________________________________________________________________________________________________</color>" as MainMenu
+
+note top of MainMenu
+  Entry and mode selection.
+  Students choose sequential
+  or collaborative path.
 end note
 
-state SPOptionsDialog : Singleplayer Options\n(popup Window)
-note left of SPOptionsDialog
-Configure card count, value range,
-buffer size, and start game.
+' --- Singleplayer Track (Left Side) ---
+state "Singleplayer Options\n(popup Window)" as SPOptionsDialog #E9F7EF;line:27AE60
+note bottom of SPOptionsDialog
+  Configure card count,
+  value range, buffer size,
+  and start game.
 end note
 
-state SinglePlayer
-note right of SinglePlayer
-Sequential baseline (T1).
-Single student manipulates full card set.
+state SinglePlayer #E9F7EF;line:27AE60
+note bottom of SinglePlayer
+  Sequential baseline (T1).
+  Single student manipulates
+  full card set.
 end note
 
-state MPOptionsDialog : Multiplayer Options\n(popup Window)
-note left of MPOptionsDialog
-Connect to GDSync, host or join lobby.
-Enter room code or browse public lobbies.
+' --- Multiplayer Track (Right Side) ---
+state "Multiplayer Options\n(popup Window)" as MPOptionsDialog #EBF5FB;line:2980B9
+note top of MPOptionsDialog
+  Connect to GDSync,
+  host or join lobby.
+  Enter room code
+  or browse public lobbies.
 end note
 
-state MultiplayerLobby : Multiplayer Lobby\n(popup Window)
-note right of MultiplayerLobby
-Session setup and player discovery.
-Host configures settings (buffer, cards, barrier mode).
-Players join and appear in player list.
+state "Multiplayer Lobby\n(popup Window)" as MultiplayerLobby #EBF5FB;line:2980B9
+note bottom of MultiplayerLobby
+  Session setup
+  and player discovery.
+  Host configures settings.
 end note
 
-state MultiplayerGame
-note right of MultiplayerGame
-OpenMP-style collaborative mode.
-Shared container + private buffers + barrier sync.
+state MultiplayerGame #EBF5FB;line:2980B9
+note bottom of MultiplayerGame
+  OpenMP-style collaborative mode.
+  Shared container + private buffers
+  + barrier sync.
 end note
 
-state Completion : Completion / Results
-note right of Completion
-Time/moves feedback.
-Used for speedup and coordination discussion.
+' --- Convergence (Bottom Center) ---
+state "Completion / Results" as Completion #F4ECF7;line:8E44AD;line.bold
+note left of Completion
+  Time/moves feedback.
+  Used for speedup
+  and coordination discussion.
 end note
 
-MainMenu --> SPOptionsDialog : "Singleplayer" button\n(opens dialog)
-SPOptionsDialog --> SinglePlayer : SceneManager.goto_scene()
+' ==========================================
+' MAIN DOWNWARD FLOW  (solid colored arrows)
+' ==========================================
+MainMenu -[#27AE60]down-> SPOptionsDialog : <back:white>  <color:#27AE60>"Singleplayer" button</color>  </back>
+SPOptionsDialog -[#27AE60]down-> SinglePlayer : <back:white>  <color:#27AE60>SceneManager.goto_scene()</color>  </back>
 
-MainMenu --> MPOptionsDialog : "Multiplayer" button\n(opens dialog)
-MPOptionsDialog --> MultiplayerLobby : on lobby created/joined\n(opens lobby window)
-MultiplayerLobby --> MultiplayerGame : host presses Start Game\n(GDSync broadcast to all clients)
+MainMenu -[#2980B9]down-> MPOptionsDialog : <back:white>  <color:#2980B9>"Multiplayer" button</color>  </back>
+MPOptionsDialog -[#2980B9]down-> MultiplayerLobby : <back:white>  <color:#2980B9>on lobby created/joined</color>  </back>
+MultiplayerLobby -[#2980B9]down-> MultiplayerGame : <back:white>  <color:#2980B9>host presses Start Game</color>  </back>
 
-SinglePlayer --> Completion : sorted && validated
-MultiplayerGame --> Completion : globally sorted && synchronized
+' --- ALIGNMENT FIX ---
+SinglePlayer -[hidden]right-> MultiplayerGame
 
-Completion --> MainMenu : return to menu / replay choice
-SinglePlayer --> MainMenu : back action
-MultiplayerLobby --> MainMenu : leave lobby / close window
-MultiplayerGame --> MainMenu : exit / disconnect handling
+' Convergence to Completion
+SinglePlayer -[#27AE60]down-> Completion : <back:white>  <color:#27AE60>sorted && validated</color>  </back>
+MultiplayerGame -[#2980B9]down-> Completion : <back:white>  <color:#2980B9>globally sorted</color>  </back>
+
+' ==========================================
+' RETURN BUSES  (dashed, routed to outer edges)
+' Extra dashes (---) push arrows further from forward-flow lanes
+' ==========================================
+SinglePlayer -[dashed,#27AE60]left-> MainMenu : <back:white>  <color:#27AE60>back action</color>  </back>
+MultiplayerLobby -[dashed,#2980B9]right-> MainMenu : <back:white>  <color:#2980B9>leave lobby</color>  </back>
+MultiplayerGame --[dashed,#2980B9]right-> MainMenu : <back:white>  <color:#2980B9>exit</color>  </back>
+
+Completion -[bold,#8E44AD]up-> MainMenu : <back:white>  <color:#8E44AD><b>return to menu</b></color>  </back>
 
 @enduml
-

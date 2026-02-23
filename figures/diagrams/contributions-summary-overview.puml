@@ -1,7 +1,6 @@
 @startuml contributions-summary-overview
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 title Thesis Contributions Summary
 

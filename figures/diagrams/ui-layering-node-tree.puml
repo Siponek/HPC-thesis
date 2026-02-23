@@ -1,7 +1,6 @@
 @startuml ui-layering-node-tree
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 title UI Layering and Overlay Isolation (Menu Scene)
 

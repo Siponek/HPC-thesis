@@ -1,13 +1,12 @@
 @startuml physical-to-digital-mapping
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 skinparam Shadowing false
-skinparam RoundCorner 10
 
 top to bottom direction
 skinparam nodesep 60
 skinparam ranksep 20
+title Transformation from Physical Classroom Experiment to Digital Serious Game
 
 together {
   card "**Physical Classroom Experiment**\n\n<b>Description</b>\nStudents sort numbered cards\nat desks to simulate parallel\ncomputing paradigms\n\n<color:green><b>Strengths</b></color>\n+ Highly engaging\n+ Memorable hands-on experience\n+ Intuitive understanding\n+ Immediate feedback\n\n<color:red><b>Limitations</b></color>\n- Limited scalability\n- Requires a large desk and space\n- No automated metrics" as PHYS #LightBlue

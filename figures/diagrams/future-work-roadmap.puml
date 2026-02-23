@@ -1,7 +1,6 @@
 @startuml future-work-roadmap
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 title Future Work Roadmap
 

@@ -1,7 +1,6 @@
 @startuml card-move-sequence-flow
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 skinparam sequenceMessageAlign center
 
 title Card Move Sequence (Move -> Broadcast -> Sync -> Visibility Update)

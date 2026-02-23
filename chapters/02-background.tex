@@ -326,12 +326,11 @@ Web browsers provide a universal platform for educational game deployment, elimi
 \label{subsec:web-game-engines}
 
 Several game engines support web deployment through HTML5/WebAssembly export, each with different trade-offs relevant to educational game development:
-%TODO add links!
 \begin{description}
-    \item[Unity] offers a mature ecosystem with extensive documentation and asset store, but web exports tend to be large (50--100~MB) and the licensing model introduces constraints for open-source educational projects.
-    \item[Unreal Engine] provides advanced rendering and networking capabilities; however, its focus on high-fidelity 3D and large export sizes make it less suited for lightweight 2D browser applications.
-    \item[Godot Engine] is fully open-source (MIT license), produces compact web exports, and provides a Python-like scripting language (GDScript) alongside a scene-based architecture oriented toward rapid 2D development.
-    \item[Cocos2d] is efficient for 2D applications and supports cross-platform builds, though its tooling ecosystem is smaller and the editor workflow is less integrated than some alternatives.
+    \item[Unity] offers a mature ecosystem with extensive documentation and a large asset marketplace \citep{unity_engine,unity_asset_store}. Browser deployment is supported through WebGL builds \citep{unity_webgl_docs}, but web exports tend to be large (often tens of MB), and plan/licensing thresholds can introduce constraints for open-source educational projects \citep{unity_pricing}.
+    \item[Unreal Engine] provides advanced rendering and networking capabilities \citep{unreal_engine}; however, browser delivery is commonly handled through Pixel Streaming rather than lightweight HTML5/WebAssembly export \citep{unreal_pixel_streaming}, and its high-fidelity 3D focus is often less suitable for lightweight 2D browser applications.
+    \item[Godot Engine] is fully open-source (MIT license) \citep{godot_engine,godot_license}, supports Web export \citep{godot_web_export}, and provides a Python-like scripting language (GDScript) alongside a scene-based architecture oriented toward rapid 2D development.
+    \item[Cocos2d/Cocos Creator] is efficient for 2D applications and supports web publishing alongside cross-platform builds \citep{cocos_creator,cocos_web_build}, though its tooling ecosystem is smaller and the editor workflow is less integrated than some alternatives.
 \end{description}
 
 Key evaluation criteria for an educational web game include export size (affecting load time), 2D rendering quality, scripting accessibility for students who may inspect source code, and licensing compatibility with open educational resources. The engine selection process, evaluation evidence, and final decision are presented in Chapter~\ref{ch:methodology}, Section~\ref{subsec:godot-selection}.
@@ -359,8 +358,11 @@ Multiplayer functionality is essential for simulating OpenMP shared-memory paral
         \textbf{Evaluation Criteria} & \textbf{Client-Server} & \textbf{P2P (WebRTC)} & \textbf{HTTP/SSE Relay} \\
         \midrule
         Browser compatibility        & Partial                & Problematic           & \textbf{Universal}      \\
+        \midrule
         Infrastructure needs         & High                   & Low (STUN/TURN)       & \textbf{Minimal}        \\
+        \midrule
         Implementation complexity    & Medium                 & High                  & \textbf{Low}            \\
+        \midrule
         Latency                      & Low                    & Lowest                & Moderate                \\
         \bottomrule
     \end{tabular}
@@ -430,9 +432,8 @@ This section reviews existing educational tools and games related to parallel co
 \label{subsec:parallel-tools}
 
 Several tools exist for teaching parallel computing, each with strengths and limitations.
-\textbf{PARMACS} provides parallel algorithm visualization through thread and process execution timelines, but offers limited interactivity and runs only on desktop platforms.
-Tools such as \textbf{Intel VTune} and \textbf{TAU} (Tuning and Analysis Utilities) focus on OpenMP performance profiling; while powerful, they have steep learning curves and are designed for optimization work rather than introductory education.
-\textbf{MPICH} and \textbf{Open MPI} supply debugging tools for MPI-based programs, but require cluster access or virtual machines and presuppose programming ability.
+Tools such as \textbf{Intel VTune} \citep{intel_vtune} and \textbf{TAU} (Tuning and Analysis Utilities) \citep{tau_shende2006} focus on OpenMP performance profiling; while powerful, they have steep learning curves and are designed for optimization work rather than introductory education.
+\textbf{MPICH} \citep{mpich_website} and \textbf{Open MPI} \citep{openmpi_website} supply debugging tools for MPI-based programs, but require cluster access or virtual machines and presuppose programming ability.
 
 \paragraph*{Gap Identification:}
 
@@ -443,9 +444,9 @@ Existing tools generally fall into two categories: (1)~visualization tools that 
 \label{subsec:cs-games}
 
 Several serious games have successfully taught computing concepts, though none specifically target OpenMP-style parallel computing on web platforms.
-\textbf{CodeCombat} teaches programming through RPG gameplay in which players write real Python or JavaScript; it is effective for syntax and basic algorithms but does not address parallelism.
-\textbf{Human Resource Machine} uses visual assembly-like puzzles to teach sequential algorithmic thinking without syntax barriers, but its single-threaded model excludes parallelism concepts.
-\textbf{Shenzhen I/O} targets hardware design and low-level optimization for experienced programmers; while sophisticated, it has no explicit parallel computing focus.
+\textbf{CodeCombat} \citep{codecombat} teaches programming through RPG gameplay in which players write real Python or JavaScript; it is effective for syntax and basic algorithms but does not address parallelism.
+\textbf{Human Resource Machine} \citep{human_resource_machine} uses visual assembly-like puzzles to teach sequential algorithmic thinking without syntax barriers, but its single-threaded model excludes parallelism concepts.
+\textbf{Shenzhen I/O} \citep{shenzhen_io} targets hardware design and low-level optimization for experienced programmers; while sophisticated, it has no explicit parallel computing focus.
 
 \paragraph*{Gap in Parallel Computing Games:}
 
@@ -459,7 +460,7 @@ The pedagogical approach for this thesis draws inspiration from physical classro
 
 \paragraph*{CS Unplugged:}
 
-The CS Unplugged collection teaches computer science concepts---algorithms, sorting, searching---through hands-on activities that require no computers. These activities are highly engaging but inherently limited to in-person classroom settings and are difficult to scale or reproduce consistently.
+The CS Unplugged \citep{cs_unplugged} collection teaches computer science concepts---algorithms, sorting, searching---through hands-on activities that require no computers. These activities are highly engaging but inherently limited to in-person classroom settings and are difficult to scale or reproduce consistently.
 
 \paragraph*{Professor D'Agostino's Card Sorting Experiments:}
 

@@ -1,11 +1,8 @@
 @startuml sequential-mode
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 skinparam nodesep 40
 skinparam ranksep 50
-skinparam roundcorner 10
-skinparam ArrowThickness 2
 
 title Game Mode 1: Sequential Execution (Baseline)
 
@@ -28,14 +25,6 @@ node "Memory Spaces" as MEM_SPACE #transparent {
 
 P1 -down-> PRIV_BUF : <b>Public Access</b>
 P1 -down-> SHARED_CONT : <b>Global Access</b>\n(Sorts entire dataset alone)
-
-'note right of P1
-'  <b>Pedagogical Mapping: Sequential Execution</b>
-'  * Single actor represents a single CPU thread.
-'  * Processes the entire array element-by-element.
-'  * No parallel speedup; serves as the baseline
-'    for calculating parallel efficiency later.
-'end note
 
 ' Layout hints
 PRIV_BUF -[hidden]down- SHARED_CONT

@@ -1,0 +1,11 @@
+' theme.puml - Global Stylesheet
+skinparam backgroundColor white
+skinparam defaultFontName "Computer Modern"
+skinparam padding 10
+skinparam DefaultFontSize 34
+skinparam TitleFontSize 38
+
+' You can also add other global settings here later!
+' skinparam roundcorner 10
+skinparam ArrowThickness 2
+skinparam ArrowColor #555555

@@ -1,7 +1,6 @@
 @startuml algorithm-mode-class-extension
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 skinparam ClassBackgroundColor #F0F8FF
 skinparam ClassBorderColor #4682B4
 skinparam ClassAttributeFontSize 11

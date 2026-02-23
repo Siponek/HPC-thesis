@@ -1,0 +1,17 @@
+' This is a shared theme file for sequence diagrams in the thesis.
+ ' You can include this in any diagram with: !include ../shared/sequence-theme.puml
+skinparam sequenceMessageAlign center
+skinparam backgroundColor white
+skinparam defaultFontName "Computer Modern"
+skinparam padding 8
+skinparam DefaultFontSize 24
+skinparam TitleFontSize 28
+skinparam ActorFontSize 24
+skinparam ArrowFontSize 22
+skinparam SequenceStereotypeFontSize 22
+skinparam ArrowThickness 1
+skinparam ArrowColor #555555
+skinparam nodesep 20
+skinparam ranksep 20
+skinparam maxMessageSize 36
+hide footbox

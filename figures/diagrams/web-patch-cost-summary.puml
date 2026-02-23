@@ -1,7 +1,6 @@
 @startuml web-patch-cost-summary
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 title Cost of Web Patch Strategy (and Mitigations)
 

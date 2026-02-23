@@ -1,11 +1,8 @@
 @startuml networking-approach-comparison
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 skinparam nodesep 40
 skinparam ranksep 40
-skinparam roundcorner 10
-skinparam ArrowThickness 2
 
 title Architectural Decision: Networking for Browser-First Deployment
 

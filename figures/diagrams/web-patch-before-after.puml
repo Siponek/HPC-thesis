@@ -1,7 +1,6 @@
 @startuml web-patch-before-after
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 
 title Web Export Patch: Prototype Path vs Patched Path
 

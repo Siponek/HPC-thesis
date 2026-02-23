@@ -1,8 +1,7 @@
 @startuml http-sse-architecture
 !theme plain
-skinparam backgroundColor white
+!include ../shared/theme.puml
 skinparam componentStyle rectangle
-skinparam defaultFontName Arial
 
 title HTTP/SSE Relay Architecture
 

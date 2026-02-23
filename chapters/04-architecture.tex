@@ -31,12 +31,14 @@ The architecture is guided by the following principles:
 \subsection{System Layers}
 \label{subsec:system-layers}
 
-\begin{description}
-    \item[Presentation Layer] Renders cards, buffers, indicators, and interaction feedback.
-    \item[Game Logic Layer] Validates sorting actions, completion conditions, and per-mode rules.
-    \item[Synchronization Layer] Coordinates shared/private state propagation, ordering, and conflict resolution.
-    \item[Transport/Relay Layer] Handles browser-compatible signaling and event relay via HTTP/SSE.
-\end{description}
+The system is organized into four layers, each with a distinct responsibility:
+
+\begin{itemize}
+    \item \textbf{Presentation Layer}: Renders cards, buffers, indicators, and interaction feedback.
+    \item \textbf{Game Logic Layer}: Validates sorting actions, completion conditions, and per-mode rules.
+    \item \textbf{Synchronization Layer}: Coordinates shared/private state propagation, ordering, and conflict resolution.
+    \item \textbf{Transport/Relay Layer}: Handles browser-compatible signaling and event relay via HTTP/SSE
+\end{itemize}
 
 These layers decouple pedagogical behavior from transport mechanics, which was essential when adapting multiplayer behavior for browser export.
 
@@ -74,9 +76,23 @@ Scene changes are managed through a central scene manager to avoid ad-hoc transi
 The architecture is event-driven at component boundaries. Local game objects communicate via Godot signals, while multiplayer state changes are propagated through authority-managed synchronization paths. This split allows UI responsiveness without directly coupling UI events to transport internals.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.92\textwidth]{figures/diagrams/event-driven-signal-flow}
-    \caption{Event-driven signal flow across local scene components and multiplayer synchronization paths}
-    \label{fig:event-driven-signal-flow}
+    \includegraphics[width=0.86\textwidth]{figures/diagrams/event-driven-signal-flow-local}
+    \caption{Event-driven local signal path across UI interaction and rule validation components}
+    \label{fig:event-driven-signal-flow-local}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\textwidth]{figures/diagrams/event-driven-signal-flow-multiplayer}
+    \caption{Multiplayer synchronization path extending local rule handling through relay-based transport}
+    \label{fig:event-driven-signal-flow-multiplayer}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.76\textwidth]{figures/diagrams/event-driven-signal-flow-lobby}
+    \caption{Lobby and connection signal path with namespaced re-emission in the connection manager}
+    \label{fig:event-driven-signal-flow-lobby}
 \end{figure}
 
 %-----------------------------------------------------------------------

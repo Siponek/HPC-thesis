@@ -1,12 +1,10 @@
 @startuml background-concept-overview
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
+
 skinparam nodesep 30
 skinparam ranksep 80
-skinparam ArrowColor #555555
-skinparam ArrowThickness 2
-skinparam roundcorner 10
+
 
 title Foundational Domains Converging in the Thesis
 

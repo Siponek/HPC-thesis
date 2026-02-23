@@ -232,16 +232,16 @@ Unity, Unreal, Godot, and Cocos2d were evaluated against the criteria in Section
 Before this thesis, the author had only brief prior hands-on exposure to Unity and Godot, and no production experience with Unreal or Cocos2d. For this reason, engine selection emphasized thesis-time experimentation and iteration evidence rather than long-term prior specialization.
 
 \paragraph*{Unity:}
-Unity was a strong candidate due to its mature ecosystem, large community, and broad platform support. It provides robust tooling and many ready-made resources, which can reduce implementation risk. However, for this specific web-first educational prototype, the overall project/runtime footprint and workflow complexity were less aligned with the goal of fast, lightweight iteration.
+was a strong candidate due to its mature ecosystem, large community, and broad platform support. It provides robust tooling and many ready-made resources, which can reduce implementation risk. However, for this specific web-first educational prototype, the overall project/runtime footprint and workflow complexity were less aligned with the goal of fast, lightweight iteration.
 
 \paragraph*{Unreal Engine:}
-Unreal offers advanced rendering and strong networking capabilities, but it was less suitable for a small 2D educational game with frequent design revisions. In practice, heavier tooling and longer compilation/build cycles can slow down rapid prototyping during thesis development, where many short iteration loops are required.
+offers advanced rendering and strong networking capabilities, but it was less suitable for a small 2D educational game with frequent design revisions. In practice, heavier tooling and longer compilation/build cycles can slow down rapid prototyping during thesis development, where many short iteration loops are required.
 
 \paragraph*{Cocos2d:}
-Cocos2d is efficient for 2D applications and supports cross-platform development. However, for this thesis it appeared less convenient as an all-in-one workflow for scene editing, multiplayer experimentation, and rapid educational UI iteration. Compared to Godot's integrated editor-first experience, Cocos2d would likely require more custom assembly of tooling and architecture choices for comparable development speed.
+is efficient for 2D applications and supports cross-platform development. However, for this thesis it appeared less convenient as an all-in-one workflow for scene editing, multiplayer experimentation, and rapid educational UI iteration. Compared to Godot's integrated editor-first experience, Cocos2d would likely require more custom assembly of tooling and architecture choices for comparable development speed.
 
 \paragraph*{Godot:}
-Godot provided the best balance for this thesis context: small web exports, strong 2D workflow, open-source licensing, and fast iteration through a cohesive scene-based architecture. These factors made it the most natural fit for implementing and evaluating the proposed educational game within thesis time constraints.
+provided the best balance for this thesis context: small web exports, strong 2D workflow, open-source licensing, and fast iteration through a cohesive scene-based architecture. These factors made it the most natural fit for implementing and evaluating the proposed educational game within thesis time constraints.
 
 \begin{table}[htbp]
     \centering
@@ -642,40 +642,43 @@ Colors convey semantic meaning:
 \section{Evaluation Methodology}
 \label{sec:evaluation-methodology}
 
-\paragraph*{Evaluation Criteria:}
+\subsection{Evaluation Criteria}
+\label{subsec:evaluation-criteria}
 
-The educational tool's success was evaluated across multiple dimensions:
+The educational tool's success was evaluated across four primary dimensions:
 
 \begin{enumerate}
-    \item \textbf{Technical Performance}: Frame rate, memory usage, browser compatibility
-    \item \textbf{Functional Completeness}: Implementation of all required features
-    \item \textbf{Usability}: Ease of use, learnability, satisfaction
-    \item \textbf{Educational Effectiveness}: Preliminary conceptual understanding and engagement indicators (informal evaluation scope)
+    \item \textbf{Technical Performance}: Frame rate stability, memory consumption, and cross-browser compatibility.
+    \item \textbf{Functional Completeness}: The successful implementation of all core required features.
+    \item \textbf{Usability}: General ease of use, user learnability, and overall satisfaction.
+    \item \textbf{Educational Effectiveness}: Indicators of user engagement and preliminary conceptual understanding (evaluated informally).
 \end{enumerate}
 
-\paragraph*{Evaluation Methods:}
+\subsection{Evaluation Methods}
+\label{subsec:evaluation-methods}
 
-\subparagraph{Technical Benchmarking:}
+To assess the criteria outlined above, the following methodologies were applied:
+
+\subsubsection*{Technical Benchmarking}
 \begin{itemize}
-    \item Performance profiling using Godot's built-in tools
-    \item Frame rate monitoring in target browsers
-    \item Memory usage tracking during extended gameplay
+    \item Performance profiling utilizing Godot's built-in diagnostic tools.
+    \item Frame rate monitoring across target web browsers.
+    \item Memory usage tracking during extended gameplay sessions.
 \end{itemize}
 
-\subparagraph{Usability Testing:}
+\subsubsection*{Usability Testing}
 \begin{itemize}
-    \item Think-aloud protocols with test users
-    \item Observation of first-time players
-    \item Task completion rates and times
-    \item System Usability Scale (SUS) questionnaire (if time permits)
+    \item Think-aloud protocols conducted with test users.
+    \item Direct observation of first-time players interacting with the system.
+    \item Measurement of task completion rates and completion times.
+    \item Administration of the System Usability Scale (SUS) questionnaire to quantify user satisfaction. % Remove this line if you didn't actually do the SUS!
 \end{itemize}
 
-\subparagraph{Educational Assessment:}
+\subsubsection*{Educational Assessment}
 \begin{itemize}
-    \item Pre/post-test knowledge assessments (if formal study conducted)
-    \item Concept mapping to evaluate mental model formation
-    \item Comparison with traditional teaching methods (if feasible)
-    \item Qualitative feedback on perceived learning value
+    \item Pre- and post-test knowledge assessments to measure conceptual growth. % Remove if you didn't do this!
+    \item Concept mapping to evaluate the formation of parallel computing mental models.
+    \item Qualitative feedback gathering regarding the perceived learning value of the serious game.
 \end{itemize}
 
 %-----------------------------------------------------------------------

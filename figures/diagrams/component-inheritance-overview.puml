@@ -1,13 +1,31 @@
 @startuml component-inheritance-overview
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+
 skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam defaultFontName "Computer Modern"
+skinparam padding 10
+skinparam DefaultFontSize 34
+skinparam TitleFontSize 38
+
+' Increased separation to give elements more breathing room and prevent squished labels
+skinparam nodesep 300
+skinparam ranksep 160
+skinparam ArrowThickness 2
+skinparam ArrowColor #555555
+skinparam linetype ortho
 
 title Core Component Relationships and Reuse Boundaries
 
-package "Card Domain" {
-  class Card <<Control>> {
+package "Card Domain" #F4F9FC {
+  class CardManager <<Control>> #D6EAF8 {
+    +sorting validation
+    +buffer/slot orchestration
+    +completion checks
+    +timer and move counting
+  }
+
+  class Card <<Control>> #D6EAF8 {
     +value : int
     +card_color : Color
     +original_index : int
@@ -18,7 +36,7 @@ package "Card Domain" {
     signal card_dropped(card, drop_position)
   }
 
-  class CardBuffer <<VBoxContainer>> {
+  class CardBuffer <<VBoxContainer>> #D6EAF8 {
     +slot_text : String
     +occupied_by : Card
     --
@@ -26,21 +44,21 @@ package "Card Domain" {
     signal card_removed(card, slot)
   }
 
-  class CardManager <<Control>> {
-    +sorting validation
-    +buffer/slot orchestration
-    +completion checks
-    +timer and move counting
-  }
-
-  class MultiplayerCardManager <<Control>> {
+  class MultiplayerCardManager <<Control>> #D6EAF8 {
     +host-authoritative sync behavior
     +private buffer visibility rules
     +barrier synchronization (BarrierManager)
     +multiplayer state reconciliation
   }
+  
+  note right of MultiplayerCardManager #FFFACD
+    Extension-over-duplication strategy:
+    base rules remain in CardManager,
+    multiplayer concerns added in subclass
+    via path-based inheritance.
+  end note
 
-  class BarrierManager <<RefCounted>> {
+  class BarrierManager <<RefCounted>> #D6EAF8 {
     +state : {RUNNING, WAITING, ACTIVE}
     +barrier_mode : int
     --
@@ -49,42 +67,39 @@ package "Card Domain" {
     signal main_thread_assigned
   }
 
+  ' Use -left- and -right- hints to spread these out horizontally
+  CardManager "1" o-right- "*" Card : manages
+  CardManager "1" o-left- "*" CardBuffer : orchestrates
   CardManager <|-- MultiplayerCardManager : extends (path-based)
-  CardManager "1" o-- "*" Card : manages
-  CardManager "1" o-- "*" CardBuffer : orchestrates
-  MultiplayerCardManager "1" *-- "1" BarrierManager : owns
+  MultiplayerCardManager "1" *-left- "1" BarrierManager : owns
 }
 
-package "Session/Connection Domain" {
-  class ConnectionManager <<Node, Autoload>> {
+package "Session/Connection Domain" #F4FCF4 {
+  class ConnectionManager <<Node, Autoload>> #D5F5E3 {
     +lobby lifecycle state
     +player list updates
     +signal re-emission layer (inner Signals class)
   }
 
-  class "GDSync (Autoload)" as GDSync {
+  class "GDSync (Autoload)" as GDSync #D5F5E3 {
     +call_func() / expose_func()
     +lobby_create() / lobby_join()
     +framework integration boundary
   }
 
-  class SceneManager <<Node, Autoload>> {
+  class SceneManager <<Node, Autoload>> #D5F5E3 {
     +goto_scene(res_path)
     +centralized scene transition
   }
+
+  ' Line breaks (\n) added to labels so they are taller rather than wider, 
+  ' preventing them from overlapping adjacent vertical lines.
+  ConnectionManager -right-> GDSync : subscribes to\nconnection/lobby\nsignals
+  ConnectionManager ..left..> SceneManager : lobby scenes call\nSceneManager\n.goto_scene()
 }
 
-MultiplayerCardManager --> GDSync : GDSync.call_func()\n(sync_card_moved, etc.)
-ConnectionManager --> GDSync : subscribes to\nconnection/lobby signals
-MultiplayerCardManager ..> ConnectionManager : reads host/client state
-SceneManager <.. ConnectionManager : lobby scenes call\nSceneManager.goto_scene()
-
-note right of MultiplayerCardManager
-Extension-over-duplication strategy:
-base rules remain in CardManager,
-multiplayer concerns added in subclass
-via path-based inheritance.
-end note
+' Lengthen cross-package arrows to physically push the packages apart
+MultiplayerCardManager ----> GDSync : GDSync.call_func()\n(sync_card_moved,\netc.)
+MultiplayerCardManager ....> ConnectionManager : reads\nhost/client\nstate
 
 @enduml
-

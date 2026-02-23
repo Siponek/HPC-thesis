@@ -1,7 +1,6 @@
 @startuml parallel-mergesort-game-flow
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
 skinparam ActivityDiamondBackgroundColor #FFFFCC
 skinparam ActivityBackgroundColor #F0F8FF
 skinparam PartitionBackgroundColor #FAFAFA
