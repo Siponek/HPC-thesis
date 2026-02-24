@@ -1,48 +1,68 @@
 @startuml parallel-mergesort-game-flow
 !theme plain
 !include ../shared/theme.puml
+
+' --- FONT SIZES ---
+skinparam defaultFontSize 34
+skinparam TitleFontSize 38
+skinparam SwimlaneTitleFontSize 34
+skinparam NoteFontSize 34
+skinparam ActivityFontSize 34
+skinparam ActivityDiamondFontSize 34
+skinparam style strictuml
+skinparam ArrowThickness 4 
+ 
+
+' --- COLORS ---
 skinparam ActivityDiamondBackgroundColor #FFFFCC
 skinparam ActivityBackgroundColor #F0F8FF
 skinparam PartitionBackgroundColor #FAFAFA
 
 title Performing Parallel Merge Sort with the Existing Tool
 
-|#LightBlue| System |
-|#LightGreen| All Players |
-|#LightYellow| Merger (Main Thread) |
-|#LightPink| Non-Merger (Blocked) |
+|#LightBlue|System|
+|#LightGreen|All\nPlayers|
+|#LightYellow|Merger\n(Main Thread)|
+|#LightPink|Non-Merger\n(Blocked)|
 
 |System|
 start
 :Generate **n** shuffled cards\nin shared container;
 :Divide cards into **p** equal\npartitions (one per player);
+
 note right
-  Partition dividers appear
-  in the shared container.
-  Each zone highlighted
-  in a player's color.
+  Partition dividers
+  appear in the shared
+  container. Each zone
+  highlighted in a
+  player's color.
 end note
 :Assign each partition\nto a player;
 
-|All Players|
-partition "**Phase 1 — Local Sort** (parallel, independent)" {
+' FIX 1: We declare the partition BEFORE switching swimlanes. 
+' FIX 2: Added \n at the end of the string to create vertical padding!
+partition "**Phase 1 — Local Sort** (parallel, independent)\n" {
+    
+    |All\nPlayers|
     fork
-        :Player 1 sorts\npartition 1\nusing private buffer;
+        :Player 1 sorts\npartition 1\nusing public buffer;
     fork again
-        :Player 2 sorts\npartition 2\nusing private buffer;
-    fork again
-        :Player **p** sorts\npartition **p**\nusing private buffer;
+        :Player **p** sorts\npartition **p**\nusing public buffer;
     end fork
+    
+    :Each player clicks\n"Reach Barrier Done";
+    
     note right
       Each player works **only**
       on their assigned zone.
       Buffer contiguity check
       enforces coherent subsets.
       ——
-      **Maps to:** embarrassingly
-      parallel local computation
+      **Maps to:**
+      embarrassingly
+      parallel local
+      computation
     end note
-    :Each player clicks\n"Local Sort Done";
 }
 
 |System|
@@ -54,33 +74,36 @@ note right
   → BARRIER_ACTIVE
 end note
 
-partition "**Phase 2 — Merge Rounds** (⌈log₂ p⌉ rounds)" {
+' FIX 2: Added \n at the end of the string to push the repeat diamond down!
+partition "**Phase 2 — Merge Rounds**\n(⌈log₂ p⌉ rounds)\n" {
     repeat
         :Pair adjacent players\nfor this merge round;
         note right
           Round **k**: merge
-          2^(k-1)-size sorted runs
-          into 2^k-size runs
+          2^(k-1)-size sorted
+          runs into 2^k-size
         end note
 
         fork
-            |Merger (Main Thread)|
+            |Merger\n(Main Thread)|
             :Merge two adjacent\nsorted runs into one;
-            note right
-              Merger interacts with
-              shared container.
-              Other player's cards
-              become visible.
+            note left
+              Merger interacts
+              with shared
+              container. Other
+              cards visible.
               ——
-              **Maps to:** reduction /
-              tree-based merging
+              **Maps to:**
+              reduction /
+              tree merging
             end note
         fork again
-            |Non-Merger (Blocked)|
+            |Non-Merger\n(Blocked)|
             :See lock overlay\n(barrier active);
-            note right
-              **Maps to:** thread
-              idle time / sync cost
+            note left
+              **Maps to:**
+              thread idle time
+              / sync cost
             end note
         end fork
 
@@ -94,9 +117,10 @@ partition "**Phase 2 — Merge Rounds** (⌈log₂ p⌉ rounds)" {
 |System|
 :All cards in ascending order\n→ **Game complete!**;
 note right
-  Single fully sorted array
-  in shared container.
-  Show completion stats:
+  Single fully sorted
+  array in shared
+  container. Show
+  completion stats:
   time, moves, rounds.
 end note
 stop

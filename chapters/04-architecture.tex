@@ -219,9 +219,23 @@ The architecture explicitly distinguishes:
 This model is central to the OpenMP analogy: all participants can access shared memory, while local buffer state remains private.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.94\textwidth]{figures/diagrams/card-move-sequence-flow.png}
-    \caption{Card move data flow from proposal to authoritative application and visibility update}
-    \label{fig:card-move-sequence-flow}
+    \includegraphics[width=0.94\textwidth]{figures/diagrams/card-move-enter-buffer.png}
+    \caption{Data flow when a card enters a player buffer (proposal phase)}
+    \label{fig:card-move-enter-buffer}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/diagrams/card-move-leave-buffer.png}
+    \caption{Data flow when a card leaves a player buffer (confirmation phase)}
+    \label{fig:card-move-leave-buffer}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/diagrams/card-move-shared-container.png}
+    \caption{Data flow in the shared container during authoritative update and visibility adjustment}
+    \label{fig:card-move-shared-container}
 \end{figure}
 
 \begin{lstlisting}[language={}, caption={Architectural mechanism: public buffer visibility gate (pseudocode)}]
@@ -312,13 +326,13 @@ The game does not enforce a specific sorting algorithm. Instead, its architectur
 
 Three existing architectural components form a general-purpose substrate for parallel sorting strategies:
 
-\begin{description}
-    \item[Shared card container (shared memory).] All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative partitioning (quicksort), independent sub-array sorting (merge sort), or any other rearrangement strategy.
+\begin{itemize}
+    \item \textbf{Shared card container (shared memory)}: All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative partitioning (quicksort), independent sub-array sorting (merge sort), or any other rearrangement strategy.
 
-    \item[Public player buffers (partitioned shared memory).] Each player has public buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
+    \item \textbf{Public player buffers (partitioned shared memory)}: Each player has public buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
 
-    \item[Barrier synchronization (\texttt{\#pragma omp barrier}).] The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging, or after partitioning before recursing into sub-arrays. The main-thread selection mechanism models coordinator election.
-\end{description}
+    \item \textbf{Barrier synchronization (\texttt{\#pragma omp barrier})}: The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging, or after partitioning before recursing into sub-arrays. The main-thread selection mechanism is currently considered as "first player to reach barrier".
+\end{itemize}
 
 \begin{figure}[htbp]
     \centering

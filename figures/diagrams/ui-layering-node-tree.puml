@@ -2,33 +2,49 @@
 !theme plain
 !include ../shared/theme.puml
 
+' Layout spacing and sizing adjustments
+skinparam padding 10
+skinparam nodesep 100
+skinparam ranksep 90
+skinparam ArrowThickness 2
+skinparam ArrowColor #555555
+skinparam linetype ortho
+
 title UI Layering and Overlay Isolation (Menu Scene)
 
-package "Main Scene Tree" {
-  node "Control (root)" as Root
-  node "Background" as Bg
-  node "MainScreenLogo" as Logo
-  node "MainMenuButtons" as Buttons
-  node "CanvasLayer" as Layer
-  node "VarTreeMainMenu (debug tree)" as VarTree
+' Soft warm background for the UI package
+package "Main Scene Tree" #FCF8F2 {
+  node "Control (root)" as Root #FDEBD0
+  node "Background" as Bg #FDEBD0
+  node "MainScreenLogo" as Logo #FDEBD0
+  node "MainMenuButtons" as Buttons #FDEBD0
+  node "CanvasLayer" as Layer #FDEBD0
+  
+  ' Added a line break to prevent the node from being too wide
+  node "VarTreeMainMenu\n(debug tree)" as VarTree #FDEBD0
+  note bottom of Buttons #FFFACD
+    Primary interactive gameplay/menu controls.
+    Subject to normal UI layout flow.
+  end note
+ 
+  note left of Layer #FFFACD
+    Overlay plane separated
+    from main UI flow.
+    Useful for diagnostics/debug
+    display without
+    disturbing gameplay-space
+    transform logic.
+  end note
 }
 
+' Standard top-down tree connections
 Root --> Bg
 Root --> Logo
 Root --> Buttons
 Root --> Layer
 Layer --> VarTree
 
-note right of Buttons
-Primary interactive gameplay/menu controls.
-Subject to normal UI layout flow.
-end note
 
-note right of Layer
-Overlay plane separated from main UI flow.
-Useful for diagnostics/debug display without
-disturbing gameplay-space transform logic.
-end note
 
 legend right
 |= Node |= Role |
@@ -39,4 +55,3 @@ legend right
 endlegend
 
 @enduml
-

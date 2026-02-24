@@ -1,16 +1,24 @@
 @startuml component-inheritance-overview
 !theme plain
+!import ../shared/theme.puml
+scale 1.5
+'scale 1.5 | scale 200 width | scale 100 height | scale [max] 200x100
 
 skinparam classAttributeIconSize 0
-skinparam backgroundColor white
-skinparam defaultFontName "Computer Modern"
-skinparam padding 10
-skinparam DefaultFontSize 34
-skinparam TitleFontSize 38
+skinparam ClassFontSize 34
+skinparam CardFontSize 34
+skinparam ClassAttributeFontSize 34
+skinparam ClassStereotypeFontSize 34
+skinparam NoteFontSize 34
+skinparam ArrowFontSize 34
+skinparam PackageFontSize 34
+skinparam TitleFontSize 44
+
+
 
 ' Increased separation to give elements more breathing room and prevent squished labels
 skinparam nodesep 300
-skinparam ranksep 160
+skinparam ranksep 100
 skinparam ArrowThickness 2
 skinparam ArrowColor #555555
 skinparam linetype ortho
@@ -18,11 +26,22 @@ skinparam linetype ortho
 title Core Component Relationships and Reuse Boundaries
 
 package "Card Domain" #F4F9FC {
+  together{
+
   class CardManager <<Control>> #D6EAF8 {
     +sorting validation
     +buffer/slot orchestration
     +completion checks
     +timer and move counting
+  }
+
+  class CardBuffer <<VBoxContainer>> #D6EAF8 {
+    +slot_text : String
+    +occupied_by : Card
+    --
+    signal card_placed_in_slot(card, slot)
+    signal card_removed(card, slot)
+  }
   }
 
   class Card <<Control>> #D6EAF8 {
@@ -36,14 +55,6 @@ package "Card Domain" #F4F9FC {
     signal card_dropped(card, drop_position)
   }
 
-  class CardBuffer <<VBoxContainer>> #D6EAF8 {
-    +slot_text : String
-    +occupied_by : Card
-    --
-    signal card_placed_in_slot(card, slot)
-    signal card_removed(card, slot)
-  }
-
   class MultiplayerCardManager <<Control>> #D6EAF8 {
     +host-authoritative sync behavior
     +private buffer visibility rules
@@ -51,7 +62,7 @@ package "Card Domain" #F4F9FC {
     +multiplayer state reconciliation
   }
   
-  note right of MultiplayerCardManager #FFFACD
+  note top of MultiplayerCardManager #FFFACD
     Extension-over-duplication strategy:
     base rules remain in CardManager,
     multiplayer concerns added in subclass
@@ -68,8 +79,8 @@ package "Card Domain" #F4F9FC {
   }
 
   ' Use -left- and -right- hints to spread these out horizontally
-  CardManager "1" o-right- "*" Card : manages
-  CardManager "1" o-left- "*" CardBuffer : orchestrates
+  CardManager "1" o-up- "*" Card : manages
+  CardManager "1" o-up- "*" CardBuffer : orchestrates
   CardManager <|-- MultiplayerCardManager : extends (path-based)
   MultiplayerCardManager "1" *-left- "1" BarrierManager : owns
 }
@@ -81,21 +92,20 @@ package "Session/Connection Domain" #F4FCF4 {
     +signal re-emission layer (inner Signals class)
   }
 
-  class "GDSync (Autoload)" as GDSync #D5F5E3 {
-    +call_func() / expose_func()
-    +lobby_create() / lobby_join()
-    +framework integration boundary
-  }
-
   class SceneManager <<Node, Autoload>> #D5F5E3 {
     +goto_scene(res_path)
     +centralized scene transition
   }
 
+  class "GDSync (Autoload)" as GDSync #D5F5E3 {
+    +call_func() / expose_func()
+    +lobby_create() / lobby_join()
+    +framework integration boundary
+  }
   ' Line breaks (\n) added to labels so they are taller rather than wider, 
   ' preventing them from overlapping adjacent vertical lines.
-  ConnectionManager -right-> GDSync : subscribes to\nconnection/lobby\nsignals
-  ConnectionManager ..left..> SceneManager : lobby scenes call\nSceneManager\n.goto_scene()
+  ConnectionManager ..up..> SceneManager : lobby scenes call\nSceneManager\n.goto_scene()
+  ConnectionManager --up--> GDSync : subscribes to\nconnection/lobby\nsignals
 }
 
 ' Lengthen cross-package arrows to physically push the packages apart
