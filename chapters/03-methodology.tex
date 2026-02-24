@@ -541,9 +541,16 @@ The HTTP/SSE relay introduces additional latency compared to direct peer-to-peer
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/diagrams/http-sse-sequence.png}
-    \caption{HTTP/SSE relay message flow: connection, lobby creation, and gameplay synchronization}
-    \label{fig:http-sse-sequence}
+    \includegraphics[width=0.78\textwidth]{figures/diagrams/http-sse-sequence.png}
+    \caption{HTTP/SSE relay setup flow: client connection, SSE subscription, lobby creation, and lobby join}
+    \label{fig:http-sse-sequence-setup}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figures/diagrams/http-sse-sequence-gameplay-disconnect.png}
+    \caption{HTTP/SSE relay runtime flow: gameplay packet broadcast and disconnection handling}
+    \label{fig:http-sse-sequence-gameplay}
 \end{figure}
 
 %-----------------------------------------------------------------------
@@ -569,7 +576,7 @@ Beyond core engine/networking choices, several tools were selected to address sp
 
     \item \textbf{Chocolatey}: A Windows package manager used to standardize the development environment setup (installing Python, Node.js, and other dependencies). Reduced the ``it works on my machine'' risk when switching between development workstations \citep{chocolatey_platform}.
 
-    \item \textbf{const\_generator (Godot plugin)}: Automatically generates GDScript constant files from project resources (scene paths, node names, input actions). This eliminated manual string duplication---when a scene path changed, the generated constants updated automatically, preventing hard-to-debug runtime errors from stale path strings \citep{const_generator_asset}.
+    \item \textbf{const\_generator (Godot plugin)}: Automatically generates a structured set of GDScript constants for project resources (scene/file paths, node names, input actions). This removed hard-coded string paths across scripts, so renaming files or scenes did not break links---generated constants updated with the new names and prevented stale-reference bugs \citep{const_generator_asset}.
 
     \item \textbf{Git + GitHub}: Version control with branching for experimental features (networking experiments, UI prototypes) and issue tracking for bug management. GitHub also hosted project documentation and enabled collaborative review with the thesis supervisor \citep{git_scm,github_platform}.
 \end{itemize}
