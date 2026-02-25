@@ -202,7 +202,7 @@ Extends \texttt{CardManager} for multiplayer mode.
 \begin{itemize}
     \item \texttt{sync\_complete\_game\_state(state\_data)} --- Full state reconciliation
     \item \texttt{sync\_card\_moved(value, from\_idx, to\_idx, client\_id)} --- Card repositioning
-    \item \texttt{sync\_card\_entered\_buffer(value, player\_id)} --- Card enters public buffer
+    \item \texttt{sync\_card\_entered\_buffer(value, player\_id)} --- Card enters local buffer
     \item \texttt{sync\_card\_left\_buffer(value, player\_id, new\_idx)} --- Card leaves buffer
     \item \texttt{barrier\_thread\_reached(player\_id)} --- Player reached barrier
     \item \texttt{barrier\_activate()} --- All threads at barrier; activate

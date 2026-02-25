@@ -80,7 +80,7 @@ On launch, the main menu presents the following options:
     \item Configure game parameters in the options dialog:
           \begin{itemize}
               \item \textbf{Number of cards}: configurable via spin box
-              \item \textbf{Buffer slot count}: number of public buffer positions
+              \item \textbf{Buffer slot count}: number of local buffer positions
               \item \textbf{Card value range}: upper bound for card values
           \end{itemize}
     \item Click ``Start'' to begin
@@ -151,9 +151,9 @@ Sort all cards in ascending order in the main container.
     \item Changes propagate to all connected players in real time
 \end{itemize}
 
-\paragraph{public buffers (Thread-Local Storage):}
+\paragraph{local buffers (Thread-Local Storage):}
 \begin{itemize}
-    \item Each player has public buffer slots visible only to themselves
+    \item Each player has local buffer slots visible only to themselves
     \item Cards moved to a player's buffer disappear from other players' views
     \item When a card is returned to the shared container, it becomes visible to all again
     \item This simulates the distinction between shared and private memory in OpenMP
@@ -264,7 +264,7 @@ Sort all cards in ascending order in the main container.
     \item Facilitate post-gameplay discussion connecting game mechanics to parallel programming:
           \begin{itemize}
               \item Shared container $\leftrightarrow$ shared memory
-              \item public buffers $\leftrightarrow$ thread-local / private variables
+              \item local buffers $\leftrightarrow$ thread-local / private variables
               \item Barrier mechanic $\leftrightarrow$ \texttt{\#pragma omp barrier}
               \item Multiple players $\leftrightarrow$ multiple threads
               \item Single-player $\leftrightarrow$ sequential execution baseline

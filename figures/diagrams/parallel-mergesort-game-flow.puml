@@ -45,9 +45,9 @@ partition "**Phase 1 — Local Sort** (parallel, independent)\n" {
     
     |All\nPlayers|
     fork
-        :Player 1 sorts\npartition 1\nusing public buffer;
+        :Player 1 sorts\npartition 1\nusing local buffer;
     fork again
-        :Player **p** sorts\npartition **p**\nusing public buffer;
+        :Player **p** sorts\npartition **p**\nusing local buffer;
     end fork
     
     :Each player clicks\n"Reach Barrier Done";

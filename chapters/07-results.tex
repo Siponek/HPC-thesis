@@ -21,7 +21,7 @@ The implemented system includes all planned core features:
     \item Configurable number of cards (10--200)
     \item Random card shuffling and generation
     \item Drag-and-drop card manipulation
-    \item public buffer zones for local sorting
+    \item local buffer zones for local sorting
     \item Sorting validation and completion detection
     \item Timer and move counter
     \item Victory screen with performance summary
@@ -34,7 +34,7 @@ The implemented system includes all planned core features:
     \item HTTP/SSE relay-based networking
     \item Real-time state synchronization across clients
     \item Shared container visible to all players (OpenMP shared memory)
-    \item Selective card visibility (public buffers hidden, simulating thread-private data)
+    \item Selective card visibility (local buffers hidden, simulating thread-private data)
     \item Disconnection handling and graceful degradation
     \item Host migration capability (partial)
 \end{itemize}
@@ -142,7 +142,7 @@ The tool implements pedagogical mappings to HPC concepts:
         \midrule
         Sequential Execution     & Single player mode           & Implemented       \\
         Shared Memory (OpenMP)   & Shared card container        & Implemented       \\
-        Per-Thread Work Area     & public buffer zones          & Implemented       \\
+        Per-Thread Work Area     & local buffer zones           & Implemented       \\
         Parallel Execution       & Multiple players working     & Implemented       \\
         Memory Access Overhead   & Network latency              & Implicit          \\
         Speedup                  & Completion time comparison   & Implemented       \\
@@ -197,7 +197,7 @@ Based on observed sessions and questionnaire/interview outcomes, the tool is exp
           Evidence: performance comparisons and observed coordination friction in multiplayer sessions.
 
     \item \textbf{Shared and private workspaces have different roles.}
-          Evidence: players recognized shared container access versus public buffer semantics in multiplayer mode.
+          Evidence: players recognized shared container access versus local buffer semantics in multiplayer mode.
 
     \item \textbf{Work balancing strongly affects team performance.}
           Evidence: uneven task distribution corresponded to slower completion and higher perceived confusion.
@@ -495,7 +495,7 @@ Post-gameplay interviews revealed that participants with prior HPC knowledge:
 
 \begin{itemize}
     \item \textbf{8/8} recognized single-player mode as the sequential baseline ($T_1$)
-    \item \textbf{7/8} identified multiplayer mode as shared-memory collaboration with public buffers (OpenMP-style analogy)
+    \item \textbf{7/8} identified multiplayer mode as shared-memory collaboration with local buffers (OpenMP-style analogy)
     \item \textbf{6/8} connected buffers to thread-local storage or private memory
     \item \textbf{7/8} noted communication/coordination overhead when exchanging cards
     \item \textbf{5/8} discussed load balancing when cards were unevenly distributed

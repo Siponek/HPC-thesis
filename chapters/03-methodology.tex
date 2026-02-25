@@ -58,7 +58,7 @@ The primary purpose of the game is education. Requirements were derived from HPC
 \begin{itemize}
     \item The game must simulate shared-memory parallelism
     \item All players must see all cards in the main container (shared memory)
-    \item Players must have public buffers (partitioned shared memory for per-thread work)
+    \item Players must have local buffers (partitioned shared memory for per-thread work)
     \item No explicit communication required between players (implicit synchronization)
 \end{itemize}
 
@@ -80,7 +80,7 @@ The primary purpose of the game is education. Requirements were derived from HPC
 \paragraph*{ER4: Progressive Difficulty}
 \begin{itemize}
     \item Support variable numbers of cards (10--200) for scalability lessons
-    \item Support variable numbers of players (10--40) for parallelism degree
+    \item Support variable numbers of players (E.g. 10--40) for parallelism degree
     \item Provide different sorting challenges (random, partially sorted, reverse sorted)
 \end{itemize}
 
@@ -109,19 +109,19 @@ Functional requirements specify what the system must do:
 \begin{itemize}
     \item Provide a single-player game mode representing sequential execution
     \item Display all cards in a scrollable container
-    \item Provide work buffer zones for temporary storage
+    \item Provide local buffer zones for temporary storage
     \item Validate sorting order upon completion
     \item Display completion time and move count
 \end{itemize}
 
 \paragraph*{FR3: Multiplayer Mode}
 \begin{itemize}
-    \item Enable 10--40 players to connect via server-relayed networking
+    \item Enable many players (e.g. 10--40) to connect via server-relayed networking
     \item Provide lobby for matchmaking and game configuration
     \item Display shared container visible to all players (OpenMP shared memory)
     \item Synchronize card movements across all clients
-    \item Provide public buffers for each player (partitioned shared memory for per-thread sorting)
-    \item Hide cards in other players' public buffers (thread-private data)
+    \item Provide local buffers for each player (partitioned shared memory for per-thread sorting)
+    \item Hide cards in other players' local buffers (thread-private data)
     \item Handle player disconnections gracefully
 \end{itemize}
 
@@ -150,13 +150,12 @@ Functional requirements specify what the system must do:
 
 \paragraph*{FR6: Quality Attributes}
 \begin{itemize}
-    \item Target 60 FPS in modern web browsers
     \item Game initialization and card generation under 2 seconds
-    \item Support up to 200 cards without significant performance degradation
+    \item Support up to 200 cards without noticeable UI lag during event handling
     \item Intuitive interface requiring no tutorial for basic gameplay
     \item Responsive drag-and-drop with visual feedback
     \item Graceful handling of network disconnections
-    \item Clean code structure with modular design
+    \item Clean code structure with modular, event-driven design (no per-frame game logic)
     \item Open-source license (MIT) for educational reuse
     \item No account creation or authentication required
 \end{itemize}
@@ -169,14 +168,14 @@ The game presents players with a deck of numbered cards that must be sorted in a
 
 \paragraph*{Single-Player Mode (Sequential Execution):} Represents traditional sequential algorithm execution where a single process sorts all data. The player works alone with all cards visible, performing the entire sorting task independently.
 
-\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses public buffer zones for local sorting (representing partitioned regions of shared memory), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
+\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses work buffer zones for local sorting (representing partitioned regions of shared memory), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
 
 The complete architecture and pedagogical mapping are detailed in Chapter~\ref{ch:architecture}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.65\textwidth]{figures/diagrams/sequential-mode.png}
-    \caption{Game Mode~1: Sequential Execution (Baseline). A single player (main thread) sorts the entire dataset alone, accessing both the main container (main memory) and a public work buffer (local variables).}
+    \caption{Game Mode~1: Sequential Execution (Baseline). A single player (main thread) sorts the entire dataset alone, accessing both the main container (main memory) and a local buffer (local variables).}
     \label{fig:sequential-mode}
 
     \vspace{0.3em}
@@ -188,12 +187,12 @@ The complete architecture and pedagogical mapping are detailed in Chapter~\ref{c
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/diagrams/openmp-mode.png}
-    \caption{Game Mode~2: OpenMP Shared-Memory Parallelism. Multiple players (threads) access a shared card container concurrently and use public buffers for per-thread sorting.}
+    \caption{Game Mode~2: OpenMP Shared-Memory Parallelism. Multiple players (threads) access a shared card container concurrently and use local buffers for per-thread sorting.}
     \label{fig:openmp-mode}
 
     \vspace{0.3em}
     \begin{description}
-        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{Public buffers} represent partitioned regions of shared memory---analogous to per-thread segments of a shared array (e.g., \texttt{array[tid*chunk ..\ (tid+1)*chunk-1]}), where each thread conventionally works on its own portion while the data remains technically accessible to all threads. This models common OpenMP patterns such as block-based parallel sorting, where each thread sorts a local chunk before results are merged back into the shared space.
+        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{Local buffers} represent partitioned regions of shared memory---analogous to per-thread segments of a shared array (e.g., \texttt{array[tid*chunk ..\ (tid+1)*chunk-1]}), where each thread conventionally works on its own portion while the data remains technically accessible to all threads. This models common OpenMP patterns such as block-based parallel sorting, where each thread sorts a local chunk before results are merged back into the shared space.
     \end{description}
 \end{figure}
 
@@ -235,7 +234,7 @@ Before this thesis, the author had only brief prior hands-on exposure to Unity a
 was a strong candidate due to its mature ecosystem, large community, and broad platform support. Unity's WebGL export compiles C\# game code via IL2CPP to C++, then cross-compiles to WebAssembly using Emscripten \citep{emscripten_docs}. This pipeline produces functional browser builds, but with significant overhead: typical WebGL exports range from 50--100~MB uncompressed, and the generated \texttt{UnityLoader.js} bootstrap adds measurable initialization latency before the first frame renders. Unity~6 improved WebGL build sizes somewhat, but exports remain substantially larger than Godot's. Additionally, Unity's WebGL target does not support native multithreading in most browsers (WebWorkers can be used for limited parallelism, but the main game loop remains single-threaded). The free tier displays a mandatory Unity splash screen; removing it requires a Pro license (\$2,040/year as of 2025), which is impractical for unfunded educational projects. Unity's asset store and documentation are extensive, but rapid iteration on gameplay experiments was slowed by the C\#~compilation step and editor reload cycle compared to GDScript's interpreted hot-reload workflow.
 
 \paragraph*{Unreal Engine:}
-offers industry-leading rendering and a mature networking subsystem (Unreal Replication). However, Unreal Engine~5 officially removed \textbf{HTML5\-/\-WebGL \-export support} from its platform targets. The Unreal Engine~4 HTML5 export existed as an experimental feature but was never production-stable and produced very large builds (150--300~MB). The current recommended approach for browser access is \textit{Pixel\- Streaming}, which runs the full game on a GPU-equipped server and streams video frames to the client browser. This architecture requires dedicated server infrastructure per concurrent session---entirely impractical for classroom deployment where 10--40~students each need an independent game instance on personal devices. Beyond the web export issue, Unreal's C++ codebase imposes compilation times of several minutes per change, and its editor is resource-intensive ($\sim$8~GB RAM minimum), making rapid gameplay iteration substantially slower than Godot's sub-second GDScript reload cycle. Unreal's 2D support exists but is not a primary focus of the engine, resulting in additional complexity for what is fundamentally a 2D card interaction game.
+offers industry-leading rendering and a mature networking subsystem (Unreal Replication). However, Unreal Engine~5 officially removed \textbf{HTML5\-/\-WebGL \-export support} from its platform targets. The Unreal Engine~4 HTML5 export existed as an experimental feature but was never production-stable and produced very large builds (150--300~MB). The current recommended approach for browser access is \textit{Pixel\- Streaming}, which runs the full game on a GPU-equipped server and streams video frames to the client browser. This architecture requires dedicated server infrastructure per concurrent session---entirely impractical for classroom deployment where many ~students each need an independent game instance on personal devices. Beyond the web export issue, Unreal's C++ codebase imposes compilation times of several minutes per change, and its editor is resource-intensive ($\sim$8~GB RAM minimum), making rapid gameplay iteration substantially slower than Godot's sub-second GDScript reload cycle. Unreal's 2D support exists but is not a primary focus of the engine, resulting in additional complexity for what is fundamentally a 2D card interaction game.
 
 \paragraph*{Cocos Creator (Cocos2d):}
 Cocos Creator~3.x supports WebGL~2.0 export with reasonable build sizes (15--30~MB), making it the closest competitor to Godot for web-first 2D applications. The engine uses TypeScript/JavaScript as its primary scripting language, which provides good browser affinity. However, Cocos Creator's scene editor, while functional, is less mature than Godot's for rapid educational UI prototyping---particularly for drag-and-drop card interactions, scrollable containers, and dynamic layout management that this project requires. The multiplayer ecosystem is minimal: Cocos Creator provides no built-in high-level networking framework comparable to Godot's \texttt{Multiplayer\-API} or third-party solutions like GDSync. Implementing lobby management, state synchronization, and RPC dispatch would require building or integrating external solutions from scratch. Community resources and plugin availability are also more limited, particularly for English-language documentation.
@@ -249,23 +248,21 @@ provided the best overall balance for this thesis context. Godot~4.x exports to 
     \setlength{\tabcolsep}{4pt} % tighten horizontal padding
     \caption{Game engine comparison for HPC Sorting Game}
     \label{tab:engine-comparison}
-    \begin{adjustbox}{max width=\textwidth}
-        \begin{tabular}{@{}lcccc@{}}
-            \toprule
-            \textbf{Criterion}      & \textbf{Unity}    & \textbf{Unreal}       & \textbf{Godot}     & \textbf{Cocos}     \\
-            \midrule
-            Free/Open Source        & Partial           & Partial               & Yes (MIT)          & Yes                \\
-            2D Performance          & Good              & Fair                  & Excellent          & Excellent          \\
-            Web Export Status       & Supported (WebGL) & Removed in UE5        & Native (WASM)      & Supported (WebGL)  \\
-            Typical Web Export Size & 50--100~MB        & N/A (Pixel Streaming) & 12--28~MB          & 15--30~MB          \\
-            Iteration Speed         & Medium (compile)  & Slow (C++ compile)    & Fast (interpreted) & Medium (transpile) \\
-            Learning Curve          & Medium            & Steep                 & Gentle             & Medium             \\
-            Networking APIs         & Good              & Excellent             & Good               & Minimal            \\
-            Community Size          & Large             & Large                 & Growing            & Small              \\
-            License Cost            & Free tier limited & 5\% royalty $>$\$1M   & Free               & Free               \\
-            \bottomrule
-        \end{tabular}
-    \end{adjustbox}
+    \begin{tabular}{@{}lcccc@{}}
+        \toprule
+        \textbf{Criterion}      & \textbf{Unity}    & \textbf{Unreal}       & \textbf{Godot}     & \textbf{Cocos Creator} \\
+        \midrule
+        Free/Open Source        & Partial           & Partial               & Yes (MIT)          & Yes                    \\
+        2D Performance          & Good              & Fair                  & Excellent          & Excellent              \\
+        Web Export Status       & Supported (WebGL) & Removed in UE5        & Native (WASM)      & Supported (WebGL)      \\
+        Typical Web Export Size & 50--100~MB        & N/A (Pixel Streaming) & 12--28~MB          & 15--30~MB              \\
+        Iteration Speed         & Medium (compile)  & Slow (C++ compile)    & Fast (interpreted) & Medium (transpile)     \\
+        Learning Curve          & Medium            & Steep                 & Gentle             & Medium                 \\
+        Networking APIs         & Good              & Excellent             & Good               & Minimal                \\
+        Community Size          & Large             & Large                 & Growing            & Small                  \\
+        License Cost            & Free tier limited & 5\% royalty $>$\$1M   & Free               & Free                   \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 
@@ -644,7 +641,7 @@ The game development followed an iterative, incremental approach spanning approx
 
 \paragraph*{Phase 4: Multiplayer Refinement (October -- December 2025)}
 \begin{itemize}
-    \item Implemented card visibility management (public buffers)
+    \item Implemented card visibility management (local buffers)
     \item Developed host-authoritative state management
     \item Added disconnection handling and recovery
     \item Refined synchronization for card movements
@@ -684,7 +681,7 @@ The core challenge was translating abstract parallel computing concepts into tan
         \midrule
         Shared Memory          & Desk visible to all students       & Shared card container                \\
         \midrule
-        Per-Thread Work Area   & Student's section of a shared desk & Player's public buffer zones         \\
+        Per-Thread Work Area   & Student's section of a shared desk & Player's local buffer zones          \\
         \midrule
         Parallel Execution     & Students work simultaneously       & Multiple players, no turn-taking     \\
         \midrule

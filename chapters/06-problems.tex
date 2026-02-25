@@ -337,7 +337,7 @@ Multiplayer systems are susceptible to race conditions:
 
 \textbf{Challenge:}
 
-In multiplayer mode (OpenMP simulation), different players should see different cards in public buffers (simulating thread-private data), but maintaining this selective visibility while synchronizing the shared container was complex.
+In multiplayer mode (OpenMP simulation), different players should see different cards in local buffers (simulating thread-private data), but maintaining this selective visibility while synchronizing the shared container was complex.
 
 \paragraph*{Technical Issue:}
 
