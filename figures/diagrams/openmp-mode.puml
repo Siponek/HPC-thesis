@@ -30,13 +30,13 @@ node "Memory Spaces  " as MEM_SPACE #transparent {
     
     ' Middle Rank: Private Buffers
     together {
-        rectangle "<b>P1 Public Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P1_BUF #PaleGreen {
+        rectangle "<b>P1 Local Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P1_BUF #PaleGreen {
             card " 1 " as b1
             card " 3 " as b2
             b1 -[hidden]right- b2
         }
 
-        rectangle "<b>P2 Public Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P2_BUF #PeachPuff {
+        rectangle "<b>P2 Local Buffer</b>\n<i>(Per-Thread Work Area)</i>\n----" as P2_BUF #PeachPuff {
             card " 7 " as b3
             card " 9 " as b4
             b3 -[hidden]right- b4

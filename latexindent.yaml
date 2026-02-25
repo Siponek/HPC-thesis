@@ -1,0 +1,3 @@
+# Example latexindent.yaml
+lineWidth: 80
+modifyLineBreaks: 1
