@@ -37,7 +37,7 @@ func _ready():
     if num_cards < 1:
         num_cards = 1
     values = generate_random_values()
-    sorted_all = values.duplicate()
+    sorted_all = values.duplicate() # Create a separate sorted array for reference
     sorted_all.sort()
 
     adjust_container_spacing()

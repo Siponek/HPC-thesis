@@ -192,7 +192,7 @@ The complete architecture and pedagogical mapping are detailed in Chapter~\ref{c
 
     \vspace{0.3em}
     \begin{description}
-        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{Local buffers} represent partitioned regions of shared memory---analogous to per-thread segments of a shared array (e.g., \texttt{array[tid*chunk ..\ (tid+1)*chunk-1]}), where each thread conventionally works on its own portion while the data remains technically accessible to all threads. This models common OpenMP patterns such as block-based parallel sorting, where each thread sorts a local chunk before results are merged back into the shared space.
+        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{Local buffers} represent partitioned regions of shared memory---analogous to per-thread segments of a shared array (e.g., \texttt{array[tid*chunk ..\ (tid+1)*chunk-1]}), where each thread conventionally works on its own portion while the data remains technically accessible to other threads when they reach a barrier. This models common OpenMP patterns such as block-based parallel sorting, where each thread sorts a local chunk before results are merged back into the shared space.
     \end{description}
 \end{figure}
 
@@ -220,7 +220,7 @@ Selection decisions were made using a consistent set of criteria aligned with th
 Decisions were validated through prototype iterations described in Section~\ref{subsec:development-approach}, with problematic assumptions revisited as implementation evidence emerged.
 
 %-----------------------------------------------------------------------
-\subsection{Game Engine: Godot 4.x}
+\subsection{Game Engine: Selection}
 \label{subsec:godot-selection}
 
 \paragraph*{Alternatives explored:}
@@ -307,7 +307,7 @@ Godot's limitations include:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Programming Language: GDScript}
+\subsection{Programming Language: Selection}
 \label{subsec:gdscript-selection}
 
 \paragraph*{Alternatives explored:}
@@ -355,7 +355,7 @@ GDScript is slower than C++ but acceptable for this use case because:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Multiplayer Framework: GDSync}
+\subsection{Multiplayer Framework: Selection}
 \label{subsec:gdsync-selection}
 
 \paragraph*{Alternatives explored:}
@@ -466,7 +466,7 @@ GDSync introduced several difficulties that required workarounds:
 Despite these challenges, GDSync provided net benefits by enabling functional multiplayer within the first week of integration rather than after months of infrastructure development. During development, a framework issue affecting web export behavior required a local fork maintained by the author \citep{gdsync_fork}. A pull request was submitted to the upstream GDSync repository \citep{gdsync_framework}, but until that change is merged and released, this project uses the author's fork for the web-export-based game build.
 
 %-----------------------------------------------------------------------
-\subsection{Networking Technology: HTTP/SSE Relay}
+\subsection{Networking Technology: Selection}
 \label{subsec:http-sse-selection}
 
 The transport layer decision was driven by the fundamental constraint that GDSync's local multiplayer mode is entirely non-functional in browser environments (Section~\ref{subsec:gdsync-selection}). A browser-compatible transport was required that could replace GDSync's UDP/ENet local server while preserving its high-level API contract.
@@ -561,7 +561,7 @@ Beyond core engine/networking choices, several tools were selected to address sp
 
     \item \textbf{VarTree (Godot plugin)}: Displays a real-time tree view of all synchronized variables and their current values during runtime. This was essential for debugging state synchronization issues---when a card appeared in the wrong position on one client, VarTree immediately showed which variable was out of sync without adding temporary \texttt{print()} statements \citep{vartree_asset}.
 
-    \item \textbf{Custom logging framework}: A structured logging system that timestamps and categorizes network events, gameplay actions, and synchronization operations into separate log channels. This enabled post-session analysis of timing issues (e.g., determining whether a card move arrived before or after a barrier signal) that could not be diagnosed from real-time observation alone.
+    \item \textbf{Custom logging library}: A structured logging system that timestamps and categorizes network events, gameplay actions, and synchronization operations into separate log channels. This enabled post-session analysis of timing issues (e.g., determining whether a card move arrived before or after a barrier signal, on which client) that could not be diagnosed from real-time observation alone.
 
     \item \textbf{Python/aiohttp relay server}: The HTTP/SSE relay backend described in Section~\ref{subsec:http-sse-selection}. Implemented in Python~3.11+ with the aiohttp async framework because Python's ecosystem provided the fastest path to a working relay server---async HTTP handling, SSE support, and JSON serialization are all available as mature, well-documented libraries \citep{python_org,aiohttp_docs}.
 
@@ -592,9 +592,13 @@ Beyond core engine/networking choices, several tools were selected to address sp
         \textbf{Tool}                & \textbf{Category}     & \textbf{Selected because}                                                                    & \textbf{Trade-off accepted}                                                             \\
         \midrule
         Godot 4.x                    & Engine                & 28~MB web exports (WASM+WebGL2), MIT license, native 2D pipeline, sub-second iteration       & Smaller ecosystem and fewer third-party assets than Unity/Unreal                        \\
+        \midrule
         GDScript                     & Language              & Interpreted (no compile step), Python-like readability, no web export size overhead          & Lower peak performance than C++ or C\#                                                  \\
+        \midrule
         GDSync                       & Multiplayer framework & Built-in lobby, state sync, RPC, and security model; functional in first week of integration & Protected mode debugging overhead, local mode web-incompatible, framework fork required \\
+        \midrule
         HTTP/SSE relay (Python)      & Transport             & Universal browser compatibility, standard HTTP tooling, 10--25~ms LAN latency                & Requires relay server infrastructure; not peer-to-peer                                  \\
+        \midrule
         Supporting plugins/utilities & Toolchain             & Solved specific debugging (VarTree), feedback (ToastParty), and deployment (mkcert) problems & Additional dependency maintenance surface                                               \\
         \bottomrule
     \end{tabular}
@@ -701,8 +705,7 @@ The core challenge was translating abstract parallel computing concepts into tan
 The pedagogical mapping was validated through:
 \begin{itemize}
     \item Comparison with Professor D'Agostino's physical experiments
-    \item Review by HPC instructors for conceptual accuracy
-    \item Pilot testing with students familiar with parallel computing
+    \item Review by Professor D'Agostino for conceptual accuracy
     \item Iterative refinement based on feedback
 \end{itemize}
 

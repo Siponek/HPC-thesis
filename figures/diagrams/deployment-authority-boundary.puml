@@ -25,9 +25,16 @@ node "Browser Client A\n(Host authority)" as Host #EAF2F8 {
   component "ConnectionManager" as HostConn #D4E6F1
   component "MultiplayerCardManager" as HostMCM #A9CCE3
   component "GDSync +\nLocalServerSignaling" as HostSync #D4E6F1
+  
+  ' MAGIC TRICK: Hidden lines force a 2x2 Grid!
+  ' Row 1: UI (left) | Conn (right)
+  ' Row 2: MCM (left) | Sync (right)
+  HostUI -right[hidden]-> HostConn
+  HostUI -down[hidden]-> HostMCM
+  HostConn -down[hidden]-> HostSync
 }
 
-note left of Host #E6F4EA
+note bottom of Host #E6F4EA
   **In-process boundary**
   (signals/local callbacks)
   occur internally within 
@@ -37,7 +44,7 @@ end note
 ' RELAY SERVER (Middle)
 cloud "Signaling/Relay Server\n(Python HTTP/SSE)" as Relay #FEF9E7
 
-note right of Relay #FFF4E6
+note left of Relay #FFF4E6
   **Inter-client boundary**
   (HTTP/SSE relay)
   bridges the clients.
@@ -45,10 +52,15 @@ end note
 
 ' PEER NODES (Bottom)
 node "Browser Client B\n(Peer)" as Peer1 #EAFAF1 {
-  component "GDSync +\nLocalServerSignaling" as PeerSync #D5F5E3
   component "MultiplayerCardManager" as PeerMCM #A9DFBF
-  component "ConnectionManager" as PeerConn #D5F5E3
+  component "GDSync +\nLocalServerSignaling" as PeerSync #D5F5E3
   component "Game Scenes\n(UI + Card logic)" as PeerUI #D5F5E3
+  component "ConnectionManager" as PeerConn #D5F5E3
+  
+  ' 2x2 Grid. Top row connects to Relay/Host
+  PeerMCM -right[hidden]-> PeerSync
+  PeerMCM -down[hidden]-> PeerUI
+  PeerSync -down[hidden]-> PeerConn
 }
 
 node "Browser Client C\n(Peer)" as Peer2 #EAFAF1 {
@@ -56,6 +68,11 @@ node "Browser Client C\n(Peer)" as Peer2 #EAFAF1 {
   component "MultiplayerCardManager" as Peer2MCM #A9DFBF
   component "ConnectionManager" as Peer2Conn #D5F5E3
   component "Game Scenes\n(UI + Card logic)" as Peer2UI #D5F5E3
+  
+  ' 2x2 Grid. Mirrored so Sync is closer to the center Relay
+  Peer2Sync -right[hidden]-> Peer2MCM
+  Peer2Sync -down[hidden]-> Peer2Conn
+  Peer2MCM -down[hidden]-> Peer2UI
 }
 
 ' --- RELATIONSHIPS ---
@@ -77,7 +94,7 @@ Peer2MCM -up[#707B7C,dashed]-> HostMCM : proposes move intent\n(via relay path)
 ' Host Self-Validation
 HostMCM -right[#27AE60,bold]-> HostMCM : authoritative validation\nand canonical updates
 
-legend top left
+legend bottom right
 |= Boundary |= Meaning |
 | Host authority | Final move validation and state convergence |
 | In-process signals | Local component communication inside one client |

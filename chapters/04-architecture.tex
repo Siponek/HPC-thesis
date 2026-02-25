@@ -216,7 +216,7 @@ The architecture explicitly distinguishes:
     \item \textbf{Player-private state}: cards in local buffers hidden from other players.
 \end{itemize}
 
-This model is central to the OpenMP analogy: all participants can access shared memory, while local buffer state remains private.
+This model reflects OpenMP’s shared-memory paradigm: all threads operate on a common address space, while thread-local buffers remain private to each thread.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.94\textwidth]{figures/diagrams/card-move-enter-buffer.png}
