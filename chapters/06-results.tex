@@ -111,10 +111,8 @@ The implemented system includes all planned core features:
     % TODO: Export and add victory screen screenshot
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \fbox{\parbox[c][6cm][c]{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
-                \centering\textit{Victory screen placeholder}\\[0.5em]
-                \small Performance summary with time and move count}}
-        \caption{Victory screen (screenshot pending)}
+        \includegraphics[width=\textwidth]{resources/images/multiplayer/multiplayer-victory.png}
+        \caption{Victory screen}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
@@ -122,7 +120,7 @@ The implemented system includes all planned core features:
         \includegraphics[width=\textwidth]{resources/images/multiplayer/multiplayer-lobby.png}
         \caption{Multiplayer lobby with host and local-player highlighting}
     \end{subfigure}
-    \caption{Victory summary (screenshot pending) and multiplayer lobby with color-coded player identification}
+    \caption{Victory summary and multiplayer lobby with color-coded player identification}
     \label{fig:results-victory-lobby}
 \end{figure}
 
@@ -174,7 +172,7 @@ The following use cases summarize how the tool was used and what was observed in
 \begin{itemize}
     \item \textbf{Context}: Small groups (2--10 players) with minimal upfront instructions.
     \item \textbf{Activity}: Player negotiate before starting who handles which card ranges then proceed to sort card collaboratively.
-    \item \textbf{Observed behavior}: Unbalanced strategies produced visible slowdowns and coordination friction.
+    \item \textbf{Observed behavior}: Na\"{i}ve strategies (e.g.\ no pre-agreed work partitioning) produced visible slowdowns and coordination friction.
     \item \textbf{Outcome}: Users recognized that parallel activity alone is insufficient without coordination discipline.
 \end{itemize}
 
@@ -286,7 +284,7 @@ Godot's web export produces a small number of files rather than a traditional as
 
 \paragraph*{Comparison:}
 
-The \exportSizeGzip~MB gzip-compressed total is competitive with typical Unity WebGL builds (50--100~MB uncompressed) despite being served uncompressed from the development server. Production deployment behind a reverse proxy (nginx, Cloudflare, GitHub Pages) with automatic gzip/brotli compression reduces the effective transfer to \exportSizeGzip~MB. This eliminates the need for Unreal Engine's Pixel Streaming infrastructure entirely, enabling deployment as a static web page with no GPU server requirements.
+The uncompressed export totals \exportSizeUncompressed~MB, reducing to \exportSizeGzip~MB with gzip compression (level~6). The development server does not apply compression, but production deployment behind a reverse proxy or CDN with automatic gzip/brotli support would serve the compressed payload. The resulting download size is practical for classroom use on standard broadband connections.
 
 \paragraph*{Note on the development server:}
 
@@ -439,56 +437,20 @@ The game adapts to various screen configurations:
 \subsection{Preliminary Assessment}
 \label{subsec:preliminary-assessment}
 
-While formal educational efficacy evaluation is outside the scope of this thesis, preliminary indicators suggest educational value:
+While formal educational efficacy evaluation is outside the scope of this thesis, preliminary indicators suggest the followingeducational value:
 
 \paragraph*{Quantitative HPC Metrics:}
 
-To evaluate educational effectiveness, HPC performance concepts were introduced during gameplay:
+To evaluate educational effectiveness, HPC performance concepts can be introduced during gameplay:
 
 \begin{itemize}
-    \item \textbf{Speedup ($S$)}: Defined as $S = T_1 / T_p$ where $T_1$ is single-player completion time and $T_p$ is $p$-player completion time. Participants observed that adding players reduced completion time, but not linearly---demonstrating Amdahl's Law in practice.
-    \item \textbf{Efficiency ($E$)}: Calculated as $E = S / p = T_1 / (p \cdot T_p)$. Players noted efficiency decreased with more players due to coordination overhead (communication, waiting for others).
+    \item \textbf{Speedup ($S$)}: Defined as $S = T_1 / T_p$ where $T_1$ is single-player completion time and $T_p$ is $p$-player completion time.
+    \item \textbf{Efficiency ($E$)}: Calculated as $E = S / p = T_1 / (p \cdot T_p)$.
     \item \textbf{Communication Overhead}: Time spent passing cards between players (analogous to message passing cost in distributed systems).
     \item \textbf{Load Imbalance}: Observable when one player receives more difficult cards or falls behind, reducing overall parallel efficiency.
 \end{itemize}
 
-These metrics were explained post-gameplay to connect the intuitive experience with formal HPC terminology.
 
-\paragraph*{Conceptual Understanding (HPC-Experienced Participants):}
-
-Post-gameplay interviews revealed that participants with prior HPC knowledge:
-
-\begin{itemize}
-    \item \textbf{8/8} recognized single-player mode as the sequential baseline ($T_1$)
-    \item \textbf{7/8} identified multiplayer mode as shared-memory collaboration with local buffers (OpenMP-style analogy)
-    \item \textbf{6/8} connected buffers to thread-local storage or private memory
-    \item \textbf{7/8} noted communication/coordination overhead when exchanging cards
-    \item \textbf{5/8} discussed load balancing when cards were unevenly distributed
-    \item \textbf{6/8} explicitly articulated HPC speedup as $S = T_1 / T_p$ after brief explanation
-    \item \textbf{5/8} related efficiency degradation ($E = S/p$) to their gameplay experience
-\end{itemize}
-
-In particular, participants who discussed speedup did not treat it as ``faster play'' only; they linked it to the formal HPC interpretation of comparing sequential baseline time against collaborative parallel time.
-
-\paragraph*{Conceptual Introduction (Non-HPC Participants):}
-
-Participants without HPC background:
-
-\begin{itemize}
-    \item \textbf{4/4} understood basic parallelism concept (multiple players working simultaneously)
-    \item \textbf{3/4} recognized that coordination becomes harder with more players
-    \item \textbf{2/4} understood communication trade-offs (passing cards takes time)
-    \item After brief explanation, \textbf{4/4} expressed interest in learning more about parallel computing
-\end{itemize}
-
-\paragraph*{Engagement and Motivation:}
-
-\begin{itemize}
-    \item \textbf{10/12} participants expressed willingness to play again
-    \item \textbf{9/12} would recommend to peers learning HPC
-    \item \textbf{7/12} found it more engaging than reading textbook explanations
-    \item \textbf{11/12} appreciated the hands-on, interactive approach
-\end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Pedagogical Value Proposition}
@@ -508,11 +470,11 @@ The game serves as an effective \textbf{icebreaker or introductory activity}:
 \subsection{Comparison with Traditional Methods}
 \label{subsec:comparison-traditional}
 
-Informal comparison with traditional HPC teaching methods (based on participant feedback):
+Informal comparison with traditional HPC teaching methods:
 
 \begin{table}[htbp]
     \centering
-    \caption{Perceived advantages over traditional methods}
+    \caption{Expected advantages over traditional methods}
     \label{tab:comparison-traditional}
     \begin{tabular}{@{}lcc@{}}
         \toprule
@@ -524,8 +486,7 @@ Informal comparison with traditional HPC teaching methods (based on participant 
         Conceptual Visualization    & Strong        & Weak                      \\
         Detailed Explanation        & Weak          & Strong                    \\
         Accessibility               & High          & Medium                    \\
-        Scalability (student count) & High          & High                      \\
-        Time Required               & 15--30 min    & 60--90 min (lecture)      \\
+        Scalability (student count) & High          & Medium                    \\
         \bottomrule
     \end{tabular}
 \end{table}
