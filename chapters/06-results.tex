@@ -172,8 +172,8 @@ The following use cases summarize how the tool was used and what was observed in
 
 \paragraph*{Use Case 2: First-Time Multiplayer Coordination}
 \begin{itemize}
-    \item \textbf{Context}: Small groups (10--40 players) with minimal upfront instructions.
-    \item \textbf{Activity}: Players sort collaboratively while negotiating who handles which card ranges.
+    \item \textbf{Context}: Small groups (2--10 players) with minimal upfront instructions.
+    \item \textbf{Activity}: Player negotiate before starting who handles which card ranges then proceed to sort card collaboratively.
     \item \textbf{Observed behavior}: Unbalanced strategies produced visible slowdowns and coordination friction.
     \item \textbf{Outcome}: Users recognized that parallel activity alone is insufficient without coordination discipline.
 \end{itemize}
@@ -223,81 +223,29 @@ Early usability sessions indicated that small non-critical interaction details a
 
 \section{Technical Performance}
 \label{sec:technical-performance}
-% TODO: [Artifact] Performance visualization set (plots/charts).
-% TODO: [Purpose] Complement tabular metrics with trend visibility across load and browser dimensions.
-% TODO: [Source Inputs] Table~\ref{tab:framerate}; Table~\ref{tab:memory-usage}; browser compatibility outcomes in Section~\ref{subsec:browser-compatibility}.
-% TODO: [Placement] At the start of this section, before subsection analyses.
-% TODO: [Done Criteria] Include FPS vs card count, memory vs game state, and browser comparison chart with the same values as reported tables.
-% TODO: [Cross-refs] Chapter~\ref{ch:methodology}, Section~\ref{subsec:functional-requirements}.
+
+This section reports measured technical performance metrics for the deployed web application. Because the game uses an event-driven architecture with no per-frame game logic (\texttt{\_process()} is not used), traditional frame rate benchmarks are not meaningful---the engine's idle render loop runs at the display's native refresh rate regardless of game complexity. Instead, the metrics reported here focus on what users and instructors actually experience: export size, memory footprint, and responsiveness.
 
 %-----------------------------------------------------------------------
-\subsection{Frame Rate Performance}
-\label{subsec:framerate}
+\subsection{Load Time and Responsiveness}
+\label{subsec:load-time}
 
-Frame rate was measured across representative browsers:
-
-\begin{table}[htbp]
-    \centering
-    \caption{Frame rate performance by browser}
-    \label{tab:framerate}
-    \begin{tabular}{@{}lcccc@{}}
-        \toprule
-        \textbf{Browser}      & \textbf{Cards} & \textbf{Avg FPS} & \textbf{Min FPS} & \textbf{Target} \\
-        \midrule
-        Chrome 120+ (Windows) & 50             & 60               & 58               & 60              \\
-        Chrome 120+           & 100            & 60               & 55               & 60              \\
-        Chrome 120+           & 200            & 57               & 48               & 60              \\
-        \midrule
-        Firefox 120+ (Linux)  & 50             & 59               & 54               & 60              \\
-        Firefox 120+          & 100            & 56               & 48               & 60              \\
-        Firefox 120+          & 200            & 51               & 42               & 60              \\
-        \midrule
-        Safari 17+ (macOS)    & 50             & 60               & 57               & 60              \\
-        Safari 17+            & 100            & 58               & 51               & 60              \\
-        Safari 17+            & 200            & 53               & 44               & 60              \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\paragraph*{Analysis:}
-
-\begin{itemize}
-    \item Target 60 FPS achieved for 50--100 cards in all browsers
-    \item Performance degradation with 200 cards acceptable (still playable above 40 FPS)
-    \item No significant frame drops during gameplay
-    \item Optimization opportunities remain for very high card counts
-\end{itemize}
+The uncompressed \exportSizeUncompressed~MB export loads in under 2~seconds on localhost; real-world load times depend on hosting infrastructure and user bandwidth. Load time is dominated by the WebAssembly binary download and compilation. Once loaded, all game logic is event-driven---card drags, drops, and multiplayer synchronization respond without perceptible delay at human interaction timescales (approximately one card move every 1--3~seconds). The HTTP/SSE relay architecture (Section~\ref{subsec:http-sse-selection}) adds one network hop compared to peer-to-peer, but this overhead remains imperceptible for a turn-based card-sorting game.
 
 %-----------------------------------------------------------------------
 \subsection{Memory Usage}
 \label{subsec:memory}
 
-Memory consumption measured during typical gameplay:
+Memory consumption was measured using Chrome Task Manager (\texttt{Shift+Esc}) during gameplay sessions across all game states: main menu, single-player with 50, 100, and 200 cards, multiplayer lobby, and multiplayer game.
 
-\begin{table}[htbp]
-    \centering
-    \caption{Memory usage by game state}
-    \label{tab:memory-usage}
-    \begin{tabular}{@{}lcc@{}}
-        \toprule
-        \textbf{Game State}          & \textbf{Memory (MB)} & \textbf{Peak (MB)} \\
-        \midrule
-        Startup (Main Menu)          & 85                   & 92                 \\
-        Single-player (50 cards)     & 110                  & 125                \\
-        Single-player (100 cards)    & 135                  & 155                \\
-        Single-player (200 cards)    & 175                  & 210                \\
-        Multiplayer lobby            & 120                  & 140                \\
-        Multiplayer game (4 players) & 165                  & 195                \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+The tab's memory footprint settled at approximately 530~MB across all game states after initial garbage collection, with transient spikes up to 630~MB during scene transitions. No significant difference was observed between 50-card and 200-card sessions, nor between single-player and multiplayer modes. This indicates that memory consumption is dominated by the Godot Engine WebAssembly runtime and its pre-allocated linear memory, not by game-specific objects such as card nodes.
 
 \paragraph*{Analysis:}
 
 \begin{itemize}
-    \item Memory usage reasonable for modern browsers (typically several GB available)
-    \item No memory leaks detected during extended gameplay sessions
-    \item Object pooling successfully reduced allocation overhead
+    \item The $\sim$530~MB baseline is well within modern browser limits (typically several GB available per tab) and suitable for classroom computers
+    \item Increasing card count from 50 to 200 does not measurably increase memory, confirming that UI nodes are lightweight relative to the engine baseline
+    \item No memory leaks were observed---values remained stable after settling, with fluctuations attributable to browser garbage collection cycles
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -307,22 +255,42 @@ Memory consumption measured during typical gameplay:
 The final web export package characteristics:
 
 \begin{itemize}
-    \item \textbf{Uncompressed}: 28 MB
-    \item \textbf{Gzip compressed}: 12 MB
-    \item \textbf{Initial load time}: 3--5 seconds on typical broadband
+    \item \textbf{Uncompressed}: \exportSizeUncompressed~MB
+    \item \textbf{Gzip compressed}: \exportSizeGzip~MB
 \end{itemize}
 
 \paragraph*{Size Breakdown:}
-\begin{itemize}
-    \item Godot Engine WebAssembly runtime: 15 MB
-    \item Game scripts and scenes: 2 MB
-    \item Assets (textures, fonts, audio): 5 MB
-    \item GDSync library: 1 MB
-\end{itemize}
+
+Godot's web export produces a small number of files rather than a traditional asset tree. The WebAssembly runtime is split across two files, while all game content (scenes, scripts, textures, fonts, and addon code including GDSync) is bundled into a single \texttt{.pck} archive:
+
+\begin{table}[htbp]
+    \centering
+    \caption{Web export file sizes}
+    \label{tab:export-size-breakdown}
+    \begin{tabular}{@{}llr@{}}
+        \toprule
+        \textbf{File}            & \textbf{Contents}                 & \textbf{Size (MB)}               \\
+        \midrule
+        \texttt{index.pck}       & Scenes, scripts, assets, GDSync   & 90.4                             \\
+        \texttt{index.side.wasm} & Godot Engine WASM (main)          & 38.9                             \\
+        \texttt{index.js}        & JavaScript glue code              & 2.8                              \\
+        \texttt{index.wasm}      & Godot Engine WASM (secondary)     & 1.5                              \\
+        \texttt{index.html}      & Entry page                        & 0.01                             \\
+        Other                    & Icons, worklets                   & 1.9                              \\
+        \midrule
+        \textbf{Total}           &                                   & \textbf{\exportSizeUncompressed} \\
+        \textbf{Gzip total}      & \textit{(at compression level 6)} & \textbf{\exportSizeGzip}         \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \paragraph*{Comparison:}
 
-Significantly smaller than typical Unity (50--100 MB) or Unreal Engine (100+ MB) web exports, enabling faster loading in browsers.
+The \exportSizeGzip~MB gzip-compressed total is competitive with typical Unity WebGL builds (50--100~MB uncompressed) despite being served uncompressed from the development server. Production deployment behind a reverse proxy (nginx, Cloudflare, GitHub Pages) with automatic gzip/brotli compression reduces the effective transfer to \exportSizeGzip~MB. This eliminates the need for Unreal Engine's Pixel Streaming infrastructure entirely, enabling deployment as a static web page with no GPU server requirements.
+
+\paragraph*{Note on the development server:}
+
+The Python-based HTTPS server used for LAN testing (\texttt{exports/main.py}) does not implement compression; it serves files at their full uncompressed size. This is acceptable for LAN testing where bandwidth exceeds 100~Mbps, but production deployment should use a server or CDN that supports \texttt{Content-Encoding: gzip}.
 
 %-----------------------------------------------------------------------
 \section{Platform Compatibility}
@@ -340,14 +308,11 @@ Testing conducted across major web browsers:
     \label{tab:browser-compat}
     \begin{tabular}{@{}lccl@{}}
         \toprule
-        \textbf{Browser} & \textbf{Platform} & \textbf{Status} & \textbf{Notes}    \\
+        \textbf{Browser} & \textbf{Platform} & \textbf{Status} & \textbf{Notes}             \\
         \midrule
-        Chrome 120+      & Windows           & Excellent       & Reference browser \\
-        Chrome 120+      & macOS             & Excellent       & Full support      \\
-        Firefox 120+     & Windows           & Excellent       & Full support      \\
-        Firefox 120+     & Linux             & Excellent       & Full support      \\
-        Safari 17+       & macOS             & Excellent       & Full support      \\
-        Edge 120+        & Windows           & Excellent       & Chromium-based    \\
+        Chrome 145+      & Windows           & Functional      & Reference browser          \\
+        Firefox 148+     & Windows           & Functional      & Independent engine (Gecko) \\
+        Edge 145+        & Windows           & Functional      & Chromium-based             \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -382,89 +347,89 @@ The game adapts to various screen configurations:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\section{Usability Evaluation}
-\label{sec:usability-evaluation}
-% TODO: [Artifact] Usability visualization set (Likert summary + feedback category breakdown).
-% TODO: [Purpose] Make qualitative/quantitative usability outcomes scannable and auditable.
-% TODO: [Source Inputs] Questionnaire items in Section~\ref{subsec:informal-testing}; positive/improvement findings in Section~\ref{subsec:usability-findings}.
-% TODO: [Placement] At the beginning of this section.
-% TODO: [Done Criteria] Provide one aggregated Likert chart and one categorized feedback chart with participant counts matching reported text.
-% TODO: [Cross-refs] Section~\ref{subsec:engagement-effects}; Chapter~\ref{ch:problems}, Section~\ref{sec:mobile-ux-challenges}.
+% \section{Usability Evaluation}
+% \label{sec:usability-evaluation}
+% % TODO: [Artifact] Usability visualization set (Likert summary + feedback category breakdown).
+% % TODO: [Purpose] Make qualitative/quantitative usability outcomes scannable and auditable.
+% % TODO: [Source Inputs] Questionnaire items in Section~\ref{subsec:informal-testing}; positive/improvement findings in Section~\ref{subsec:usability-findings}.
+% % TODO: [Placement] At the beginning of this section.
+% % TODO: [Done Criteria] Provide one aggregated Likert chart and one categorized feedback chart with participant counts matching reported text.
+% % TODO: [Cross-refs] Section~\ref{subsec:engagement-effects}; Chapter~\ref{ch:problems}, Section~\ref{sec:mobile-ux-challenges}.
 
-%-----------------------------------------------------------------------
-\subsection{Informal User Testing}
-\label{subsec:informal-testing}
+% %-----------------------------------------------------------------------
+% \subsection{Informal User Testing}
+% \label{subsec:informal-testing}
 
-Informal usability testing conducted with 12 volunteer participants (students and colleagues):
+% Informal usability testing conducted with 12 volunteer participants (students and colleagues):
 
-\paragraph*{Demographics:}
-\begin{itemize}
-    \item Age range: 20--35 years
-    \item 8 with prior HPC knowledge, 4 without
-    \item Mix of gamers and non-gamers
-    \item All had web browser experience
-\end{itemize}
+% \paragraph*{Demographics:}
+% \begin{itemize}
+%     \item Age range: 20--35 years
+%     \item 8 with prior HPC knowledge, 4 without
+%     \item Mix of gamers and non-gamers
+%     \item All had web browser experience
+% \end{itemize}
 
-\paragraph*{Testing Protocol:}
-\begin{enumerate}
-    \item Brief introduction to project goals (no gameplay instruction)
-    \item Observation of first-time gameplay
-    \item Think-aloud protocol during play
-    \item Post-session questionnaire
-    \item Semi-structured interview
-\end{enumerate}
+% \paragraph*{Testing Protocol:}
+% \begin{enumerate}
+%     \item Brief introduction to project goals (no gameplay instruction)
+%     \item Observation of first-time gameplay
+%     \item Think-aloud protocol during play
+%     \item Post-session questionnaire
+%     \item Semi-structured interview
+% \end{enumerate}
 
-\paragraph*{Post-Session Questionnaire:}
-The questionnaire included the following items (5-point Likert scale unless noted):
-\begin{enumerate}
-    \item \textbf{Usability}: ``The game controls were intuitive and easy to learn.''
-    \item \textbf{Visual Clarity}: ``Card numbers and game elements were clearly visible.''
-    \item \textbf{Engagement}: ``I found the game engaging and would play again.''
-    \item \textbf{Conceptual Connection}: ``The game helped me understand parallel computing concepts.'' (HPC participants only)
-    \item \textbf{Multiplayer Experience}: ``Coordinating with other players felt natural.''
-    \item \textbf{Performance}: ``The game ran smoothly without lag or delays.''
-    \item \textbf{Educational Value}: ``I would recommend this game to others learning about HPC.''
-    \item \textbf{Open Response}: ``What aspects of parallel computing did you recognize during gameplay?''
-    \item \textbf{Open Response}: ``What improvements would you suggest?''
-\end{enumerate}
+% \paragraph*{Post-Session Questionnaire:}
+% The questionnaire included the following items (5-point Likert scale unless noted):
+% \begin{enumerate}
+%     \item \textbf{Usability}: ``The game controls were intuitive and easy to learn.''
+%     \item \textbf{Visual Clarity}: ``Card numbers and game elements were clearly visible.''
+%     \item \textbf{Engagement}: ``I found the game engaging and would play again.''
+%     \item \textbf{Conceptual Connection}: ``The game helped me understand parallel computing concepts.'' (HPC participants only)
+%     \item \textbf{Multiplayer Experience}: ``Coordinating with other players felt natural.''
+%     \item \textbf{Performance}: ``The game ran smoothly without lag or delays.''
+%     \item \textbf{Educational Value}: ``I would recommend this game to others learning about HPC.''
+%     \item \textbf{Open Response}: ``What aspects of parallel computing did you recognize during gameplay?''
+%     \item \textbf{Open Response}: ``What improvements would you suggest?''
+% \end{enumerate}
 
-%-----------------------------------------------------------------------
-\subsection{Key Findings}
-\label{subsec:usability-findings}
+% %-----------------------------------------------------------------------
+% \subsection{Key Findings}
+% \label{subsec:usability-findings}
 
-\paragraph*{Positive Feedback:}
+% \paragraph*{Positive Feedback:}
 
-\begin{itemize}
-    \item \textbf{Intuitive Controls}: 11/12 participants understood drag-and-drop immediately without instruction
-    \item \textbf{Visual Clarity}: Card numbers and states were clearly visible
-    \item \textbf{Conceptual Connection}: Participants with HPC background (8/8) recognized OpenMP shared-memory parallels
-    \item \textbf{Engagement}: Average play session 15--20 minutes, indicating good engagement
-    \item \textbf{Performance}: No complaints about lag or performance issues
-\end{itemize}
+% \begin{itemize}
+%     \item \textbf{Intuitive Controls}: 11/12 participants understood drag-and-drop immediately without instruction
+%     \item \textbf{Visual Clarity}: Card numbers and states were clearly visible
+%     \item \textbf{Conceptual Connection}: Participants with HPC background (8/8) recognized OpenMP shared-memory parallels
+%     \item \textbf{Engagement}: Average play session 15--20 minutes, indicating good engagement
+%     \item \textbf{Performance}: No complaints about lag or performance issues
+% \end{itemize}
 
-\paragraph*{Areas for Improvement:}
+% \paragraph*{Areas for Improvement:}
 
-\begin{itemize}
-    \item \textbf{Onboarding}: 6/12 participants wanted brief tutorial or tooltips
-    \item \textbf{Buffer Purpose}: 5/12 weren't immediately sure why buffers were useful
-    \item \textbf{Multiplayer Clarity}: 7/12 found it unclear what other players were doing
-    \item \textbf{Educational Context}: Participants without HPC background (4/4) didn't make HPC connections without explanation
-\end{itemize}
+% \begin{itemize}
+%     \item \textbf{Onboarding}: 6/12 participants wanted brief tutorial or tooltips
+%     \item \textbf{Buffer Purpose}: 5/12 weren't immediately sure why buffers were useful
+%     \item \textbf{Multiplayer Clarity}: 7/12 found it unclear what other players were doing
+%     \item \textbf{Educational Context}: Participants without HPC background (4/4) didn't make HPC connections without explanation
+% \end{itemize}
 
-%-----------------------------------------------------------------------
-\subsection{Suggested Improvements}
-\label{subsec:suggested-improvements}
+% %-----------------------------------------------------------------------
+% \subsection{Suggested Improvements}
+% \label{subsec:suggested-improvements}
 
-Based on feedback, future versions should include:
+% Based on feedback, future versions should include:
 
-\begin{enumerate}
-    \item \textbf{Optional Tutorial}: Brief interactive tutorial explaining mechanics
-    \item \textbf{Tooltips and Hints}: Contextual help for first-time users
-    \item \textbf{Player Activity Indicators}: Show what other players are doing
-    \item \textbf{Educational Overlay}: Optional explanations connecting gameplay to HPC concepts
-    \item \textbf{Strategy Hints}: Suggestions for efficient sorting approaches
-    \item \textbf{Replay/Analysis Mode}: Review completed games to understand performance
-\end{enumerate}
+% \begin{enumerate}
+%     \item \textbf{Optional Tutorial}: Brief interactive tutorial explaining mechanics
+%     \item \textbf{Tooltips and Hints}: Contextual help for first-time users
+%     \item \textbf{Player Activity Indicators}: Show what other players are doing
+%     \item \textbf{Educational Overlay}: Optional explanations connecting gameplay to HPC concepts
+%     \item \textbf{Strategy Hints}: Suggestions for efficient sorting approaches
+%     \item \textbf{Replay/Analysis Mode}: Review completed games to understand performance
+% \end{enumerate}
 
 %-----------------------------------------------------------------------
 \section{Educational Effectiveness}

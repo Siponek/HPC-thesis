@@ -146,6 +146,24 @@
 \newcommand*\hpc{HPC}
 
 %-----------------------------------------------------------------------
+% Measurement placeholders — replace \MEASURE{placeholder} with actual values
+% after running benchmarks. Search for \MEASURE to find all unfilled values.
+\newcommand{\MEASURE}[1]{\textbf{[\,#1\,]}}  % renders as bold [placeholder]
+
+% --- Web Export Size (measured via Get-ChildItem + Python gzip) ---
+\newcommand{\exportSizeUncompressed}{135}           % MB, uncompressed export folder (actual: 135.32 MB)
+\newcommand{\exportSizeGzip}{30}                    % MB, gzip-compressed (actual: 30.38 MB at level 6)
+\newcommand{\exportSizeWasm}{40}                    % MB, index.side.wasm=38.88 + index.wasm=1.52 = 40.4 MB
+\newcommand{\exportSizeScenes}{91}                  % MB, index.pck=90.4 MB (bundles scenes, scripts, assets)
+\newcommand{\exportSizeAssets}{\MEASURE{??}}       % MB, subset of .pck — not separately measurable without Godot PCK tool
+\newcommand{\exportSizeGDSync}{\MEASURE{??}}       % MB, subset of .pck — not separately measurable without Godot PCK tool
+
+% --- Memory (measured via Chrome Task Manager: ~530 MB baseline across all states) ---
+% No per-state variables needed — memory is engine-dominated, reported as prose in 06-results.tex
+
+% (Load time and event latency reported as prose in 06-results.tex, no variables needed)
+
+%-----------------------------------------------------------------------
 %	BEGIN DOCUMENT
 %-----------------------------------------------------------------------
 
