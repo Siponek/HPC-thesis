@@ -154,9 +154,9 @@ All error responses follow the format \texttt{\{"success": false, "error": "<cod
 
 The signaling server uses two primary data models:
 
-\paragraph{Peer:} Represents a connected player. Fields: \texttt{peer\_id} (int), \texttt{ws} (WebSocket connection, optional), \texttt{sse\_queue} (asyncio Queue for SSE events, optional), \texttt{player\_data} (dict), \texttt{lobby\_code} (str, optional). A peer uses either WebSocket \emph{or} SSE, not both---this dual-transport design enables both native and browser clients.
+\paragraph*{Peer:} Represents a connected player. Fields: \texttt{peer\_id} (int), \texttt{ws} (WebSocket connection, optional), \texttt{sse\_queue} (asyncio Queue for SSE events, optional), \texttt{player\_data} (dict), \texttt{lobby\_code} (str, optional). A peer uses either WebSocket \emph{or} SSE, not both---this dual-transport design enables both native and browser clients.
 
-\paragraph{Lobby:} Represents a game lobby. Fields: \texttt{code} (str), \texttt{name} (str), \texttt{host\_id} (int), \texttt{public} (bool), \texttt{player\_limit} (int), \texttt{open} (bool), \texttt{created\_at} (ISO timestamp), \texttt{peers} (dict of Peer).
+\paragraph*{Lobby:} Represents a game lobby. Fields: \texttt{code} (str), \texttt{name} (str), \texttt{host\_id} (int), \texttt{public} (bool), \texttt{player\_limit} (int), \texttt{open} (bool), \texttt{created\_at} (ISO timestamp), \texttt{peers} (dict of Peer).
 
 %-----------------------------------------------------------------------
 \section{GDScript Game Classes}
@@ -169,7 +169,7 @@ This section summarizes the key GDScript classes. Full source code is available 
 
 Base class managing all card logic for single-player mode.
 
-\paragraph{Key Properties:}
+\paragraph*{Key Properties:}
 \begin{itemize}
     \item \texttt{num\_cards: int} --- Number of cards in the game
     \item \texttt{cards\_array: Array} --- All card node instances
@@ -178,7 +178,7 @@ Base class managing all card logic for single-player mode.
     \item \texttt{card\_container: HBoxContainer} --- Shared card container (scene tree node)
 \end{itemize}
 
-\paragraph{Key Methods:}
+\paragraph*{Key Methods:}
 \begin{itemize}
     \item \texttt{check\_sorting\_order() -> bool} --- Validates ascending order of cards in container
     \item \texttt{check\_player\_buffer\_contiguity() -> bool} --- Validates buffer cards form a contiguous sorted subsequence
@@ -192,13 +192,13 @@ Base class managing all card logic for single-player mode.
 
 Extends \texttt{CardManager} for multiplayer mode.
 
-\paragraph{Inner Class --- CardState:}
+\paragraph*{Inner Class --- CardState:}
 \begin{itemize}
     \item Serializable state object with \texttt{to\_dict()} and \texttt{from\_dict()} methods
     \item Fields: \texttt{value}, \texttt{index}, \texttt{original\_index}, \texttt{in\_container}, \texttt{in\_buffer}, \texttt{buffer\_owner}
 \end{itemize}
 
-\paragraph{Key Methods (GDSync-exposed):}
+\paragraph*{Key Methods (GDSync-exposed):}
 \begin{itemize}
     \item \texttt{sync\_complete\_game\_state(state\_data)} --- Full state reconciliation
     \item \texttt{sync\_card\_moved(value, from\_idx, to\_idx, client\_id)} --- Card repositioning
@@ -214,9 +214,9 @@ Extends \texttt{CardManager} for multiplayer mode.
 
 Implements barrier synchronization state machine.
 
-\paragraph{States:} \texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE} $\to$ \texttt{RUNNING}.
+\paragraph*{States:} \texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE} $\to$ \texttt{RUNNING}.
 
-\paragraph{Key Methods:}
+\paragraph*{Key Methods:}
 \begin{itemize}
     \item \texttt{enter\_waiting\_state(initiator\_id, all\_player\_ids)} --- Transition to waiting state
     \item \texttt{activate\_barrier()} --- Transition to active state (all threads arrived)
@@ -224,7 +224,7 @@ Implements barrier synchronization state machine.
     \item \texttt{determine\_main\_thread(first\_id, all\_ids) -> int} --- Select coordinator (first-to-reach or round-robin)
 \end{itemize}
 
-\paragraph{Signals:}
+\paragraph*{Signals:}
 \begin{itemize}
     \item \texttt{barrier\_state\_changed(new\_state)} --- State transition notification
     \item \texttt{thread\_reached\_barrier(player\_id)} --- Player arrival notification
@@ -236,14 +236,14 @@ Implements barrier synchronization state machine.
 
 Autoload that wraps GDSync signals into game-level events.
 
-\paragraph{Key Methods:}
+\paragraph*{Key Methods:}
 \begin{itemize}
     \item \texttt{am\_i\_host() -> bool} --- Whether local player is lobby host
     \item \texttt{get\_my\_client\_id() -> int} --- Local player's GDSync client ID
     \item \texttt{get\_player\_list() -> MultiplayerTypes.PlayersMap} --- Current player map
 \end{itemize}
 
-\paragraph{Key Signals:}
+\paragraph*{Key Signals:}
 \begin{itemize}
     \item \texttt{player\_joined\_lobby(player\_id)} --- Player entered lobby
     \item \texttt{player\_list\_updated(players)} --- Player list changed
@@ -270,7 +270,7 @@ GDSync.call_func_on(target_peer_id, self.my_function, [arg1, arg2])
 GDSync.expose_var(self, "variable_name")
 \end{lstlisting}
 
-\paragraph{Key GDSync Signals:}
+\paragraph*{Key GDSync Signals:}
 \begin{itemize}
     \item \texttt{GDSync.connected} --- Successfully connected to server
     \item \texttt{GDSync.connection\_failed} --- Connection attempt failed

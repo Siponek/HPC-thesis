@@ -16,22 +16,12 @@ The game is deployed as a \textbf{web application} (Godot Engine WebAssembly exp
 \subsection{Web Version (Primary)}
 
 \begin{itemize}
-    \item \textbf{Browser}: Chromium-based browser (Chrome, Edge, Brave) or Firefox, version 90 or later
+    \item \textbf{Browser}: Chromium-based browser (Chrome, Edge, Brave) or Firefox, version 145 or later
     \item \textbf{WebGL}: WebGL 2.0 support required
-    \item \textbf{SharedArrayBuffer}: Must be enabled (requires HTTPS with proper COOP/COEP headers)
+    \item \textbf{JavaScript}: Must be enabled
     \item \textbf{RAM}: 2~GB minimum available to browser
     \item \textbf{Network}: Internet connection required for multiplayer mode; single-player works offline after initial load
-    \item \textbf{Input}: Mouse or touchscreen; keyboard shortcuts optional
-\end{itemize}
-
-\subsection{Desktop Version (Windows)}
-
-\begin{itemize}
-    \item \textbf{Operating System}: Windows 10 or later (x86\_64)
-    \item \textbf{RAM}: 2~GB minimum
-    \item \textbf{Storage}: 100~MB free space
-    \item \textbf{Graphics}: Vulkan or OpenGL 3.3 support
-    \item \textbf{Network}: Internet connection for multiplayer
+    \item \textbf{Input}: Mouse or touchscreen
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -46,15 +36,7 @@ The game is deployed as a \textbf{web application} (Godot Engine WebAssembly exp
     \item The main menu appears once loading is complete
 \end{enumerate}
 
-\noindent\textbf{Note:} The web export requires the hosting server to set specific HTTP headers (\texttt{Cross-Origin-Opener-Policy: same-origin} and \texttt{Cross-Origin-Embedder-Policy: require-corp}) for \texttt{SharedArrayBuffer} support. If these headers are missing, multiplayer functionality will not work. See docs/GITHUB\_PAGES\_AND\_LOCAL\_SIGNALING\_LIMITATIONS.md in the project repository for details.
-
-\subsection{Desktop Version}
-
-\begin{enumerate}
-    \item Download the Windows executable from the project releases page
-    \item Extract the archive if necessary
-    \item Run the executable directly---no installation is required
-\end{enumerate}
+\noindent\textbf{Note:} The web export is built with thread support disabled (\texttt{variant/thread\_support=false} in the Godot export preset), so COOP/COEP headers and \texttt{SharedArrayBuffer} are \emph{not} required. The game runs as a single-threaded WebAssembly application. Multiplayer communication uses HTTP/SSE, which does not depend on shared memory or cross-origin isolation.
 
 %-----------------------------------------------------------------------
 \section{Getting Started}
@@ -66,7 +48,7 @@ On launch, the main menu presents the following options:
 \begin{itemize}
     \item \textbf{Single Player}: Practice sorting alone (sequential execution baseline)
     \item \textbf{Multiplayer}: Join or host a cooperative multiplayer game (OpenMP shared-memory simulation)
-    \item \textbf{Settings}: Configure theme and display options
+    \item \textbf{Options}: Configure theme and display options
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -88,16 +70,16 @@ On launch, the main menu presents the following options:
 
 \subsection{Gameplay}
 
-\paragraph{Objective:}
+\paragraph*{Objective:}
 Sort all cards in ascending order in the main container.
 
-\paragraph{Controls:}
+\paragraph*{Controls:}
 \begin{itemize}
     \item \textbf{Drag and Drop}: Click and drag a card to reposition it within the container or move it to/from a buffer slot
     \item \textbf{Scroll}: Use the horizontal scroll bar or mouse wheel to navigate through cards when they exceed viewport width
 \end{itemize}
 
-\paragraph{Using Buffer Slots:}
+\paragraph*{Using Buffer Slots:}
 \begin{itemize}
     \item Buffer slots appear below the main card container
     \item Drag cards into buffer slots for temporary storage during sorting
@@ -105,7 +87,7 @@ Sort all cards in ascending order in the main container.
     \item Cards in buffers must form a contiguous subsequence of the sorted target before the game can complete
 \end{itemize}
 
-\paragraph{Winning:}
+\paragraph*{Winning:}
 \begin{itemize}
     \item The game completes when all cards are in correct ascending order in the main container
     \item Completion time is displayed
@@ -144,14 +126,14 @@ Sort all cards in ascending order in the main container.
 
 \subsection{Multiplayer Gameplay}
 
-\paragraph{Shared Container (Shared Memory):}
+\paragraph*{Shared Container (Shared Memory):}
 \begin{itemize}
     \item All cards are visible in the shared container, simulating shared memory accessible by all threads
     \item Any player can drag cards within the shared container to reorder them
     \item Changes propagate to all connected players in real time
 \end{itemize}
 
-\paragraph{local buffers (Thread-Local Storage):}
+\paragraph*{Local Buffers (Partitioned Shared Memory):}
 \begin{itemize}
     \item Each player has local buffer slots visible only to themselves
     \item Cards moved to a player's buffer disappear from other players' views
@@ -159,7 +141,7 @@ Sort all cards in ascending order in the main container.
     \item This simulates the distinction between shared and private memory in OpenMP
 \end{itemize}
 
-\paragraph{Barrier Synchronization:}
+\paragraph*{Barrier Synchronization:}
 \begin{itemize}
     \item Any player can initiate a barrier (analogous to \texttt{\#pragma omp barrier})
     \item All players must reach the barrier before proceeding
@@ -168,7 +150,7 @@ Sort all cards in ascending order in the main container.
     \item This teaches students about synchronization primitives in parallel computing
 \end{itemize}
 
-\paragraph{Winning Together:}
+\paragraph*{Winning Together:}
 \begin{itemize}
     \item The team wins when all cards are sorted correctly in the shared container
     \item All players must have returned their buffer cards to the container
@@ -210,23 +192,22 @@ Sort all cards in ascending order in the main container.
 
 \subsection{Common Issues and Solutions}
 
-\paragraph{Game does not load in browser:}
+\paragraph*{Game does not load in browser:}
 \begin{itemize}
     \item Verify that your browser supports WebGL 2.0 (check \texttt{chrome://gpu} in Chrome)
-    \item Ensure the hosting server sends correct COOP/COEP headers for \texttt{SharedArrayBuffer}
+    \item Verify that JavaScript is enabled and WebGL 2.0 is supported (check \texttt{chrome://gpu} in Chrome)
     \item Try clearing browser cache and reloading
     \item Try a different Chromium-based browser
 \end{itemize}
 
-\paragraph{Performance issues:}
+\paragraph*{Performance issues:}
 \begin{itemize}
     \item Reduce the number of cards
     \item Close other browser tabs to free memory
     \item Ensure hardware acceleration is enabled in browser settings
-    \item The desktop version generally performs better than the web version for large card counts
 \end{itemize}
 
-\paragraph{Cannot connect to multiplayer:}
+\paragraph*{Cannot connect to multiplayer:}
 \begin{itemize}
     \item Verify internet connection is active
     \item Check that both players are using the same game version
@@ -235,7 +216,7 @@ Sort all cards in ascending order in the main container.
     \item If using a custom signaling server, verify it is running and accessible
 \end{itemize}
 
-\paragraph{Multiplayer desynchronization:}
+\paragraph*{Multiplayer desynchronization:}
 \begin{itemize}
     \item This can occur if network packets are lost or arrive out of order
     \item The host can use the ``sync state'' mechanism to push authoritative state to all clients
