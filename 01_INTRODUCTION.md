@@ -115,7 +115,7 @@ The game presents players with a deck of numbered cards that must be sorted in a
 2. **Real-Time Multiplayer**: WebRTC-based peer-to-peer communication for low-latency gameplay
 3. **Visual Feedback**: Color-coded cards, animations, and notifications to guide players
 4. **Performance Tracking**: Timer and move counter to encourage efficiency
-5. **Scalability**: Support for variable numbers of cards (10-200) and players (2-4)
+5. **Scalability**: Support for variable numbers of cards (10-200) and many players (10-40)
 6. **No Authentication Required**: Direct gameplay without registration or login barriers
 
 ### Technology Stack

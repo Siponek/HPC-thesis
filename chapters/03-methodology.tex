@@ -283,7 +283,8 @@ Godot Engine was selected because:
 
     \item \textbf{2D Optimization}: Godot is specifically optimized for 2D games, unlike Unity and Unreal which prioritize 3D. The 2D rendering pipeline operates independently from the 3D engine, avoiding unnecessary overhead for a card-based interaction game.
 
-    \item \textbf{Smallest Web Exports}: The final game build is approximately 28~MB uncompressed (12~MB gzip-compressed), loading in 3--5~seconds on typical broadband. This is 2--4$\times$ smaller than Unity WebGL builds and orders of magnitude smaller than Unreal's Pixel Streaming infrastructure requirement.
+    \item \textbf{Web Export Capabilities}: While Unity WebGL builds can often achieve smaller file sizes due to aggressive managed code stripping and IL2CPP optimizations, Godot provides a frictionless, natively integrated web export process without complex compilation pipelines. Furthermore, a static 135~MB web payload (which is significantly reduced over the network via gzip/Brotli compression) is fundamentally simpler to host than Unreal Engine's heavy Pixel Streaming infrastructure.
+          % TODO Work on exporting size comparison with actual build outputs from each engine, including gzip/Brotli compression ratios, to provide concrete evidence for this claim. Need to check what is actually exported and if the font awesome is exported
 
     \item \textbf{GDScript}: Python-like scripting language is accessible to students who may examine the source code. Lower barrier to entry than C\# (Unity) or C++ (Unreal/Cocos2D). The interpreted execution model eliminates compilation delays during rapid gameplay iteration.
 
@@ -430,11 +431,17 @@ The PackRTC addon (already present in this project's \texttt{addons/} directory)
         \textbf{Capability}   & \textbf{Raw Godot}      & \textbf{GDSync}                & \textbf{Custom WebRTC} \\
         \midrule
         Lobby management      & Not provided            & Built-in                       & Must implement         \\
+        \midrule
         State synchronization & Not provided            & Automatic variable sync        & Must implement         \\
+        \midrule
         RPC system            & Low-level \texttt{@rpc} & High-level \texttt{call\_func} & Must implement         \\
+        \midrule
         Security model        & Not provided            & Whitelist-based                & Must implement         \\
+        \midrule
         Web browser support   & WebSocket only          & WebSocket fallback (cloud)     & Native WebRTC          \\
+        \midrule
         External dependency   & None                    & GDSync servers or fork         & Signaling + STUN/TURN  \\
+        \midrule
         Estimated effort      & 4--6~weeks extra        & Usable immediately             & 8--12~weeks extra      \\
         \bottomrule
     \end{tabular}
