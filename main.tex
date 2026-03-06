@@ -103,33 +103,6 @@
 \lstset{style=gdscript}
 
 %-----------------------------------------------------------------------
-%	HEADERS AND FOOTERS
-%-----------------------------------------------------------------------
-
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[LE]{\leftmark}
-\fancyhead[RO]{\rightmark}
-\fancyfoot[C]{\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\footrulewidth}{0.4pt}
-
-% Chapter and section formatting
-\fancypagestyle{plain}{
-	\fancyhf{}
-	\fancyfoot[C]{\thepage}
-	\renewcommand{\headrulewidth}{0pt}
-}
-
-%-----------------------------------------------------------------------
-%	TITLE FORMATTING
-%-----------------------------------------------------------------------
-
-\titleformat{\chapter}[display]
-{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
-\titlespacing*{\chapter}{0pt}{0pt}{40pt}
-
-%-----------------------------------------------------------------------
 %	BIBLIOGRAPHY
 %-----------------------------------------------------------------------
 
@@ -158,10 +131,6 @@
 \newcommand{\exportSizeAssets}{\MEASURE{??}}       % MB, subset of .pck — not separately measurable without Godot PCK tool
 \newcommand{\exportSizeGDSync}{\MEASURE{??}}       % MB, subset of .pck — not separately measurable without Godot PCK tool
 
-% --- Memory (measured via Chrome Task Manager: ~530 MB baseline across all states) ---
-% No per-state variables needed — memory is engine-dominated, reported as prose in 06-results.tex
-
-% (Load time and event latency reported as prose in 06-results.tex, no variables needed)
 
 %-----------------------------------------------------------------------
 %	BEGIN DOCUMENT
