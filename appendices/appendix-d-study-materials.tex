@@ -8,28 +8,6 @@
 This appendix provides educational materials to help students and instructors connect the HPC Sorting Serious Game to formal parallel computing concepts. It includes learning objectives, discussion questions, exercises, and connections to OpenMP programming and sequential vs. parallel execution.
 
 %-----------------------------------------------------------------------
-\section{Core Concepts}
-\label{app:d:core-concepts}
-
-Before starting the activities, here are the key ideas we want to explore through the game:
-
-\begin{enumerate}
-    \item \textbf{More helpers should mean faster work.} If one person takes 20~minutes to sort all the cards, then in a perfect world two people should take 10~minutes, and four people should take 5~minutes. The ideal time is:
-          \[
-              T_{\text{ideal}} = \frac{T_{\text{alone}}}{N}
-          \]
-          where $N$ is the number of players. But in practice, you will discover that this perfect speedup \emph{never quite happens}---and the reasons why are one of the most important lessons.
-
-    \item \textbf{Overhead is the enemy.} When people work together, they spend some time \emph{not sorting}---they coordinate, wait for each other, or accidentally work on the same cards. This wasted time is called \textbf{overhead}. The more players you add, the more overhead appears, which is why doubling the team rarely halves the time.
-
-    \item \textbf{Shared memory = shared desk.} In this game, all players look at the \emph{same} card container on screen. This is called a \textbf{shared-memory architecture}: everyone can see and touch the same data. The alternative (not simulated in this game) would be \textbf{distributed memory}, where each player has their own private pile and must \emph{send messages} to exchange cards. In our game, players do not send messages---they simply pick up and put down cards in a space that everyone can see.
-
-    \item \textbf{Threads, not messengers.} Each player represents a \textbf{thread}. Threads are workers that share the same memory. They do not send letters or packages to each other---instead, they read and write to the same shared space. That is why coordination problems (two players grabbing the same card) can happen, and why strategies for dividing work matter so much.
-
-    \item \textbf{Smart strategy vs.\ brute force.} Not all approaches are equally good. If the instructor lets each team design their own strategy, some teams will finish much faster than others---even with the same number of players and cards. Designing a good \textbf{parallel strategy} (how to divide work, when to merge, how to avoid conflicts) is the core skill of parallel programming.
-\end{enumerate}
-
-%-----------------------------------------------------------------------
 \section{Learning Objectives}
 \label{app:d:learning-objectives}
 
@@ -62,11 +40,12 @@ Students should understand:
 Students should understand:
 
 \begin{enumerate}
-    \item All players see the same card container---this is \textbf{shared memory} (like a shared desk)
-    \item Players do \emph{not} send messages to each other; they interact only by reading and modifying the shared container
-    \item Each player has their own buffer area---a section of the shared desk reserved for their work, but still visible to everyone
-    \item Barriers let all players pause and synchronize before moving to the next phase
-    \item Work is divided among players for parallel execution; the final merge combines each player's sorted portion
+    \item Multiple threads share a common memory space
+    \item Each thread can have private (local) data in buffers
+    \item Threads work collaboratively on shared data
+    \item Synchronization occurs through shared container access
+    \item Work is divided among threads for parallel execution
+    \item Final merge combines results from parallel execution
 \end{enumerate}
 
 %-----------------------------------------------------------------------
@@ -114,11 +93,11 @@ After multiplayer gameplay:
 Bridge from game to formal concepts:
 
 \begin{enumerate}
-    \item How does single-player mode relate to sequential (single-threaded) execution?
-    \item How does multiplayer mode relate to shared-memory parallel programming (OpenMP)?
+    \item How does single-player mode relate to shared-memory parallel programming?
+    \item How does multiplayer mode relate to distributed-memory parallel programming?
     \item What real-world computing problems benefit from parallelism?
-    \item What role does the shared container play compared to player buffer zones?
-    \item When might coordination overhead outweigh parallelism benefits?
+    \item What are the trade-offs between shared-memory and distributed-memory approaches?
+    \item When might communication costs outweigh parallelism benefits?
 \end{enumerate}
 
 %-----------------------------------------------------------------------
@@ -144,7 +123,6 @@ Bridge from game to formal concepts:
     \item Did teams that divided work evenly finish faster?
     \item What problems did your team face during the game?
     \item If you played again, what would you do differently?
-    \item \textbf{Key question:} Two teams had the same number of players and cards, but one finished much faster. What made their \emph{strategy} better? (In computing, choosing a smart parallel algorithm is just as important as having more processors.)
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -167,10 +145,8 @@ Bridge from game to formal concepts:
 
 \paragraph{Analysis Questions:}
 \begin{itemize}
-    \item First, record your single-player time ($T_{\text{alone}}$). For each multiplayer run, compute the \textbf{ideal time}: $T_{\text{ideal}} = T_{\text{alone}} / N$, where $N$ is the number of players. How does your \emph{actual} time compare to the ideal?
-    \item Compute the \textbf{speedup} for each run: $S = T_{\text{alone}} / T_{\text{actual}}$. Is $S$ close to $N$? Why or why not?
     \item Does doubling the number of players cut the time in half?
-    \item What makes it hard to keep getting faster as you add more players? (Hint: think about the time you spend \emph{not sorting}---waiting, coordinating, or bumping into each other.)
+    \item What makes it hard to keep getting faster as you add more players?
     \item Can you think of tasks where adding more people doesn't help much?
 \end{itemize}
 
@@ -202,7 +178,7 @@ Bridge from game to formal concepts:
 \section{Exercises}
 \label{app:d:exercises}
 
-These exercises are designed for students and learners with no prior HPC experience. They focus on understanding parallel computing concepts through gameplay rather than technical implementation.
+These exercises are designed for students aged 12-16 with no prior programming experience. They focus on understanding concepts through the game rather than technical implementation.
 
 \subsection{Exercise 1: Comparing Single and Multiple Players}
 
@@ -216,9 +192,8 @@ Play the game twice with the same number of cards (e.g., 30 cards):
 
 \paragraph{Questions:}
 \begin{enumerate}
-    \item Which mode finished faster? Write down both times: $T_{\text{alone}} = \text{\underline{\hspace{2cm}}}$ and $T_{\text{team}} = \text{\underline{\hspace{2cm}}}$
-    \item Compute the speedup: $S = T_{\text{alone}} \div T_{\text{team}} = \text{\underline{\hspace{2cm}}}$. If you had $N$ players, is $S$ close to $N$?
-    \item Was multiplayer always faster? If not, what \emph{overhead} slowed you down?
+    \item Which mode finished faster?
+    \item Was multiplayer always faster? If not, why not?
     \item What made working together harder than working alone?
     \item If you added more players, would it keep getting faster forever? Why or why not?
 \end{enumerate}
@@ -279,17 +254,15 @@ Play multiplayer mode and try two different strategies:
     \caption{Detailed game-to-OpenMP concept mapping}
     \begin{tabular}{@{}p{4cm}p{5cm}p{5cm}@{}}
         \toprule
-        \textbf{Game Element}         & \textbf{HPC/OpenMP Concept}                      & \textbf{What It Means}                                           \\
+        \textbf{Game Element} & \textbf{OpenMP Concept} & \textbf{Code Example}          \\
         \midrule
-        Single-player mode            & Sequential execution                             & One worker does everything alone                                 \\
-        Multiplayer session           & Parallel region                                  & Multiple workers start at the same time                          \\
-        Main card container           & Shared memory                                    & Everyone can see and touch the same data                         \\
-        Player's buffer zone          & Per-thread work area (partitioned shared memory) & Your section of the desk---others can see it, but you work there \\
-        Players working independently & Independent threads                              & Workers sort without talking to each other                       \\
-        Sorting within buffer         & Local computation                                & Sorting your own portion before merging                          \\
-        Merging back to main          & Writing results to shared memory                 & Putting your sorted cards back on the shared desk                \\
-        Barrier mechanic              & Barrier synchronization                          & Everyone pauses until all are ready, then continues together     \\
-        Main thread during barrier    & Master thread                                    & One designated leader coordinates the group                      \\
+        Single-player session & Parallel region         & \texttt{\#pragma omp parallel} \\
+        Main card container   & Shared array            & Global array variable          \\
+        Buffer zones          & Thread-private storage  & \texttt{private(buffer)}       \\
+        No forced turn-taking & Independent threads     & No explicit synchronization    \\
+        Sorting within buffer & Local computation       & Serial code in parallel region \\
+        Merging back to main  & Reduction/merge         & \texttt{\#pragma omp critical} \\
+        Completion check      & Barrier synchronization & \texttt{\#pragma omp barrier}  \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -318,8 +291,8 @@ For instructors wishing to grade student understanding:
 \subsection{Practical Application (30 points)}
 
 \begin{itemize}
-    \item (15 pts) Designs reasonable parallel sorting strategy using in-game tools
-    \item (15 pts) Demonstrates effective use of buffers, barriers, and coordination during gameplay
+    \item (15 pts) Designs reasonable parallel sorting strategy
+    \item (15 pts) Implements parallel sorting code (OpenMP)
 \end{itemize}
 
 \subsection{Analysis and Reflection (30 points)}
@@ -360,36 +333,6 @@ For instructors wishing to grade student understanding:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\section{Tool and Framework Reference Links}
-\label{app:d:tool-links}
-
-This section lists direct links to core tools, frameworks, and plugins referenced in the thesis. These links are also represented in the bibliography entries used in Chapters~\ref{ch:methodology} and \ref{ch:implementation}.
-
-\begin{table}[htbp]
-    \centering
-    \caption{External tools and framework links used in this thesis}
-    \begin{tabular}{@{}p{3.2cm}p{2.8cm}p{7.0cm}@{}}
-        \toprule
-        \textbf{Tool}         & \textbf{Category}          & \textbf{URL}                                                     \\
-        \midrule
-        Godot Engine          & Game engine                & \url{https://godotengine.org/}                                   \\
-        GDSync (upstream)     & Multiplayer framework      & \url{https://www.gd-sync.com/}                                   \\
-        GDSync (project fork) & Multiplayer framework fork & \url{https://github.com/Siponek/GD-Sync-fork}                    \\
-        ToastParty            & Godot plugin               & \url{https://godotassetlibrary.com/asset/PcSgaA/toast-party}     \\
-        VarTree               & Godot plugin               & \url{https://godotassetlibrary.com/asset/PUudIL/vartree}         \\
-        Const Generator       & Godot plugin               & \url{https://godotassetlibrary.com/asset/DrA6Bt/const-generator} \\
-        Python                & Language/runtime           & \url{https://www.python.org/}                                    \\
-        aiohttp               & Python web framework       & \url{https://docs.aiohttp.org/}                                  \\
-        Ruff                  & Linter                     & \url{https://docs.astral.sh/ruff/}                               \\
-        just                  & Task runner                & \url{https://just.systems/}                                      \\
-        mkcert                & Local TLS utility          & \url{https://github.com/FiloSottile/mkcert}                      \\
-        Chocolatey            & Package manager            & \url{https://chocolatey.org/}                                    \\
-        Git                   & Version control            & \url{https://git-scm.com/}                                       \\
-        GitHub                & Collaboration hosting      & \url{https://github.com/}                                        \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-%-----------------------------------------------------------------------
 \section{Instructor Notes}
 \label{app:d:instructor-notes}
 
@@ -425,7 +368,7 @@ Be prepared to address:
 
 \begin{enumerate}
     \item \textbf{"More processes/threads always means faster"}: Discuss communication overhead and Amdahl's Law
-    \item \textbf{"Shared memory means no synchronization needed"}: Discuss why barriers exist and what could go wrong without them
+    \item \textbf{"Shared memory means no synchronization needed"}: Explain race conditions and critical sections
     \item \textbf{"Message passing is always slower"}: Discuss scalability benefits of distributed memory
     \item \textbf{"The game perfectly simulates HPC"}: Clarify simplifications and abstractions
 \end{enumerate}

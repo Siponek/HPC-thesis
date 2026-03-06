@@ -1,35 +1,23 @@
 @startuml http-sse-architecture
 !theme plain
-!include ../shared/theme.puml
+skinparam backgroundColor white
 skinparam componentStyle rectangle
-
-left to right direction
-
-skinparam padding 10
-skinparam DefaultFontSize 34
-skinparam TitleFontSize 38
-
-skinparam nodesep 120
-skinparam ranksep 280
-skinparam ArrowThickness 2
-
-' Restored polyline as requested!
-skinparam linetype polyline
+skinparam defaultFontName Arial
 
 title HTTP/SSE Relay Architecture
 
-package "Web Browsers" #F4F9FC {
+package "Web Browsers" {
     component "Client 1\n(Host)" as C1 #LightBlue
     component "Client 2" as C2 #LightGreen
     component "Client 3" as C3 #LightGreen
     component "Client N" as CN #LightGreen
 }
 
-package "Server Infrastructure" #FCF8F2 {
+package "Server Infrastructure" {
     component "Relay Server\n(Python/aiohttp)" as RS #Orange {
-        component "Lobby Manager" as LM #FFE5B4
-        component "SSE Broadcaster" as SSE #FFE5B4
-        component "Message Router" as MR #FFE5B4
+        component "Lobby Manager" as LM
+        component "SSE Broadcaster" as SSE
+        component "Message Router" as MR
     }
 }
 
@@ -42,30 +30,27 @@ C3 -[#Blue]-> RS : HTTP POST\n/api/lobby/*
 CN -[#Blue]-> RS : HTTP POST\n/api/lobby/*
 
 ' SSE connections (server to client)
-C1 <-[#Green]- RS : SSE Stream\n/api/lobby/events
-C2 <-[#Green]- RS : SSE Stream\n/api/lobby/events
-C3 <-[#Green]- RS : SSE Stream\n/api/lobby/events
-CN <-[#Green]- RS : SSE Stream\n/api/lobby/events
+RS -[#Green]-> C1 : SSE Stream\n/api/lobby/events
+RS -[#Green]-> C2 : SSE Stream\n/api/lobby/events
+RS -[#Green]-> C3 : SSE Stream\n/api/lobby/events
+RS -[#Green]-> CN : SSE Stream\n/api/lobby/events
 
-' THE FIX: Connect from the internal "Lobby Manager" (LM) instead of the outer "RS" boundary.
-' This physically forces the line to exit the bottom of the server box, 
-' completely separating it from the client anchor points on the left edge.
-LM -down-> GS : Store/Retrieve
+RS --> GS : Store/Retrieve
 
-note top of RS #FFFACD
+note right of RS
   **Star Topology**
   All traffic routes through
   the relay server.
-  
+
   No direct P2P connections.
 end note
 
-note top of C1 #FFFACD
+note bottom of C1
   Host manages
   game authority
 end note
 
-legend bottom right
+legend right
   |= Color |= Direction |
   | <#Blue> | Client -> Server (HTTP POST) |
   | <#Green> | Server -> Client (SSE) |

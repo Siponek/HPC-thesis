@@ -1,6 +1,7 @@
 @startuml openmp-game-mode
 !theme plain
-!include ../shared/theme.puml
+skinparam backgroundColor white
+skinparam defaultFontName Arial
 
 title OpenMP Shared-Memory Game Mode
 

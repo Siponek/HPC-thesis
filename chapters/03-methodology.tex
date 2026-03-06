@@ -1,4 +1,3 @@
-% !TeX root = ../main.tex
 \chapter{Methodology}
 \label{ch:methodology}
 
@@ -43,6 +42,57 @@ DSR is appropriate for this research because:
     \item Evaluation can be both utility-based (does it work?) and design-based (is it well-constructed?)
 \end{itemize}
 
+%-----------------------------------------------------------------------
+\subsection{Development Approach}
+\label{subsec:development-approach}
+
+The game development followed an iterative, incremental approach:
+
+\paragraph*{Phase 1: Concept and Prototyping (Weeks 1--3)}
+\begin{itemize}
+    \item Defined core mechanics based on physical card-sorting experiments
+    \item Created paper prototypes and mockups
+    \item Evaluated technology options (game engines, frameworks)
+    \item Developed minimal prototype with basic card rendering
+\end{itemize}
+
+\paragraph*{Phase 2: Single-Player Implementation (Weeks 4--7)}
+\begin{itemize}
+    \item Implemented card generation, shuffling, and rendering
+    \item Developed drag-and-drop mechanics for touch and mouse input
+    \item Created buffer zones for private card storage
+    \item Implemented sorting validation and game completion logic
+    \item Added timer and move counting
+\end{itemize}
+
+\paragraph*{Phase 3: Multiplayer Foundation (Weeks 8--12)}
+\begin{itemize}
+    \item Developed HTTP/SSE relay server for web browser compatibility
+    \item Implemented lobby system for matchmaking
+    \item Developed basic state synchronization
+    \item Integrated GDSync framework with custom web transport layer
+    \item Tested connection establishment and stability
+\end{itemize}
+
+\paragraph*{Phase 4: Multiplayer Refinement (Weeks 13--16)}
+\begin{itemize}
+    \item Implemented card visibility management (private buffers)
+    \item Developed host-authoritative state management
+    \item Added disconnection handling and recovery
+    \item Refined synchronization for card movements
+    \item Addressed framework issues (GDSync protected mode)
+\end{itemize}
+
+\paragraph*{Phase 5: Polish and Testing (Weeks 17--20)}
+\begin{itemize}
+    \item UI/UX improvements for web usability
+    \item Performance optimization (rendering, networking)
+    \item Extensive testing across web browsers
+    \item Documentation and code cleanup
+    \item Preparation for evaluation and thesis writing
+\end{itemize}
+
+%-----------------------------------------------------------------------
 \section{Requirements Analysis}
 \label{sec:requirements}
 
@@ -58,7 +108,7 @@ The primary purpose of the game is education. Requirements were derived from HPC
 \begin{itemize}
     \item The game must simulate shared-memory parallelism
     \item All players must see all cards in the main container (shared memory)
-    \item Players must have local buffers (partitioned shared memory for per-thread work)
+    \item Players must have private buffers (thread-local storage)
     \item No explicit communication required between players (implicit synchronization)
 \end{itemize}
 
@@ -80,7 +130,7 @@ The primary purpose of the game is education. Requirements were derived from HPC
 \paragraph*{ER4: Progressive Difficulty}
 \begin{itemize}
     \item Support variable numbers of cards (10--200) for scalability lessons
-    \item Support variable numbers of players (E.g. 10--40) for parallelism degree
+    \item Support variable numbers of players (2--4) for parallelism degree
     \item Provide different sorting challenges (random, partially sorted, reverse sorted)
 \end{itemize}
 
@@ -109,19 +159,19 @@ Functional requirements specify what the system must do:
 \begin{itemize}
     \item Provide a single-player game mode representing sequential execution
     \item Display all cards in a scrollable container
-    \item Provide local buffer zones for temporary storage
+    \item Provide work buffer zones for temporary storage
     \item Validate sorting order upon completion
     \item Display completion time and move count
 \end{itemize}
 
 \paragraph*{FR3: Multiplayer Mode}
 \begin{itemize}
-    \item Enable many players (e.g. 10--40) to connect via server-relayed networking
+    \item Enable 2--4 players to connect via server-relayed networking
     \item Provide lobby for matchmaking and game configuration
     \item Display shared container visible to all players (OpenMP shared memory)
     \item Synchronize card movements across all clients
-    \item Provide local buffers for each player (partitioned shared memory for per-thread sorting)
-    \item Hide cards in other players' local buffers (thread-private data)
+    \item Provide private buffers for each player (thread-local storage)
+    \item Hide cards in other players' private buffers (thread-private data)
     \item Handle player disconnections gracefully
 \end{itemize}
 
@@ -140,161 +190,86 @@ Functional requirements specify what the system must do:
     \item Visual animations for card pickup, drop, invalid moves
     \item Sound effects for actions (optional, can be disabled)
     \item Confetti or celebration effects upon game completion
-          % TODO: [Artifact] Completion-state feedback screenshot with annotations.
-          % TODO: [Purpose] Show how celebration feedback reinforces task completion and user feedback loops.
-          % TODO: [Source Inputs] End-of-game UI state capture (confetti/celebration, timer, move summary, and completion labels).
-          % TODO: [Placement] Near FR5 or in results chapter screenshot montage if consolidated.
-          % TODO: [Done Criteria] Annotate which visual/audio channel corresponds to completion confirmation.
-          % TODO: [Cross-refs] Chapter~\ref{ch:results}, Sections~\ref{subsec:functional-features},~\ref{subsec:engagement-effects}, and~\ref{sec:usability-evaluation}.
 \end{itemize}
 
 \paragraph*{FR6: Quality Attributes}
 \begin{itemize}
+    \item Target 60 FPS in modern web browsers
     \item Game initialization and card generation under 2 seconds
-    \item Support up to 200 cards without noticeable UI lag during event handling
+    \item Support up to 200 cards without significant performance degradation
     \item Intuitive interface requiring no tutorial for basic gameplay
     \item Responsive drag-and-drop with visual feedback
     \item Graceful handling of network disconnections
-    \item Clean code structure with modular, event-driven design (no per-frame game logic)
+    \item Clean code structure with modular design
     \item Open-source license (MIT) for educational reuse
     \item No account creation or authentication required
 \end{itemize}
-
-
-\subsection{Core Concept}
-\label{subsec:core-concept}
-
-The game presents players with a deck of numbered cards that must be sorted in ascending order. This simple metaphor maps directly to parallel sorting algorithms, with different game modes representing different execution paradigms:
-
-\paragraph*{Single-Player Mode (Sequential Execution):} Represents traditional sequential algorithm execution where a single process sorts all data. The player works alone with all cards visible, performing the entire sorting task independently.
-
-\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses work buffer zones for local sorting (representing partitioned regions of shared memory), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
-
-The complete architecture and pedagogical mapping are detailed in Chapter~\ref{ch:architecture}.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.65\textwidth]{figures/diagrams/sequential-mode.png}
-    \caption{Game Mode~1: Sequential Execution (Baseline). A single player (main thread) sorts the entire dataset alone, accessing both the main container (main memory) and a local buffer (local variables).}
-    \label{fig:sequential-mode}
-
-    \vspace{0.3em}
-    \begin{description}
-        \item[Pedagogical mapping:] A single actor represents a single CPU thread that processes the array element-by-element. No parallel speedup occurs; this mode serves as the baseline ($T_1$) for calculating parallel efficiency.
-    \end{description}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/diagrams/openmp-mode.png}
-    \caption{Game Mode~2: OpenMP Shared-Memory Parallelism. Multiple players (threads) access a shared card container concurrently and use local buffers for per-thread sorting.}
-    \label{fig:openmp-mode}
-
-    \vspace{0.3em}
-    \begin{description}
-        \item[Pedagogical mapping:] \textbf{Players} represent concurrent threads working on a single task. The \textbf{shared container} models a globally accessible memory space, introducing concepts such as race conditions and the need for synchronization (barriers). \textbf{Local buffers} represent partitioned regions of shared memory---analogous to per-thread segments of a shared array (e.g., \texttt{array[tid*chunk ..\ (tid+1)*chunk-1]}), where each thread conventionally works on its own portion while the data remains technically accessible to other threads when they reach a barrier. This models common OpenMP patterns such as block-based parallel sorting, where each thread sorts a local chunk before results are merged back into the shared space.
-    \end{description}
-\end{figure}
 
 %-----------------------------------------------------------------------
 \section{Technology Selection}
 \label{sec:technology-selection}
 
-Technology choices were treated as methodological outcomes of iterative experimentation, not fixed assumptions. This section documents the evaluation process, alternatives explored, observed constraints, and final decisions for both core architecture and the supporting development toolchain.
+Technology choices significantly impact development efficiency, game performance, and future extensibility. This section justifies the selection of each major technology component.
 
 %-----------------------------------------------------------------------
-\subsection{Tool and Framework Evaluation Process}
-\label{subsec:tool-eval-process}
-
-Selection decisions were made using a consistent set of criteria aligned with thesis goals:
-\begin{itemize}
-    \item \textbf{Educational fit}: ability to support clear mapping between gameplay mechanics and HPC concepts
-    \item \textbf{Web deployment feasibility}: practical browser support and export reliability
-    \item \textbf{Multiplayer support}: synchronization model maturity and debugging feasibility
-    \item \textbf{Ecosystem maturity}: documentation quality, examples, and community responsiveness
-    \item \textbf{Debugging observability}: runtime inspection and logging support
-    \item \textbf{Development speed}: iteration time and implementation complexity
-    \item \textbf{Maintainability}: modularity, replacement cost, and long-term project sustainability
-\end{itemize}
-
-Decisions were validated through prototype iterations described in Section~\ref{subsec:development-approach}, with problematic assumptions revisited as implementation evidence emerged.
-
-%-----------------------------------------------------------------------
-\subsection{Game Engine: Selection}
+\subsection{Game Engine: Godot 4.x}
 \label{subsec:godot-selection}
 
-\paragraph*{Alternatives explored:}
+\paragraph*{Evaluation Criteria:}
 
-Unity, Unreal, Godot, and Cocos2d were evaluated against the criteria in Section~\ref{subsec:tool-eval-process}.
+Game engines were evaluated based on:
+\begin{itemize}
+    \item License and cost
+    \item 2D rendering capabilities
+    \item Web platform support (HTML5 export)
+    \item Learning curve and documentation
+    \item Community support and plugin ecosystem
+    \item Multiplayer/networking support
+    \item Performance in browsers
+\end{itemize}
 
-\paragraph*{Practical background and evaluation context:}
-Before this thesis, the author had only brief prior hands-on exposure to Unity and Godot, and no production experience with Unreal or Cocos2d. For this reason, engine selection emphasized thesis-time experimentation and iteration evidence rather than long-term prior specialization.
-
-\paragraph*{Unity:}
-was a strong candidate due to its mature ecosystem, large community, and broad platform support. Unity's WebGL export compiles C\# game code via IL2CPP to C++, then cross-compiles to WebAssembly using Emscripten \citep{emscripten_docs}. This pipeline produces functional browser builds, but with significant overhead: typical WebGL exports range from 50--100~MB uncompressed, and the generated \texttt{UnityLoader.js} bootstrap adds measurable initialization latency before the first frame renders. Unity~6 improved WebGL build sizes somewhat, but exports remain substantially larger than Godot's. Additionally, Unity's WebGL target does not support native multithreading in most browsers (WebWorkers can be used for limited parallelism, but the main game loop remains single-threaded). The free tier displays a mandatory Unity splash screen; removing it requires a Pro license (\$2,040/year as of 2025), which is impractical for unfunded educational projects. Unity's asset store and documentation are extensive, but rapid iteration on gameplay experiments was slowed by the C\#~compilation step and editor reload cycle compared to GDScript's interpreted hot-reload workflow.
-
-\paragraph*{Unreal Engine:}
-offers industry-leading rendering and a mature networking subsystem (Unreal Replication). However, Unreal Engine~5 officially removed \textbf{HTML5\-/\-WebGL \-export support} from its platform targets. The Unreal Engine~4 HTML5 export existed as an experimental feature but was never production-stable and produced very large builds (150--300~MB). The current recommended approach for browser access is \textit{Pixel\- Streaming}, which runs the full game on a GPU-equipped server and streams video frames to the client browser. This architecture requires dedicated server infrastructure per concurrent session---entirely impractical for classroom deployment where many ~students each need an independent game instance on personal devices. Beyond the web export issue, Unreal's C++ codebase imposes compilation times of several minutes per change, and its editor is resource-intensive ($\sim$8~GB RAM minimum), making rapid gameplay iteration substantially slower than Godot's sub-second GDScript reload cycle. Unreal's 2D support exists but is not a primary focus of the engine, resulting in additional complexity for what is fundamentally a 2D card interaction game.
-
-\paragraph*{Cocos Creator (Cocos2d):}
-Cocos Creator~3.x supports WebGL~2.0 export with reasonable build sizes (15--30~MB), making it the closest competitor to Godot for web-first 2D applications. The engine uses TypeScript/JavaScript as its primary scripting language, which provides good browser affinity. However, Cocos Creator's scene editor, while functional, is less mature than Godot's for rapid educational UI prototyping---particularly for drag-and-drop card interactions, scrollable containers, and dynamic layout management that this project requires. The multiplayer ecosystem is minimal: Cocos Creator provides no built-in high-level networking framework comparable to Godot's \texttt{Multiplayer\-API} or third-party solutions like GDSync. Implementing lobby management, state synchronization, and RPC dispatch would require building or integrating external solutions from scratch. Community resources and plugin availability are also more limited, particularly for English-language documentation.
-
-\paragraph*{Godot 4.x:}
-provided the best overall balance for this thesis context. Godot~4.x exports to WebAssembly + WebGL~2.0 with a complete game build of approximately 28~MB uncompressed (12~MB gzip-compressed), loading in 3--5~seconds on typical broadband---the smallest export among the four candidates. The engine is fully open-source under the MIT license with no usage fees, splash screen requirements, or revenue caps. Godot's scene-based architecture, where each UI element, card, container, and game mode is a composable scene, naturally supported modular development: single-player and multiplayer modes share the same card and container scenes with mode-specific logic attached via script inheritance. GDScript's interpreted execution enables sub-second iteration cycles (edit $\to$ run $\to$ observe) without any compilation step. The built-in \texttt{MultiplayerAPI} provides \texttt{ENetMultiplayerPeer}, \texttt{WebSocketMultiplayerPeer}, and \texttt{WebRTCMultiplayerPeer} as pluggable transport options, and the third-party GDSync framework (Section~\ref{subsec:gdsync-selection}) adds high-level lobby and state synchronization on top of these transports.
+\paragraph*{Alternatives Considered:}
+\par
 
 \begin{table}[htbp]
     \centering
-    \footnotesize
-    \setlength{\tabcolsep}{4pt} % tighten horizontal padding
     \caption{Game engine comparison for HPC Sorting Game}
     \label{tab:engine-comparison}
     \begin{tabular}{@{}lcccc@{}}
         \toprule
-        \textbf{Criterion}      & \textbf{Unity}    & \textbf{Unreal}       & \textbf{Godot}     & \textbf{Cocos Creator} \\
+        \textbf{Criterion} & \textbf{Unity} & \textbf{Unreal} & \textbf{Godot} & \textbf{Cocos2d} \\
         \midrule
-        Free/Open Source        & Partial           & Partial               & Yes (MIT)          & Yes                    \\
-        2D Performance          & Good              & Fair                  & Excellent          & Excellent              \\
-        Web Export Status       & Supported (WebGL) & Removed in UE5        & Native (WASM)      & Supported (WebGL)      \\
-        Typical Web Export Size & 50--100~MB        & N/A (Pixel Streaming) & 12--28~MB          & 15--30~MB              \\
-        Iteration Speed         & Medium (compile)  & Slow (C++ compile)    & Fast (interpreted) & Medium (transpile)     \\
-        Learning Curve          & Medium            & Steep                 & Gentle             & Medium                 \\
-        Networking APIs         & Good              & Excellent             & Good               & Minimal                \\
-        Community Size          & Large             & Large                 & Growing            & Small                  \\
-        License Cost            & Free tier limited & 5\% royalty $>$\$1M   & Free               & Free                   \\
+        Free/Open Source   & Partial        & Partial         & Yes            & Yes              \\
+        2D Performance     & Good           & Fair            & Excellent      & Excellent        \\
+        Web Export         & Good           & Fair            & Excellent      & Good             \\
+        Learning Curve     & Medium         & Steep           & Gentle         & Medium           \\
+        Networking APIs    & Good           & Excellent       & Good           & Fair             \\
+        Community Size     & Large          & Large           & Medium         & Small            \\
+        Export Size        & Large          & Very Large      & Small          & Medium           \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-
-
-\paragraph*{Observed constraints:}
-\begin{itemize}
-    \item Web target required small export size and predictable browser behavior
-    \item Educational project constraints favored open-source tooling and no licensing risk
-    \item 2D interaction with many UI elements required efficient scene and layout workflows
-\end{itemize}
-
-\paragraph*{Decision and justification:}
+\paragraph*{Decision Rationale:}
 
 Godot Engine was selected because:
 
 \begin{enumerate}
-    \item \textbf{Cost}: Completely free and open-source (MIT license), no royalties, subscriptions, or hidden fees. Critical for educational projects with no budget. Unlike Unity's tiered licensing or Unreal's revenue-based royalty, Godot imposes no restrictions regardless of project scope.
+    \item \textbf{Cost}: Completely free and open-source (MIT license), no royalties, subscriptions, or hidden fees. Critical for educational projects with no budget.
 
-    \item \textbf{2D Optimization}: Godot is specifically optimized for 2D games, unlike Unity and Unreal which prioritize 3D. The 2D rendering pipeline operates independently from the 3D engine, avoiding unnecessary overhead for a card-based interaction game.
+    \item \textbf{2D Optimization}: Godot is specifically optimized for 2D games, unlike Unity and Unreal which prioritize 3D. This results in better performance and smaller export sizes.
 
-    \item \textbf{Web Export Capabilities}: While Unity WebGL builds can often achieve smaller file sizes due to aggressive managed code stripping and IL2CPP optimizations, Godot provides a frictionless, natively integrated web export process without complex compilation pipelines. Furthermore, a static 135~MB web payload (which is significantly reduced over the network via gzip/Brotli compression) is fundamentally simpler to host than Unreal Engine's heavy Pixel Streaming infrastructure.
-          % TODO Work on exporting size comparison with actual build outputs from each engine, including gzip/Brotli compression ratios, to provide concrete evidence for this claim. Need to check what is actually exported and if the font awesome is exported
+    \item \textbf{Lightweight}: Web export builds are significantly smaller (10--20 MB) compared to Unity (50--100 MB) or Unreal (100+ MB), important for fast loading in browsers.
 
-    \item \textbf{GDScript}: Python-like scripting language is accessible to students who may examine the source code. Lower barrier to entry than C\# (Unity) or C++ (Unreal/Cocos2D). The interpreted execution model eliminates compilation delays during rapid gameplay iteration.
+    \item \textbf{GDScript}: Python-like scripting language is accessible to students who may examine the source code. Lower barrier to entry than C\# (Unity) or C++ (Unreal).
 
-    \item \textbf{Scene Architecture}: Godot's composable scene system promotes modular design---card scenes, container scenes, and game mode scenes can be developed and tested independently, then composed into complete game modes. This aligns with software engineering best practices and enabled code reuse between single-player and multiplayer modes.
+    \item \textbf{Scene Architecture}: Godot's scene-based architecture promotes modular design and code reuse, aligning well with software engineering best practices.
 
-    \item \textbf{Built-in Multiplayer}: Godot provides three pluggable transport backends (\texttt{ENet\-Multiplayer\-Peer}, \texttt{WebSocket\-Multiplayer\-Peer}, \texttt{WebRTC\-Multiplayer\-Peer}) through a unified \texttt{MultiplayerAPI}. This, combined with the third-party GDSync framework, provided the networking foundation needed for web browser compatibility.
+    \item \textbf{Built-in Multiplayer}: High-level networking APIs available, though third-party frameworks (GDSync) and custom transport layers were needed for web browser compatibility.
 
-    \item \textbf{Active Community}: Growing community with extensive tutorials, documentation, and plugins. Version 4.x introduced significant improvements in rendering, scripting, and multiplayer APIs over the 3.x series.
+    \item \textbf{Active Community}: Growing community with extensive tutorials, documentation, and plugins. Version 4.x introduced significant improvements over 3.x.
 
-    \item \textbf{Ethical Alignment}: Open-source philosophy aligns with educational values and ensures long-term availability without corporate dependencies or license changes.
+    \item \textbf{Ethical Alignment}: Open-source philosophy aligns with educational values and ensures long-term availability without corporate dependencies.
 \end{enumerate}
 
 \paragraph*{Trade-offs:}
@@ -308,41 +283,29 @@ Godot's limitations include:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Programming Language: Selection}
+\subsection{Programming Language: GDScript}
 \label{subsec:gdscript-selection}
 
-\paragraph*{Alternatives explored:}
+\paragraph*{Language Options in Godot:}
 
-Godot supports three primary programming approaches, each with distinct implications for web export, iteration speed, and maintainability:
+Godot supports three primary programming approaches:
+\begin{enumerate}
+    \item \textbf{GDScript}: Native scripting language, Python-like syntax
+    \item \textbf{C\#}: .NET support via Mono runtime
+    \item \textbf{C++}: Native modules via GDNative/GDExtension
+\end{enumerate}
 
-\paragraph*{GDScript:}
-Godot's native scripting language uses Python-like syntax with static type hints available but not required. Scripts are interpreted at runtime with no compilation step---changes take effect immediately when the scene is re-run. GDScript integrates deeply with Godot's editor through the \texttt{@export} annotation system, which exposes script variables as editable properties in the inspector panel. This enabled rapid gameplay parameter tuning (card counts, buffer sizes, timer intervals) without editing code.
-
-\paragraph*{C\#:}
-Godot~4.x supports C\# via the .NET~8 runtime. C\# offers stronger static typing, IDE support (IntelliSense, refactoring), and access to the .NET ecosystem. However, the .NET runtime adds approximately 20--30~MB to web export size, and Godot's C\# web export pipeline has known compatibility issues: the garbage collector's behavior in WebAssembly can cause unpredictable frame stutters, and threading APIs (\texttt{System.Threading}) are restricted in browser sandboxes. Additionally, each code change requires a C\# compilation step ($\sim$2--5~seconds), accumulating into measurable delays over hundreds of iteration cycles during development.
-
-\paragraph*{C++ (GDExtension):}
-GDExtension allows writing native C++ modules that are compiled as shared libraries and loaded by Godot at runtime. This provides maximum performance but at substantial development cost: each target platform requires its own compilation toolchain (MSVC for Windows, GCC/Clang for Linux, Emscripten for WebAssembly). Cross-compiling a single GDExtension module for web export requires setting up the Emscripten SDK, configuring CMake or SCons build files, and managing ABI compatibility across platforms. This level of build complexity is disproportionate to a 2D card game where scripting performance is never the bottleneck.
-
-\paragraph*{Observed constraints:}
-\begin{itemize}
-    \item Rapid iteration was necessary during repeated gameplay and networking experiments---over the 14-month development period, hundreds of small changes were tested per week
-    \item Implementation needed to remain readable for thesis communication and educational reuse
-    \item Web export size and compatibility needed to remain predictable without additional runtime dependencies
-    \item Cross-platform build complexity needed to remain low (single developer, no CI/CD pipeline for native builds)
-\end{itemize}
-
-\paragraph*{Decision and justification:}
+\paragraph*{Decision Rationale:}
 
 GDScript was chosen because:
 
 \begin{itemize}
-    \item \textbf{Integration}: Tight integration with Godot Engine---\texttt{@export} annotations, signal connections, and scene tree access are first-class language features rather than API bindings
-    \item \textbf{Simplicity}: Python-like syntax is readable and approachable for students who may examine the source code as part of the educational experience
-    \item \textbf{Rapid Development}: Dynamic typing and concise syntax accelerate prototyping; the interpreted execution model means zero compilation delay between edits
-    \item \textbf{Documentation}: The majority of Godot tutorials, official examples, and community resources use GDScript, reducing the time spent searching for solutions
-    \item \textbf{Performance}: Sufficient for 2D game logic; bottlenecks are in rendering (handled by Godot's C++ core) and network latency, not scripting throughput
-    \item \textbf{No Web Export Overhead}: Unlike C\#, GDScript adds no additional runtime to the web export---the interpreter is already part of Godot's WebAssembly binary
+    \item \textbf{Integration}: Tight integration with Godot Engine, optimized for game scripting
+    \item \textbf{Simplicity}: Python-like syntax is readable and approachable for students
+    \item \textbf{Rapid Development}: Dynamic typing and concise syntax accelerate prototyping
+    \item \textbf{Documentation}: Most Godot tutorials and examples use GDScript
+    \item \textbf{Performance}: Sufficient for 2D game logic; bottlenecks typically in rendering, not scripting
+    \item \textbf{No Build Step}: Interpreted language—no compilation required for iteration
 \end{itemize}
 
 \paragraph*{Performance Considerations:}
@@ -356,316 +319,130 @@ GDScript is slower than C++ but acceptable for this use case because:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Multiplayer Framework: Selection}
+\subsection{Multiplayer Framework: GDSync}
 \label{subsec:gdsync-selection}
 
-\paragraph*{Alternatives explored:}
+\paragraph*{Multiplayer Implementation Options:}
 
-Three approaches were considered for multiplayer networking. Each was evaluated not only for basic connectivity, but for the full set of capabilities required by a classroom multiplayer game: lobby management, state synchronization, remote procedure calls (RPCs), security/access control, and browser compatibility.
-
-\subsubsection*{Option 1: Raw Godot Networking}
-
-Godot~4.x provides three built-in transport backends through its \texttt{MultiplayerAPI}:
-
-\begin{itemize}
-    \item \textbf{\texttt{ENetMultiplayerPeer}}: UDP-based transport using the ENet protocol. Provides reliable and unreliable channels with automatic packet ordering. However, ENet uses raw UDP sockets, which are \textbf{not available in web browsers}---this backend cannot be used for browser-exported games.
-    \item \textbf{\texttt{WebSocketMultiplayerPeer}}: TCP-based transport over WebSocket connections. Browser-compatible, but provides no built-in lobby management, matchmaking, or peer discovery. A custom WebSocket server must be implemented to handle room creation, player registration, and message routing.
-    \item \textbf{\texttt{WebRTCMultiplayerPeer}}: Peer-to-peer transport using WebRTC data channels. Browser-compatible in principle, but requires an external signaling server for connection establishment (SDP offer/answer exchange and ICE candidate relay). Godot provides the peer connection wrapper but no signaling infrastructure.
-\end{itemize}
-
-All three backends expose Godot's low-level \texttt{@rpc} annotation system for remote function calls, but none provide higher-level abstractions for state synchronization (automatic variable replication), lobby lifecycle management, player data persistence, host migration, or security whitelisting. Building these features from scratch was estimated to require 4--6~weeks of additional development, reducing time available for educational game design and evaluation.
-
-\subsubsection*{Option 2: GDSync Framework}
-
-GDSync \citep{gdsync_framework} is a third-party Godot addon that provides a complete multiplayer abstraction layer. Understanding its internal architecture was necessary to evaluate whether it could serve as the synchronization backbone for a web-exported educational game.
-
-\paragraph*{Internal architecture:}
-GDSync operates in two modes---\textit{cloud} (connecting to GDSync's hosted infrastructure) and \textit{local} (LAN peer-to-peer). The cloud mode connection flow proceeds as follows:
+Three approaches were considered for multiplayer networking:
 
 \begin{enumerate}
-    \item \textbf{Load balancer discovery}: The client sends an HTTPS request to one of three load balancers (\texttt{lb1/lb2/lb3.gd-sync.com}), passing the project's public API key. The load balancer returns a list of available game server IP addresses.
-    \item \textbf{Server selection}: The client pings each returned server via UDP on port~8081, measures round-trip times over five probes, and selects the lowest-latency server.
-    \item \textbf{Transport connection}: On desktop, the client connects via ENet/UDP on port~8080. On web builds (detected via \texttt{OS.has\_feature("web")}), the framework automatically falls back to \texttt{WebSocketMultiplayerPeer} on port~8090.
-    \item \textbf{Encryption}: After connection, the server provides a CBC initialization vector. All subsequent packets are encrypted with AES-256-CBC using the project's private API key, then compressed with zstd before transmission.
+    \item \textbf{Raw Godot Networking}: Use built-in \texttt{ENetMultiplayerPeer} and RPC system
+    \item \textbf{GDSync Framework}: Third-party addon providing high-level synchronization abstractions
+    \item \textbf{Custom Protocol}: Build custom WebRTC integration from scratch
 \end{enumerate}
 
-\paragraph*{Packet system:}
-GDSync uses four logical packet channels: \texttt{SETUP} (connection handshake), \texttt{SERVER} (lobby operations), \texttt{RELIABLE} (guaranteed-delivery game sync), and \texttt{UNRELIABLE} (best-effort game sync). Requests are batched per channel, serialized using Godot's native \texttt{var\_to\_bytes()} format, and automatically split when a batch exceeds 20~KB to prevent packet fragmentation.
+\paragraph*{Decision Rationale:}
 
-\paragraph*{API surface:}
-The framework exposes high-level functions for lobby lifecycle (\texttt{lobby\_create()}, \texttt{lobby\_join()}, \texttt{lobby\_leave()}), remote procedure calls (\texttt{call\_func()}, \texttt{call\_func\_on()}), automatic variable synchronization (\texttt{sync\_var()}, \texttt{sync\_var\_on()}), player management (\texttt{player\_set\_username()}, \texttt{player\_set\_data()}), and ownership tracking (\texttt{set\_gdsync\_owner()}). It also provides a synchronized clock (\texttt{get\_multiplayer\_time()}) using NTP-like five-sample averaging against the host's timer.
-
-\paragraph*{Security model:}
-GDSync operates in ``protected mode'' by default, where only explicitly whitelisted functions, variables, and signals can be accessed remotely. Game code must call \texttt{expose\_func()}, \texttt{expose\_var()}, or \texttt{expose\_node()} for each remotely callable entity. Unregistered RPC calls are silently dropped with no error message---a design that initially caused significant confusion during development (see Chapter~\ref{ch:problems}).
-
-\paragraph*{Local mode limitations:}
-GDSync's local multiplayer mode uses UDP broadcast on ports 42354--42373 for lobby discovery and \texttt{ENetMultiplayerPeer} on port~8080 for game traffic. Both mechanisms rely on raw UDP sockets, which are \textbf{entirely unavailable in browser environments}. The five specific API calls that fail on web are: \texttt{PacketPeerUDP.bind()}, UDP broadcast to \texttt{255.255.255.255}, \texttt{ENetMultiplayerPeer.create\_server()}, and \texttt{ENetMultiplayerPeer.create\_client()}. This incompatibility motivated the HTTP/SSE relay architecture described in Section~\ref{subsec:http-sse-selection}.
-
-\subsubsection*{Option 3: Custom WebRTC Protocol}
-
-Building a custom WebRTC-based multiplayer system from scratch would provide maximum control but requires implementing multiple complex subsystems:
-
-\paragraph*{Signaling server:}
-WebRTC connections cannot be established without a signaling server to exchange Session Description Protocol (SDP) offers and answers between peers. This server must handle room creation (generating unique room codes), peer registration, and bidirectional message relay during the connection handshake phase. A WebSocket-based server is the standard approach, requiring implementation of connection lifecycle management, room state tracking, and graceful cleanup when peers disconnect.
-
-\paragraph*{ICE/STUN/TURN infrastructure:}
-Each peer must create an \texttt{RTCPeerConnection} configured with at least one STUN server (e.g., \texttt{stun:stun.l.google.com:19302}) for NAT traversal. STUN enables peers behind standard NATs to discover their public IP address and port mapping. However, peers behind symmetric NATs or restrictive firewalls---common in university and corporate networks where this game would be deployed---cannot establish direct connections via STUN alone. In such cases, a TURN relay server is required to forward all media traffic, adding infrastructure cost (bandwidth charges per session) and latency (extra network hop). Configuring and testing NAT traversal across diverse classroom network environments would add substantial debugging effort.
-
-\paragraph*{Data channels and game protocol:}
-Once a WebRTC connection is established, \texttt{RTCDataChannel} provides both reliable (TCP-like) and unreliable (UDP-like) message passing. However, the game protocol layer must still be implemented: packet serialization format, message type dispatch, request batching, ordering guarantees, and bandwidth management. None of this is provided by WebRTC itself.
-
-\paragraph*{Application-level features:}
-Beyond the transport layer, all application-level features must be built from scratch: lobby management (room creation, player lists, join/leave lifecycle), host election and migration, state synchronization (variable replication, conflict resolution), RPC dispatch (function exposure, parameter serialization), ownership tracking, and a security model to prevent unauthorized remote calls. These features alone represent weeks of development effort.
-
-\paragraph*{Partial solution---PackRTC addon:}
-The PackRTC addon (already present in this project's \texttt{addons/} directory) provides a partial implementation: it handles WebRTC signaling via a hosted server at \texttt{packcloud.himaji.xyz}, supports both mesh and server/client topologies, and manages ICE candidate exchange. However, PackRTC covers \textit{only} the transport layer---it provides no lobby management, state synchronization, RPC system, or security model. Building these features on top of PackRTC was estimated to require 6--8~weeks, comparable to the raw Godot networking approach.
-
-\paragraph*{Estimated total effort:} 8--12~weeks for a complete implementation, with significant additional debugging overhead for NAT traversal edge cases across diverse classroom network configurations.
-
-\begin{table}[htbp]
-    \centering
-    \caption{Multiplayer framework comparison}
-    \label{tab:multiplayer-comparison}
-    \begin{tabular}{@{}p{3.5cm}p{3.5cm}p{3.5cm}p{3.5cm}@{}}
-        \toprule
-        \textbf{Capability}   & \textbf{Raw Godot}      & \textbf{GDSync}                & \textbf{Custom WebRTC} \\
-        \midrule
-        Lobby management      & Not provided            & Built-in                       & Must implement         \\
-        \midrule
-        State synchronization & Not provided            & Automatic variable sync        & Must implement         \\
-        \midrule
-        RPC system            & Low-level \texttt{@rpc} & High-level \texttt{call\_func} & Must implement         \\
-        \midrule
-        Security model        & Not provided            & Whitelist-based                & Must implement         \\
-        \midrule
-        Web browser support   & WebSocket only          & WebSocket fallback (cloud)     & Native WebRTC          \\
-        \midrule
-        External dependency   & None                    & GDSync servers or fork         & Signaling + STUN/TURN  \\
-        \midrule
-        Estimated effort      & 4--6~weeks extra        & Usable immediately             & 8--12~weeks extra      \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\paragraph*{Observed constraints:}
-\begin{itemize}
-    \item Multiplayer state complexity required reusable abstractions, not only low-level RPC wiring---the game synchronizes card positions, buffer contents, player data, barrier states, and move counters across all clients
-    \item Browser deployment exposed transport limitations that ruled out ENet-based and UDP-based approaches entirely
-    \item Debuggability and incremental adoption were critical; the framework needed to work for basic use cases while allowing progressive customization
-    \item The 14-month thesis timeline did not permit 8--12~weeks of networking infrastructure development before game design work could begin
-\end{itemize}
-
-\paragraph*{Decision and justification:}
-
-GDSync was selected as the multiplayer framework because it was the only option that provided lobby management, state synchronization, RPC dispatch, and a security model out of the box, enabling immediate focus on game logic rather than networking infrastructure. Its cloud mode WebSocket fallback provided a path to browser compatibility, and its high-level API (\texttt{call\_func()}, \texttt{sync\_var()}, \texttt{lobby\_create()}) reduced the multiplayer boilerplate code by an estimated 60--70\% compared to raw Godot networking.
-
-\paragraph*{Challenges encountered:}
-
-GDSync introduced several difficulties that required workarounds:
+GDSync was selected because:
 
 \begin{itemize}
-    \item \textbf{Protected mode}: The default security model silently drops unregistered RPC calls with no error message or log entry. This caused hours of debugging before the root cause was identified. The workaround required explicit \texttt{expose\_func()} calls for all 12~remotely callable functions during multiplayer initialization (see Chapter~\ref{ch:problems}).
-    \item \textbf{Documentation gaps}: Several API behaviors (packet channel selection, ownership transfer semantics, reconnection lifecycle) were underdocumented, requiring source code inspection of the framework to understand actual behavior.
-    \item \textbf{Opaque error handling}: Framework errors surfaced as generic connection failure codes without indicating which specific operation failed or why.
-    \item \textbf{Local mode web incompatibility}: As described above, the local multiplayer mode is entirely non-functional in browser environments, necessitating the HTTP/SSE relay architecture (Section~\ref{subsec:http-sse-selection}).
+    \item \textbf{Abstraction Level}: Provides higher-level abstractions than raw Godot networking, reducing boilerplate code
+    \item \textbf{State Synchronization}: Built-in support for synchronizing node properties automatically
+    \item \textbf{RPC Simplification}: Cleaner RPC syntax and management compared to Godot's built-in system
+    \item \textbf{Active Development}: Maintained project with community support
+    \item \textbf{Documentation}: Adequate documentation and examples for common use cases
+    \item \textbf{Compatibility}: Works well with Godot 4.x and WebRTC connections
 \end{itemize}
 
-Despite these challenges, GDSync provided net benefits by enabling functional multiplayer within the first week of integration rather than after months of infrastructure development. During development, a framework issue affecting web export behavior required a local fork maintained by the author \citep{gdsync_fork}. A pull request was submitted to the upstream GDSync repository \citep{gdsync_framework}, but until that change is merged and released, this project uses the author's fork for the web-export-based game build.
+\paragraph*{Challenges Encountered:}
+
+GDSync introduced some difficulties:
+
+\begin{itemize}
+    \item \textbf{Protected Mode Issue}: Default "protected" mode blocked RPC calls between peers, requiring workarounds (see Chapter~\ref{ch:problems})
+    \item \textbf{Documentation Gaps}: Some features underdocumented or unclear
+    \item \textbf{Debugging}: Opaque error messages complicated troubleshooting
+    \item \textbf{Framework Overhead}: Additional layer of abstraction sometimes obscured underlying networking behavior
+\end{itemize}
+
+Despite these challenges, GDSync provided net benefits by significantly reducing the amount of low-level networking code required.
 
 %-----------------------------------------------------------------------
-\subsection{Networking Technology: Selection}
+\subsection{Networking Technology: HTTP/SSE Relay}
 \label{subsec:http-sse-selection}
 
-The transport layer decision was driven by the fundamental constraint that GDSync's local multiplayer mode is entirely non-functional in browser environments (Section~\ref{subsec:gdsync-selection}). A browser-compatible transport was required that could replace GDSync's UDP/ENet local server while preserving its high-level API contract.
+\paragraph*{Web Browser Constraints:}
 
-\paragraph*{Alternatives explored:}
-
-\subsubsection*{WebRTC (peer-to-peer)}
-
-WebRTC is the browser-native peer-to-peer protocol and would appear to be the natural choice. However, several practical constraints made it unsuitable as the primary transport:
+Web browsers impose significant restrictions on networking that prevented use of traditional approaches:
 
 \begin{itemize}
-    \item \textbf{Signaling requirement}: WebRTC connections require an external signaling server to exchange SDP offers/answers and ICE candidates before any peer-to-peer data can flow. This server must remain available for the duration of connection establishment.
-    \item \textbf{NAT traversal}: Classroom and university networks frequently use symmetric NATs or restrictive firewalls. In these environments, STUN alone is insufficient---a TURN relay server would be needed, which reintroduces a centralized server (negating the peer-to-peer advantage) while adding bandwidth costs per session.
-    \item \textbf{GDSync integration}: GDSync's local server module does not support WebRTC at all---it uses ENet/UDP exclusively. Replacing it with WebRTC would require restructuring GDSync's internal \texttt{LocalServer} class, which manages lobby state, client tracking, and packet routing. This was estimated at 3--4~weeks of framework-level work, with risk of introducing regressions in the complex networking stack.
-    \item \textbf{Mixed content blocking}: When the game is served via HTTPS (e.g., GitHub Pages), browsers block WebSocket connections to \texttt{ws://} (non-TLS) signaling servers. The signaling server would need a valid TLS certificate and public domain, complicating classroom deployment where instructors typically run a server on the local network.
+    \item \textbf{No UDP Access}: Browsers cannot open raw UDP sockets, eliminating ENet and similar protocols
+    \item \textbf{WebRTC Complexity}: While browsers support WebRTC, GDSync's native WebRTC implementation does not function in browser-exported Godot games due to sandboxing
+    \item \textbf{No LAN Discovery}: Browser security prevents local network peer discovery
 \end{itemize}
 
-The PackRTC addon available in the project provides WebRTC via a hosted signaling server (\texttt{packcloud.himaji.xyz}), but relying on a third-party hosted service for classroom use introduces availability risk and requires internet connectivity even for LAN-only sessions.
+\paragraph*{Solution: HTTP + Server-Sent Events (SSE)}
 
-\subsubsection*{Raw Godot networking (ENet/WebSocket)}
-
-Godot's built-in \texttt{WebSocketMultiplayerPeer} is browser-compatible, but provides only the transport layer. All lobby management, peer tracking, message routing, and GDSync API compatibility would need to be built on top---essentially reimplementing GDSync's \texttt{LocalServer} logic with a WebSocket backend. This approach was considered but rejected in favor of HTTP/SSE, which offered simpler debugging (standard HTTP tools), no persistent connection management complexity, and compatibility with standard web infrastructure (reverse proxies, load balancers, CORS).
-
-\paragraph*{Decision and justification: HTTP + Server-Sent Events (SSE)}
-
-To overcome browser limitations while maintaining GDSync API compatibility, a custom relay server architecture was developed using standard web protocols:
+To overcome browser limitations, a custom relay server architecture was developed:
 
 \begin{enumerate}
-    \item \textbf{HTTP POST for commands}: All game packets (card moves, barrier signals, lobby actions) are sent as standard HTTP POST requests with JSON-encoded bodies. This leverages the browser's native \texttt{fetch()} API, which is universally supported, works over both HTTP and HTTPS, and passes through firewalls and proxies without special configuration.
-    \item \textbf{Server-Sent Events (SSE) for real-time push}: Each client opens a persistent \texttt{GET} connection to the server's event stream endpoint. The server pushes game events, lobby updates, and peer notifications as SSE text frames. SSE is a W3C standard supported by all modern browsers, uses standard HTTP (no protocol upgrade), and automatically reconnects on connection loss.
-    \item \textbf{Server relay (star topology)}: All communication passes through the relay server rather than flowing peer-to-peer. Clients send packets to the server, which routes them to the appropriate recipients based on lobby membership. The designated host client receives, processes, and broadcasts game state through the server.
+    \item \textbf{HTTP POST for Commands}: All game packets sent via standard HTTP POST requests
+    \item \textbf{SSE for Real-time Events}: Server-Sent Events provide push notifications to clients
+    \item \textbf{Server Relay}: All communication passes through the relay server rather than peer-to-peer
+    \item \textbf{Star Topology}: Clients connect to server; host receives, processes, and broadcasts via server
 \end{enumerate}
 
-\paragraph*{Relay server implementation:}
+\paragraph*{Relay Server Implementation:}
 
-The relay server is implemented in Python~3.11+ using the aiohttp asynchronous web framework \citep{python_org,aiohttp_docs}. It maintains in-memory lobby state (no database required) and provides the following REST API:
-
+The relay server (Python/aiohttp) provides:
 \begin{itemize}
-    \item \texttt{POST /api/lobby/connect} --- Client registration: assigns a unique peer ID and returns server configuration
-    \item \texttt{POST /api/lobby/create} --- Creates a new lobby with a generated room code, registers the creator as host
-    \item \texttt{POST /api/lobby/join} --- Joins an existing lobby by room code, notifies existing members via SSE
-    \item \texttt{POST /api/lobby/broadcast} --- Accepts a GDSync-format game packet and relays it to all other lobby members via their SSE streams
-    \item \texttt{GET /api/lobby/events} --- Opens an SSE stream for the client; the server pushes \texttt{game\_packet}, \texttt{peer\_joined}, \texttt{peer\_left}, and \texttt{lobby\_closed} events through this channel
-    \item \texttt{GET /api/server/info} --- Health check and connectivity validation endpoint
+    \item \texttt{POST /api/lobby/connect} --- Client registration and peer ID assignment
+    \item \texttt{POST /api/lobby/create} --- Create lobby with room code
+    \item \texttt{POST /api/lobby/join} --- Join existing lobby by code
+    \item \texttt{POST /api/lobby/broadcast} --- Send game packets to other peers
+    \item \texttt{GET /api/lobby/events} --- SSE stream for receiving real-time events
 \end{itemize}
 
-The SSE stream includes periodic keep-alive heartbeats to prevent connection timeout by intermediate proxies. Game packets are tunneled as opaque byte arrays---the relay server does not parse or validate game state, maintaining a clean separation between transport and game logic.
+\paragraph*{Trade-offs:}
 
-\paragraph*{Browser security constraints:}
-
-Two additional browser security mechanisms affected the deployment model:
-
+This architecture has trade-offs compared to peer-to-peer approaches:
 \begin{itemize}
-    \item \textbf{Mixed content blocking}: Browsers serving the game from an HTTPS origin (e.g., GitHub Pages) block all requests to HTTP endpoints. This means a relay server running on a local network at \texttt{http://192.168.x.x:3000} cannot be reached from an HTTPS-hosted game. The deployment model must use either full HTTPS (with a valid TLS certificate on the relay server, enabled by mkcert for local development) or full HTTP (both game and server on the local network).
-    \item \textbf{Private Network Access}: Modern browsers implement the Private Network Access specification, which blocks requests from public origins to private network addresses (\texttt{192.168.x.x}, \texttt{10.x.x.x}) even with permissive CORS headers. This further constrains the deployment topology to either full-LAN or full-public setups.
-\end{itemize}
-
-These constraints and their workarounds are documented in detail in the project's deployment guide.
-
-\paragraph*{Latency analysis:}
-
-The HTTP/SSE relay introduces additional latency compared to direct peer-to-peer connections:
-
-\begin{itemize}
-    \item \textbf{LAN deployment}: HTTP POST round-trip adds approximately 5--20~ms (single network hop to relay server). SSE event delivery adds $<$5~ms from server to client. Total additional latency: $\sim$10--25~ms per game action.
-    \item \textbf{Internet deployment}: HTTP POST round-trip adds approximately 50--150~ms depending on geographic distance. SSE delivery adds comparable latency. Total additional latency: $\sim$100--300~ms per game action.
-    \item \textbf{Acceptability}: For a card-sorting game where actions occur at human interaction speed (one card move every 1--3~seconds), sub-second synchronization is sufficient. The game is not latency-sensitive in the way that real-time action or FPS games are. Players do not perceive delays under 300~ms as disruptive to gameplay flow.
+    \item \textbf{Advantage}: Universal browser compatibility without plugins
+    \item \textbf{Advantage}: Simplified connection establishment (no STUN/TURN configuration)
+    \item \textbf{Trade-off}: Requires running relay server infrastructure
+    \item \textbf{Trade-off}: Higher latency due to server hop (acceptable for turn-based card game)
 \end{itemize}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.78\textwidth]{figures/diagrams/http-sse-sequence.png}
-    \caption{HTTP/SSE relay setup flow: client connection, SSE subscription, lobby creation, and lobby join}
-    \label{fig:http-sse-sequence-setup}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.78\textwidth]{figures/diagrams/http-sse-sequence-gameplay-disconnect.png}
-    \caption{HTTP/SSE relay runtime flow: gameplay packet broadcast and disconnection handling}
-    \label{fig:http-sse-sequence-gameplay}
+    \includegraphics[width=0.75\textwidth]{figures/diagrams/http-sse-sequence.png}
+    \caption{HTTP/SSE relay message flow: connection, lobby creation, and gameplay synchronization}
+    \label{fig:http-sse-sequence}
 \end{figure}
 
 %-----------------------------------------------------------------------
-\subsection{Supporting Development Toolchain}
-\label{subsec:supporting-toolchain}
+\subsection{Supporting Plugins and Tools}
+\label{subsec:supporting-tools}
 
-Beyond core engine/networking choices, several tools were selected to address specific development challenges encountered during iterative prototyping. Each tool was adopted to solve an observed problem rather than selected speculatively.
+Several Godot plugins were integrated to enhance development:
 
+\paragraph*{ToastParty:}
 \begin{itemize}
-    \item \textbf{ToastParty (Godot plugin)}: Provides non-blocking toast notification popups within the game UI. Used to display multiplayer events (player joined, player left, card conflicts, connection status) without interrupting gameplay flow. Without this, event feedback required checking debug logs or watching the console, which is impractical during live multiplayer testing sessions \citep{toastparty_asset}.
-
-    \item \textbf{VarTree (Godot plugin)}: Displays a real-time tree view of all synchronized variables and their current values during runtime. This was essential for debugging state synchronization issues---when a card appeared in the wrong position on one client, VarTree immediately showed which variable was out of sync without adding temporary \texttt{print()} statements \citep{vartree_asset}.
-
-    \item \textbf{Custom logging library}: A structured logging system that timestamps and categorizes network events, gameplay actions, and synchronization operations into separate log channels. This enabled post-session analysis of timing issues (e.g., determining whether a card move arrived before or after a barrier signal, on which client) that could not be diagnosed from real-time observation alone.
-
-    \item \textbf{Python/aiohttp relay server}: The HTTP/SSE relay backend described in Section~\ref{subsec:http-sse-selection}. Implemented in Python~3.11+ with the aiohttp async framework because Python's ecosystem provided the fastest path to a working relay server---async HTTP handling, SSE support, and JSON serialization are all available as mature, well-documented libraries \citep{python_org,aiohttp_docs}.
-
-    \item \textbf{Ruff}: A fast Python linter and formatter that enforces consistent style across the relay server codebase. Adopted because the server code was modified frequently during protocol experiments, and automated style enforcement prevented formatting drift \citep{ruff_docs}.
-
-    \item \textbf{justfile}: A command runner (similar to \texttt{make} but language-agnostic) that encapsulates common development workflows as named tasks: building the web export, starting the relay server, launching multiplayer test sessions, running linters, and generating TLS certificates. This replaced a growing collection of ad-hoc shell commands and ensured reproducible workflows across Windows and Linux development environments \citep{just_docs}.
-
-    \item \textbf{mkcert}: Generates locally-trusted TLS certificates without requiring a public Certificate Authority. This was necessary because modern browsers require a Secure Context (HTTPS) for many Web APIs, and mixed-content policies block HTTP requests from HTTPS-served pages (Section~\ref{subsec:http-sse-selection}). During local development, mkcert enabled the relay server to run with a valid TLS certificate trusted by the developer's browser, allowing end-to-end HTTPS testing identical to the production deployment \citep{mkcert_repo}.
-
-    \item \textbf{Chocolatey}: A Windows package manager used to standardize the development environment setup (installing Python, Node.js, and other dependencies). Reduced the ``it works on my machine'' risk when switching between development workstations \citep{chocolatey_platform}.
-
-    \item \textbf{const\_generator (Godot plugin)}: Automatically generates a structured set of GDScript constants for project resources (scene/file paths, node names, input actions). This removed hard-coded string paths across scripts, so renaming files or scenes did not break links---generated constants updated with the new names and prevented stale-reference bugs \citep{const_generator_asset}.
-
-    \item \textbf{Git + GitHub}: Version control with branching for experimental features (networking experiments, UI prototypes) and issue tracking for bug management. GitHub also hosted project documentation and enabled collaborative review with the thesis supervisor \citep{git_scm,github_platform}.
+    \item Purpose: Display non-intrusive notification messages
+    \item Use: Player joined/left, card moved, errors, game events
+    \item Benefit: Provides feedback without blocking gameplay
 \end{itemize}
 
-
-%-----------------------------------------------------------------------
-\subsection{Final Toolchain and Rationale Summary}
-\label{subsec:toolchain-summary}
-
-\begin{table}[htbp]
-    \centering
-    \caption{Final toolchain decisions and accepted trade-offs}
-    \label{tab:toolchain-summary}
-    \begin{tabular}{@{}p{2.8cm}p{2.6cm}p{4.5cm}p{4cm}@{}}
-        \toprule
-        \textbf{Tool}                & \textbf{Category}     & \textbf{Selected because}                                                                    & \textbf{Trade-off accepted}                                                             \\
-        \midrule
-        Godot 4.x                    & Engine                & 28~MB web exports (WASM+WebGL2), MIT license, native 2D pipeline, sub-second iteration       & Smaller ecosystem and fewer third-party assets than Unity/Unreal                        \\
-        \midrule
-        GDScript                     & Language              & Interpreted (no compile step), Python-like readability, no web export size overhead          & Lower peak performance than C++ or C\#                                                  \\
-        \midrule
-        GDSync                       & Multiplayer framework & Built-in lobby, state sync, RPC, and security model; functional in first week of integration & Protected mode debugging overhead, local mode web-incompatible, framework fork required \\
-        \midrule
-        HTTP/SSE relay (Python)      & Transport             & Universal browser compatibility, standard HTTP tooling, 10--25~ms LAN latency                & Requires relay server infrastructure; not peer-to-peer                                  \\
-        \midrule
-        Supporting plugins/utilities & Toolchain             & Solved specific debugging (VarTree), feedback (ToastParty), and deployment (mkcert) problems & Additional dependency maintenance surface                                               \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-%-----------------------------------------------------------------------
-\subsection{Development Approach}
-\label{subsec:development-approach}
-
-The game development followed an iterative, incremental approach spanning approximately 14~months (December~2024 to February~2026). Figure~\ref{fig:development-timeline} shows the five phases, key milestones, and decision pivots that shaped the architecture and tooling (see also Sections~\ref{subsec:tool-eval-process} and~\ref{subsec:toolchain-summary}; Chapter~\ref{ch:problems}, Section~\ref{subsec:web-patch-case-study}).
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{figures/diagrams/development-timeline-phases}
-    \caption{Development timeline showing five project phases (December~2024 -- February~2026) with key decision pivots marked as milestones.}
-    \label{fig:development-timeline}
-\end{figure}
-
-\paragraph*{Phase 1: Concept and Prototyping (December 2024 -- February 2025)}
+\paragraph*{Logger:}
 \begin{itemize}
-    \item Defined core mechanics based on physical card-sorting experiments
-    \item Created paper prototypes and mockups
-    \item Evaluated technology options (game engines, frameworks)
-    \item Developed minimal prototype with basic card rendering
+    \item Purpose: Enhanced debugging output with categorization
+    \item Use: Development troubleshooting and performance analysis
+    \item Benefit: Structured logging with filtering capabilities
 \end{itemize}
 
-\paragraph*{Phase 2: Single-Player Implementation (March -- May 2025)}
+\paragraph*{VarTree:}
 \begin{itemize}
-    \item Implemented card generation, shuffling, and rendering
-    \item Developed drag-and-drop mechanics for touch and mouse input
-    \item Created buffer zones for private card storage
-    \item Implemented sorting validation and game completion logic
-    \item Added timer and move counting
+    \item Purpose: Runtime variable inspection and modification
+    \item Use: Debugging game state during development
+    \item Benefit: Observe and manipulate variables without recompiling
 \end{itemize}
 
-\paragraph*{Phase 3: Multiplayer Foundation (June -- September 2025)}
+\paragraph*{Scene-Selector:}
 \begin{itemize}
-    \item Developed HTTP/SSE relay server for web browser compatibility
-    \item Implemented lobby system for matchmaking
-    \item Developed basic state synchronization
-    \item Integrated GDSync framework with custom web transport layer
-    \item Tested connection establishment and stability
-\end{itemize}
-
-\paragraph*{Phase 4: Multiplayer Refinement (October -- December 2025)}
-\begin{itemize}
-    \item Implemented card visibility management (local buffers)
-    \item Developed host-authoritative state management
-    \item Added disconnection handling and recovery
-    \item Refined synchronization for card movements
-    \item Addressed framework issues (GDSync protected mode)
-\end{itemize}
-
-\paragraph*{Phase 5: Polish and Testing (January -- February 2026)}
-\begin{itemize}
-    \item UI/UX improvements for web usability
-    \item Performance optimization (rendering, networking)
-    \item Extensive testing across web browsers
-    \item Documentation and code cleanup
-    \item Preparation for evaluation and thesis writing
+    \item Purpose: Quick scene navigation during development
+    \item Use: Switch between game scenes without main menu navigation
+    \item Benefit: Faster iteration during development
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -687,21 +464,13 @@ The core challenge was translating abstract parallel computing concepts into tan
         \textbf{HPC Concept}   & \textbf{Real-World Analogy}        & \textbf{Game Mechanic}               \\
         \midrule
         Sequential Execution   & Single student working alone       & Single player in solo mode           \\
-        \midrule
         Thread (OpenMP)        & Student with access to shared desk & Player in multiplayer mode           \\
-        \midrule
         Shared Memory          & Desk visible to all students       & Shared card container                \\
-        \midrule
-        Per-Thread Work Area   & Student's section of a shared desk & Player's local buffer zones          \\
-        \midrule
+        Thread-Local Storage   & Student's private notebook         & Player's private buffer zones        \\
         Parallel Execution     & Students work simultaneously       & Multiple players, no turn-taking     \\
-        \midrule
         Synchronization        & Students coordinate access         & Shared container access patterns     \\
-        \midrule
         Memory Access Overhead & Time to reach shared desk          & Network latency to shared data       \\
-        \midrule
         Speedup                & Multiple students finish faster    & Timer comparison: solo vs. multi     \\
-        \midrule
         Load Balancing         & Even distribution of work          & Fair work distribution among players \\
         \bottomrule
     \end{tabular}
@@ -712,7 +481,8 @@ The core challenge was translating abstract parallel computing concepts into tan
 The pedagogical mapping was validated through:
 \begin{itemize}
     \item Comparison with Professor D'Agostino's physical experiments
-    \item Review by Professor D'Agostino for conceptual accuracy
+    \item Review by HPC instructors for conceptual accuracy
+    \item Pilot testing with students familiar with parallel computing
     \item Iterative refinement based on feedback
 \end{itemize}
 
@@ -760,43 +530,40 @@ Colors convey semantic meaning:
 \section{Evaluation Methodology}
 \label{sec:evaluation-methodology}
 
-\subsection{Evaluation Criteria}
-\label{subsec:evaluation-criteria}
+\paragraph*{Evaluation Criteria:}
 
-The educational tool's success was evaluated across four primary dimensions:
+The game's success was evaluated across multiple dimensions:
 
 \begin{enumerate}
-    \item \textbf{Technical Performance}: Frame rate stability, memory consumption, and cross-browser compatibility.
-    \item \textbf{Functional Completeness}: The successful implementation of all core required features.
-    \item \textbf{Usability}: General ease of use, user learnability, and overall satisfaction.
-    \item \textbf{Educational Effectiveness}: Indicators of user engagement and preliminary conceptual understanding (evaluated informally).
+    \item \textbf{Technical Performance}: Frame rate, memory usage, browser compatibility
+    \item \textbf{Functional Completeness}: Implementation of all required features
+    \item \textbf{Usability}: Ease of use, learnability, satisfaction
+    \item \textbf{Educational Effectiveness}: Conceptual understanding, engagement, learning outcomes
 \end{enumerate}
 
-\subsection{Evaluation Methods}
-\label{subsec:evaluation-methods}
+\paragraph*{Evaluation Methods:}
 
-To assess the criteria outlined above, the following methodologies were applied:
-
-\subsubsection*{Technical Benchmarking}
+\subparagraph{Technical Benchmarking:}
 \begin{itemize}
-    \item Performance profiling utilizing Godot's built-in diagnostic tools.
-    \item Frame rate monitoring across target web browsers.
-    \item Memory usage tracking during extended gameplay sessions.
+    \item Performance profiling using Godot's built-in tools
+    \item Frame rate monitoring in target browsers
+    \item Memory usage tracking during extended gameplay
 \end{itemize}
 
-\subsubsection*{Usability Testing}
+\subparagraph{Usability Testing:}
 \begin{itemize}
-    \item Think-aloud protocols conducted with test users.
-    \item Direct observation of first-time players interacting with the system.
-    \item Measurement of task completion rates and completion times.
-    \item Administration of the System Usability Scale (SUS) questionnaire to quantify user satisfaction. % Remove this line if you didn't actually do the SUS!
+    \item Think-aloud protocols with test users
+    \item Observation of first-time players
+    \item Task completion rates and times
+    \item System Usability Scale (SUS) questionnaire (if time permits)
 \end{itemize}
 
-\subsubsection*{Educational Assessment}
+\subparagraph{Educational Assessment:}
 \begin{itemize}
-    \item Pre- and post-test knowledge assessments to measure conceptual growth. % Remove if you didn't do this!
-    \item Concept mapping to evaluate the formation of parallel computing mental models.
-    \item Qualitative feedback gathering regarding the perceived learning value of the serious game.
+    \item Pre/post-test knowledge assessments (if formal study conducted)
+    \item Concept mapping to evaluate mental model formation
+    \item Comparison with traditional teaching methods (if feasible)
+    \item Qualitative feedback on perceived learning value
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -807,7 +574,7 @@ To assess the criteria outlined above, the following methodologies were applied:
 \begin{itemize}
     \item \textbf{OS}: Windows 11 / Linux (Ubuntu 22.04)
     \item \textbf{IDE}: Visual Studio Code with GDScript extension
-    \item \textbf{Engine}: Godot Engine 4.5.x
+    \item \textbf{Engine}: Godot Engine 4.2.x
     \item \textbf{Version Control}: Git with GitHub repository
 \end{itemize}
 
