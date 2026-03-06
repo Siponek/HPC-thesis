@@ -148,16 +148,44 @@ Functional requirements specify what the system must do:
           % TODO: [Cross-refs] Chapter~\ref{ch:results}, Sections~\ref{subsec:functional-features},~\ref{subsec:engagement-effects}, and~\ref{sec:usability-evaluation}.
 \end{itemize}
 
-\paragraph*{FR6: Quality Attributes}
+\paragraph*{FR6: Guest Access}
 \begin{itemize}
-    \item Game initialization and card generation under 2 seconds
-    \item Support up to 200 cards without noticeable UI lag during event handling
+    \item No account creation or authentication required
+    \item Players can join games immediately via a shared lobby code
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Non-Functional Requirements}
+\label{subsec:non-functional-requirements}
+
+Non-functional requirements specify quality attributes of the system:
+
+\paragraph*{NFR1: Usability}
+\begin{itemize}
     \item Intuitive interface requiring no tutorial for basic gameplay
     \item Responsive drag-and-drop with visual feedback
+    \item Support up to 200 cards without noticeable UI lag during event handling
+\end{itemize}
+
+\paragraph*{NFR2: Reliability}
+\begin{itemize}
     \item Graceful handling of network disconnections
+    \item Game initialization and card generation under 2 seconds
+\end{itemize}
+
+\paragraph*{NFR3: Maintainability}
+\begin{itemize}
     \item Clean code structure with modular, event-driven design (no per-frame game logic)
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Project Constraints}
+\label{subsec:project-constraints}
+
+\paragraph*{C1: Licensing \& Distribution}
+\begin{itemize}
     \item Open-source license (MIT) for educational reuse
-    \item No account creation or authentication required
+    \item Deployable as a static web application without server-side infrastructure for the game itself
 \end{itemize}
 
 
