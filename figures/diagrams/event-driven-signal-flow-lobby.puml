@@ -1,0 +1,22 @@
+@startuml event-driven-signal-flow-lobby
+!theme plain
+!include ../shared/theme.puml
+!include ../shared/sequence-theme.puml
+
+title Event-Driven Signal Flow: Lobby and Connection Signals
+
+participant "ConnectionManager\n(signal hub)" as Conn
+participant "GDSync" as Sync
+
+Conn -> Sync : subscribe to connected/lobby events\n(GDSync.connected, client_joined, etc.)
+Sync -> Conn : emit connected/lobby updates
+Conn -> Conn : re-emit via inner Signals class\n(player_joined_lobby, player_list_updated, ...)
+
+note right of Conn
+In-process event layer decouples
+UI scenes from transport details.
+Inner Signals class provides
+namespaced signal re-emission.
+end note
+
+@enduml

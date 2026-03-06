@@ -1,0 +1,47 @@
+@startuml card-move-leave-buffer
+!theme plain
+!include ../shared/theme.puml
+
+' --- FONT SIZES & THICKNESS ---
+skinparam DefaultFontSize 34
+skinparam TitleFontSize 38
+skinparam SequenceMessageFontSize 34
+skinparam ParticipantFontSize 34
+skinparam NoteFontSize 34
+skinparam ArrowThickness 4 
+skinparam sequenceMessageAlign center
+skinparam style strictuml
+
+' --- SPACING & LAYOUT ---
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+title Card Move Sequence (Out of Private Buffer)
+
+' --- PARTICIPANTS & COLORS ---
+actor "Player A" as Player #LightBlue
+participant "Card\n(UI Node)" as UI #D4E6F1
+participant "Multiplayer\nCardManager\n(Player A)" as MgrA #D5F5E3
+participant "GDSync\nAPI" as Sync #D5F5E3
+participant "LocalServer\nSignaling\n(web patch)" as LSS #D5F5E3
+participant "Relay Server\n(HTTP/SSE)" as Relay #FEF9E7
+participant "Multiplayer\nCardManager\n(Player B)" as MgrB #D5F5E3
+
+Player -> UI : drag card from\nbuffer back
+UI -> MgrA : _on_card_placed_\nin_container()\n(was_in_buffer = true)
+
+MgrA -> Sync : GDSync.call_func(\nsync_card_left_\nbuffer,\n[value, client_id,\nto_index])
+
+Sync -> LSS : route packet
+LSS -> Relay : HTTP POST\nbroadcast
+Relay -> MgrB : SSE game_packet
+
+MgrB -> MgrB : sync_card_left_\nbuffer():\nremove from tracking,\nadd card back to\ncontainer,\nmake visible
+
+note over MgrA, LSS #FFFACD
+  When a card leaves the private buffer,
+  it is added back to the shared container
+  tracking and made visible to all peers.
+end note
+
+@enduml

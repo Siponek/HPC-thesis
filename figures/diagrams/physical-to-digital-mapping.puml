@@ -1,68 +1,19 @@
 @startuml physical-to-digital-mapping
 !theme plain
-skinparam backgroundColor white
-skinparam defaultFontName Arial
+!include ../shared/theme.puml
+skinparam Shadowing false
 
-title Physical Classroom to Digital Game Transformation
+top to bottom direction
+skinparam nodesep 60
+skinparam ranksep 20
+title Transformation from Physical Classroom Experiment to Digital Serious Game
 
-rectangle "**Physical Classroom Experiment**" as PHYS #LightBlue {
-    rectangle "Description" as PHYS_DESC #White {
-        note as N1
-        Students sort numbered cards
-        at desks to simulate parallel
-        computing paradigms
-        end note
-    }
+together {
+  card "**Physical Classroom Experiment**\n\n<b>Description</b>\nStudents sort numbered cards\nat desks to simulate parallel\ncomputing paradigms\n\n<color:green><b>Strengths</b></color>\n+ Highly engaging\n+ Memorable hands-on experience\n+ Intuitive understanding\n+ Immediate feedback\n\n<color:red><b>Limitations</b></color>\n- Limited scalability\n- Requires a large desk and space\n- No automated metrics" as PHYS #LightBlue
 
-    rectangle "Strengths" as PHYS_STR #PaleGreen {
-        note as N2
-        + Highly engaging
-        + Memorable hands-on experience
-        + Intuitive understanding
-        + Immediate feedback
-        end note
-    }
-
-    rectangle "Limitations" as PHYS_LIM #LightPink {
-        note as N3
-        - Limited scalability
-        - Requires physical presence
-        - Hard to reproduce consistently
-        - No automated metrics
-        end note
-    }
+  card "**Digital Serious Game**\n\n<b>Description</b>\nWeb-based card sorting game\nwith real-time multiplayer\nvia HTTP/SSE relay\n\n<color:green><b>Strengths</b></color>\n+ Scalable to any class size\n+ Accessible anywhere, anytime\n+ Repeatable and measurable\n+ Automatic performance tracking\n\n<color:orange><b>Challenges Addressed</b></color>\n* State synchronization\n* Responsive UI design\n* Browser compatibility\n* Performance optimization" as DIGI #LightGreen
 }
 
-rectangle "**Digital Serious Game**" as DIGI #LightGreen {
-    rectangle "Description" as DIGI_DESC #White {
-        note as N4
-        Web-based card sorting game
-        with real-time multiplayer
-        via HTTP/SSE relay
-        end note
-    }
-
-    rectangle "Strengths" as DIGI_STR #PaleGreen {
-        note as N5
-        + Scalable to any class size
-        + Accessible anywhere, anytime
-        + Repeatable and measurable
-        + Automatic performance tracking
-        end note
-    }
-
-    rectangle "Challenges Addressed" as DIGI_CHL #LightYellow {
-        note as N6
-        * State synchronization
-        * Responsive UI design
-        * Browser compatibility
-        * Performance optimization
-        end note
-    }
-}
-
-PHYS -[#blue,bold]-> DIGI : **Digital\nTransformation**
-
-center footer **Goal:** Preserve pedagogical effectiveness while overcoming physical limitations
+PHYS -right[#000,thickness=2]-> DIGI : **Digital Transformation**
 
 @enduml

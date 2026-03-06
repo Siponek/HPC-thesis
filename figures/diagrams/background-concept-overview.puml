@@ -1,0 +1,31 @@
+@startuml background-concept-overview
+!theme plain
+!include ../shared/theme.puml
+
+skinparam nodesep 30
+skinparam ranksep 80
+
+
+title Foundational Domains Converging in the Thesis
+
+' The thesis acts as the "capstone" supported by the pillars below
+rectangle "=== **HPC Sorting — Serious Game**\n//**(The Thesis)**//\n\nA card-sorting game that maps parallel computing\nconcepts to tangible game mechanics, deployed\nas a web-first multiplayer application.\n\nAll four foundational domains below contribute\nessential knowledge and constraints that shape\nthe game's design and implementation." as THESIS #E8DAEF
+
+' Using "together" forces the domains to align side-by-side horizontally at the bottom
+together {
+    rectangle "=== **Parallel Computing**\n=== **Fundamentals**\n----\n* Shared-memory (OpenMP)\n* Sequential vs parallel execution\n* Synchronization primitives\n* Speedup and efficiency metrics" as HPC #D4E6F1
+
+    rectangle "=== **Serious Games**\n=== **in Education**\n----\n* Learning through play\n* Constructivist / experiential\n* Game-based vs gamification\n* Engagement and motivation" as SG #D5F5E3
+
+    rectangle "=== **Web-Based Game**\n=== **Development**\n----\n* Cross-platform deployment\n* WebAssembly / HTML5 export\n* Game engines (Godot)\n* UI/UX for educational tools" as WEB #FCF3CF
+
+    rectangle "=== **Multiplayer Networking**\n=== **Architecture**\n----\n* Client-server vs P2P models\n* HTTP/SSE relay for browsers\n* State synchronization\n* Lobby and session management" as NET #FADBD8
+}
+
+' Arrows point UP from the foundations to the thesis
+HPC -up-> THESIS : **Domain Knowledge**
+SG -up-> THESIS : **Pedagogy**
+WEB -up-> THESIS : **Platform**
+NET -up-> THESIS : **Architecture**
+
+@enduml

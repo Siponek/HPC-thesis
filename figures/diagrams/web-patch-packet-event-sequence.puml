@@ -1,0 +1,38 @@
+@startuml web-patch-packet-event-sequence
+!theme plain
+!include ../shared/theme.puml
+skinparam sequenceMessageAlign center
+
+title Patched Web Flow: Gameplay Event to Cross-Client Update
+
+participant "Gameplay Manager\n(client A)" as MgrA
+participant "GDSync API Layer" as SyncA
+participant "GDSyncWebPatch" as Patch
+participant "LocalServerSignaling" as LSS
+participant "SignalingClient\n(HTTP/SSE)" as Sig
+participant "Signaling Relay Server" as Relay
+participant "SignalingClient\n(client B)" as SigB
+participant "Gameplay Manager\n(client B)" as MgrB
+
+MgrA -> SyncA : call sync/rpc function
+SyncA -> Patch : web patch hook active
+Patch -> LSS : route through replacement local server
+LSS -> Sig : enqueue request packet
+Sig -> Relay : HTTP POST broadcast packet
+Relay --> Sig : ack
+Relay -> SigB : SSE game_packet event
+SigB -> MgrB : deliver decoded event payload
+MgrB -> MgrB : apply state update + visibility logic
+
+note right of Patch
+Interception avoids rewriting
+manager-level prototype calls.
+end note
+
+note right of Relay
+Server also handles connect/join/leave
+events via HTTP + SSE control plane.
+end note
+
+@enduml
+

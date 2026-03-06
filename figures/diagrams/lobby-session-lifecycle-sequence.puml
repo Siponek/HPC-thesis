@@ -1,0 +1,102 @@
+@startuml lobby-session-lifecycle-sequence
+!theme plain
+!include ../shared/theme.puml
+
+' --- FONT SIZES & THICKNESS ---
+skinparam DefaultFontSize 34
+skinparam TitleFontSize 38
+skinparam SequenceMessageFontSize 34
+skinparam ParticipantFontSize 34
+skinparam NoteFontSize 34
+skinparam ArrowThickness 4 
+skinparam sequenceMessageAlign center
+skinparam style strictuml
+' --- SPACING & LAYOUT ---
+' Reduces the empty space between participant lifelines to keep the diagram thin
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+title Lobby and Session Lifecycle (Create/Join/Configure/Start)
+
+' --- PARTICIPANTS & COLORS ---
+actor "Host\nPlayer" as Host #LightBlue
+actor "Joining\nPlayer" as Peer #LightGreen
+
+' UI Components (Blue)
+participant "Multiplayer\nOptions\n(dialog)" as OptUI #D4E6F1
+participant "Multiplayer\nLobby\n(window)" as LobbyUI #D4E6F1
+
+' Logic / Managers (Green)
+participant "Connection\nManager" as Conn #D5F5E3
+participant "GDSync" as Sync #D5F5E3
+participant "LocalServer\nSignaling" as LSS #D5F5E3
+
+' Server (Yellow/Orange)
+participant "Signaling\nServer\n(HTTP/SSE)" as Relay #FEF9E7
+
+== Host creates session ==
+Host -> OptUI : enter lobby name,\npress Host
+OptUI -> Conn : start_hosting_lobby\n(lobby_name)
+Conn -> Sync : lobby_create(name)
+Sync -> LSS : create lobby\ncommand
+LSS -> Relay : POST /api/lobby/create
+Relay --> LSS : room_code +\nhost identity
+LSS --> Sync : lobby_created event
+Sync --> Conn : lobby_created signal
+Conn --> OptUI : lobby_created_\nsuccessfully
+
+OptUI -> LobbyUI : instantiate +\npopup_centered()
+OptUI -> Conn : join_existing_lobby\n(lobby_id)
+
+' TRICK: "note over" spans across lifelines instead of pushing the right margin outward!
+note over OptUI, Conn #FFFACD
+  Host also joins
+  the lobby it created
+end note
+
+== Peer joins session ==
+Peer -> OptUI : enter room code,\npress Join
+OptUI -> Conn : join_existing_lobby\n(code)
+Conn -> Sync : lobby_join(code)
+Sync -> LSS : join lobby command
+LSS -> Relay : POST /api/lobby/join
+Relay --> LSS : join accepted +\nplayer list
+Relay -> LSS : SSE peer_joined\n(to host)
+LSS --> Sync : lobby_joined /\nclient_joined
+Sync --> Conn : client_joined /\nlobby_joined signals
+Conn --> LobbyUI : player_list_updated
+
+OptUI -> LobbyUI : instantiate +\npopup_centered()
+
+== Host configures and starts game ==
+Host -> LobbyUI : set game options\n(buffer_size, cards,\nrange, barrier_mode)
+Host -> LobbyUI : press Start Game
+
+LobbyUI -> Sync : GDSync.call_func(\nsync_game_settings, [...])
+
+note over LobbyUI, Sync #FFFACD
+  broadcast settings
+  to all peers
+end note
+
+LobbyUI -> Sync : GDSync.call_func(\nprepare_for_game_\ntransition, [...])
+LobbyUI -> Sync : GDSync.call_func(\ntransition_to_\nmultiplayer_game)
+
+Sync -> LSS : relay packets\nto all
+LSS -> Relay : HTTP POST\nbroadcast
+Relay -> LSS : SSE events\nto all clients
+
+LSS -> Sync : deliver to\nall peers
+Sync --> LobbyUI : transition_to_\nmultiplayer_game()\non all clients
+
+LobbyUI -> LobbyUI : SceneManager\n.goto_scene(\nMULTIPLAYER_\nGAME_SCENE)
+
+' Centered the final note so it doesn't stretch the diagram width
+note over Conn, LSS #FFFACD
+  No per-player ready state exists.
+  The host directly starts the game.
+  Timing-sensitive: settings must arrive
+  before the scene transition triggers.
+end note
+
+@enduml

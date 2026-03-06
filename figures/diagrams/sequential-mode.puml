@@ -1,0 +1,31 @@
+@startuml sequential-mode
+!theme plain
+!include ../shared/theme.puml
+skinparam nodesep 40
+skinparam ranksep 50
+
+title Game Mode 1: Sequential Execution (Baseline)
+
+actor "<b>Player 1</b>\n(Main Thread)" as P1 #LightBlue
+
+' Using an invisible node to force vertical alignment
+node "Memory Spaces" as MEM_SPACE #transparent {
+    rectangle "<b>Player's Work Buffer</b>\n<i>(Local Variables)</i>\n----" as PRIV_BUF #LightYellow {
+        card "1" as b1
+        card "3" as b2
+    }
+
+    rectangle "<b>Main Container</b>\n<i>(Main Memory / Dataset)</i>\n----" as SHARED_CONT #White {
+        card "5" as c1
+        card "12" as c2
+        card "7" as c3
+        card "18" as c4
+    }
+}
+
+P1 -down-> PRIV_BUF : <b>Public Access</b>
+P1 -down-> SHARED_CONT : <b>Global Access</b>\n(Sorts entire dataset alone)
+
+' Layout hints
+PRIV_BUF -[hidden]down- SHARED_CONT
+@enduml

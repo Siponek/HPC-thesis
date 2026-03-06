@@ -1,0 +1,40 @@
+@startuml web-patch-cost-summary
+!theme plain
+!include ../shared/theme.puml
+
+title Cost of Web Patch Strategy (and Mitigations)
+
+rectangle "Cost / Risk" as C1 #FFECEC
+rectangle "Observed Impact" as C2 #FFF7E6
+rectangle "Mitigation Used" as C3 #EAF7EA
+
+C1 -down-> C2
+C2 -down-> C3
+
+note right of C1
+1) Extra integration complexity
+2) Maintenance overhead for patch layer
+3) Temporary dependency on author fork
+end note
+
+note right of C2
+1) More moving parts to debug
+2) Higher regression risk during updates
+3) Upstream lag can block cleanup
+end note
+
+note right of C3
+1) Kept manager-level API stable
+2) Added logging + isolated web patch modules
+3) Submitted upstream PR and tracked merge path
+end note
+
+legend right
+|= Dimension |= Interpretation |
+| Complexity | Additional components and boundaries |
+| Maintenance | Ongoing effort to keep patch compatible |
+| Dependency | Operational reliance until upstream integration |
+endlegend
+
+@enduml
+

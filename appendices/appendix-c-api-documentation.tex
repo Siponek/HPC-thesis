@@ -2,434 +2,285 @@
 % Appendix C: API Documentation
 %-----------------------------------------------------------------------
 
+\label{app:c}
+
 \section{Introduction}
 \label{app:c:introduction}
 
-This appendix documents the key APIs and interfaces used in the HPC Sorting Serious Game, including custom classes, GDSync integration, and plugin APIs. This documentation is intended for developers who wish to extend or modify the game.
+This appendix documents the APIs and interfaces of the HPC Sorting Serious Game, focusing on the signaling server REST/SSE endpoints and the key GDScript classes. The signaling server is the only custom server-side component; the game client is built in Godot Engine 4.x with GDScript.
 
 %-----------------------------------------------------------------------
-\section{Core Game Classes}
-\label{app:c:core-classes}
+\section{Signaling Server API}
+\label{app:c:signaling-server-api}
 
-\subsection{Card Class}
-\label{app:c:card-class}
+The signaling server is a Python application built on \texttt{aiohttp}. It serves three route groups: HTTP session management, HTTP lobby management with SSE, and WebSocket signaling for WebRTC.
 
-The Card class represents an individual playing card.
+\subsection{Session Endpoints}
+\label{app:c:session-endpoints}
 
-\paragraph{Properties:}
+These endpoints manage rooms for WebRTC signaling.
 
-\begin{itemize}
-    \item \texttt{card\_value: int} - The numeric value displayed on the card
-    \item \texttt{card\_id: int} - Unique identifier for networking synchronization
-    \item \texttt{is\_dragging: bool} - Whether the card is currently being dragged
-    \item \texttt{is\_selected: bool} - Whether the card is selected
-    \item \texttt{original\_position: Vector2} - Position before drag operation
-\end{itemize}
+\begin{table}[htbp]
+    \centering
+    \caption{Session management endpoints}
+    \begin{tabular}{@{}llp{7cm}@{}}
+        \toprule
+        \textbf{Method} & \textbf{Path}                      & \textbf{Description}                                                                                                   \\
+        \midrule
+        \texttt{POST}   & \texttt{/session/host}             & Create a new room. Body: \texttt{\{channel, lobby\_name, public, player\_limit\}}. Returns \texttt{\{code, ws\_url\}}. \\
+        \texttt{POST}   & \texttt{/session/join/\{code\}}    & Join a room by code or lobby name. Returns \texttt{\{code, ws\_url\}}.                                                 \\
+        \texttt{POST}   & \texttt{/session/update/\{code\}}  & Update room metadata (lobby name, public flag, player limit).                                                          \\
+        \texttt{POST}   & \texttt{/session/players/\{code\}} & Update player count for a room.                                                                                        \\
+        \texttt{POST}   & \texttt{/session/close/\{code\}}   & Close a room and its associated lobby.                                                                                 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-\paragraph{Methods:}
+\subsection{HTTP Lobby Endpoints (SSE)}
+\label{app:c:lobby-endpoints}
 
-\begin{itemize}
-    \item \texttt{set\_card\_value(value: int)} - Sets the card's displayed value
-    \item \texttt{get\_card\_value() -> int} - Returns the card's value
-    \item \texttt{start\_drag()} - Initiates drag operation
-    \item \texttt{end\_drag()} - Completes drag operation
-    \item \texttt{update\_display()} - Refreshes visual representation
-\end{itemize}
+These endpoints replace WebSocket-based lobby handling for browser compatibility. Real-time events are delivered via Server-Sent Events (SSE).
 
-\paragraph{Signals:}
+\begin{table}[htbp]
+    \centering
+    \caption{HTTP lobby endpoints}
+    \begin{tabular}{@{}llp{7cm}@{}}
+        \toprule
+        \textbf{Method} & \textbf{Path}                  & \textbf{Description}                                                                                         \\
+        \midrule
+        \texttt{POST}   & \texttt{/api/lobby/connect}    & Connect and receive a peer ID. Optional body: \texttt{\{client\_id\}} to specify a GDSync client ID.         \\
+        \texttt{POST}   & \texttt{/api/lobby/disconnect} & Disconnect from the server.                                                                                  \\
+        \texttt{POST}   & \texttt{/api/lobby/create}     & Create a new lobby. Body: \texttt{\{lobby\_name, public, player\_limit\}}. Returns \texttt{\{code, lobby\}}. \\
+        \texttt{POST}   & \texttt{/api/lobby/join}       & Join a lobby. Body: \texttt{\{code\}} or \texttt{\{lobby\_name\}}.                                           \\
+        \texttt{POST}   & \texttt{/api/lobby/leave}      & Leave the current lobby.                                                                                     \\
+        \texttt{GET}    & \texttt{/api/lobby/list}       & List public lobbies.                                                                                         \\
+        \texttt{POST}   & \texttt{/api/lobby/broadcast}  & Broadcast a game packet to lobby peers. Body: \texttt{\{data\}}.                                             \\
+        \texttt{GET}    & \texttt{/api/lobby/events}     & SSE event stream. Query: \texttt{?peer\_id=\{id\}}.                                                          \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-\begin{itemize}
-    \item \texttt{card\_selected(card: Card)} - Emitted when card is selected
-    \item \texttt{card\_dragged(card: Card, position: Vector2)} - Emitted during drag
-    \item \texttt{card\_dropped(card: Card, target: Node)} - Emitted on drop
-\end{itemize}
+\subsection{SSE Event Types}
+\label{app:c:sse-events}
+
+The SSE stream (\texttt{GET /api/lobby/events}) delivers the following event types:
+
+\begin{table}[htbp]
+    \centering
+    \caption{SSE event types}
+    \begin{tabular}{@{}lp{9cm}@{}}
+        \toprule
+        \textbf{Event}            & \textbf{Description}                            \\
+        \midrule
+        \texttt{welcome}          & Initial connection acknowledgement with peer ID \\
+        \texttt{peer\_joined}     & A new peer joined the lobby                     \\
+        \texttt{peer\_left}       & A peer left the lobby                           \\
+        \texttt{lobby\_joined}    & Confirmation that this peer joined a lobby      \\
+        \texttt{lobby\_closed}    & The lobby was closed (with reason)              \\
+        \texttt{game\_packet}     & A game data packet relayed from another peer    \\
+        \texttt{heartbeat}        & Keep-alive ping                                 \\
+        \texttt{error}            & Error notification                              \\
+        \texttt{server\_shutdown} & Server is shutting down                         \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{WebSocket Endpoints}
+\label{app:c:websocket-endpoints}
+
+These provide WebRTC signaling (for native desktop clients) and legacy WebSocket lobby handling:
+
+\begin{table}[htbp]
+    \centering
+    \caption{WebSocket endpoints}
+    \begin{tabular}{@{}lp{9cm}@{}}
+        \toprule
+        \textbf{Path}         & \textbf{Description}                                                                            \\
+        \midrule
+        \texttt{/ws/\{code\}} & WebRTC signaling channel. Exchanges ICE candidates, SDP offers/answers between peers in a room. \\
+        \texttt{/lobby}       & WebSocket-based lobby management (native client usage; browser clients use HTTP+SSE instead).   \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Utility Endpoints}
+\label{app:c:utility-endpoints}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Utility endpoints}
+    \begin{tabular}{@{}llp{7cm}@{}}
+        \toprule
+        \textbf{Method} & \textbf{Path}             & \textbf{Description}                                 \\
+        \midrule
+        \texttt{GET}    & \texttt{/health}          & Health check. Returns room, lobby, and peer counts.  \\
+        \texttt{GET}    & \texttt{/rooms}           & List all active rooms.                               \\
+        \texttt{GET}    & \texttt{/lobbies}         & List all lobbies with peer details.                  \\
+        \texttt{GET}    & \texttt{/api/server/info} & Server information (version, uptime, configuration). \\
+        \texttt{GET}    & \texttt{/}                & Welcome page / root info.                            \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Error Codes}
+\label{app:c:error-codes}
+
+All error responses follow the format \texttt{\{"success": false, "error": "<code>", "message": "..."\}}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Signaling server error codes}
+    \begin{tabular}{@{}lp{9cm}@{}}
+        \toprule
+        \textbf{Code}               & \textbf{Meaning}                   \\
+        \midrule
+        \texttt{LOBBY\_NOT\_FOUND}  & Specified lobby does not exist     \\
+        \texttt{LOBBY\_CLOSED}      & Lobby has been closed              \\
+        \texttt{LOBBY\_FULL}        & Lobby has reached player limit     \\
+        \texttt{ALREADY\_IN\_LOBBY} & Peer is already in a lobby         \\
+        \texttt{NOT\_IN\_LOBBY}     & Peer is not in any lobby           \\
+        \texttt{ROOM\_NOT\_FOUND}   & Specified room does not exist      \\
+        \texttt{PEER\_NOT\_FOUND}   & Specified peer ID not found        \\
+        \texttt{PEER\_ID\_IN\_USE}  & Requested peer ID is already taken \\
+        \texttt{UNKNOWN\_COMMAND}   & Unrecognized message type          \\
+        \texttt{INVALID\_JSON}      & Malformed JSON in request body     \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 %-----------------------------------------------------------------------
-\subsection{CardManager Class}
+\section{Server Data Models}
+\label{app:c:server-models}
+
+The signaling server uses two primary data models:
+
+\paragraph*{Peer:} Represents a connected player. Fields: \texttt{peer\_id} (int), \texttt{ws} (WebSocket connection, optional), \texttt{sse\_queue} (asyncio Queue for SSE events, optional), \texttt{player\_data} (dict), \texttt{lobby\_code} (str, optional). A peer uses either WebSocket \emph{or} SSE, not both---this dual-transport design enables both native and browser clients.
+
+\paragraph*{Lobby:} Represents a game lobby. Fields: \texttt{code} (str), \texttt{name} (str), \texttt{host\_id} (int), \texttt{public} (bool), \texttt{player\_limit} (int), \texttt{open} (bool), \texttt{created\_at} (ISO timestamp), \texttt{peers} (dict of Peer).
+
+%-----------------------------------------------------------------------
+\section{GDScript Game Classes}
+\label{app:c:gdscript-classes}
+
+This section summarizes the key GDScript classes. Full source code is available in the repository (see Appendix~\ref{app:b:repository}).
+
+\subsection{CardManager (card\_manager.gd)}
 \label{app:c:card-manager-class}
 
-Manages the collection of cards and game logic.
+Base class managing all card logic for single-player mode.
 
-\paragraph{Properties:}
-
+\paragraph*{Key Properties:}
 \begin{itemize}
-    \item \texttt{cards: Array[Card]} - Array of all cards in the game
-    \item \texttt{card\_id\_counter: int} - Counter for unique card IDs
+    \item \texttt{num\_cards: int} --- Number of cards in the game
+    \item \texttt{cards\_array: Array} --- All card node instances
+    \item \texttt{sorted\_all: Array} --- Sorted reference array (target ordering)
+    \item \texttt{slots: Array} --- Buffer slot instances
+    \item \texttt{card\_container: HBoxContainer} --- Shared card container (scene tree node)
 \end{itemize}
 
-\paragraph{Methods:}
-
+\paragraph*{Key Methods:}
 \begin{itemize}
-    \item \texttt{generate\_cards(count: int) -> Array[Card]} - Creates specified number of cards
-    \item \texttt{shuffle\_cards()} - Randomly shuffles the card array
-    \item \texttt{is\_sorted(card\_array: Array) -> bool} - Checks if array is sorted
-    \item \texttt{check\_global\_sorted() -> bool} - Checks if all cards are sorted
-    \item \texttt{get\_card\_by\_id(id: int) -> Card} - Retrieves card by ID
+    \item \texttt{check\_sorting\_order() -> bool} --- Validates ascending order of cards in container
+    \item \texttt{check\_player\_buffer\_contiguity() -> bool} --- Validates buffer cards form a contiguous sorted subsequence
+    \item \texttt{generate\_completed\_card\_array(values, prefix) -> Array} --- Creates card instances from value array
+    \item \texttt{create\_buffer\_slots() -> Array} --- Instantiates player buffer slots
+    \item \texttt{animate\_card\_swap(card\_a, card\_b)} --- Animated card position swap with tween
 \end{itemize}
 
-\paragraph{Signals:}
+\subsection{MultiplayerCardManager (multiplayer\_card\_manager.gd)}
+\label{app:c:multiplayer-card-manager-class}
 
+Extends \texttt{CardManager} for multiplayer mode.
+
+\paragraph*{Inner Class --- CardState:}
 \begin{itemize}
-    \item \texttt{cards\_generated(count: int)} - Emitted after card generation
-    \item \texttt{cards\_shuffled()} - Emitted after shuffling
-    \item \texttt{sorting\_complete()} - Emitted when sorting is finished
+    \item Serializable state object with \texttt{to\_dict()} and \texttt{from\_dict()} methods
+    \item Fields: \texttt{value}, \texttt{index}, \texttt{original\_index}, \texttt{in\_container}, \texttt{in\_buffer}, \texttt{buffer\_owner}
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\subsection{Buffer Class}
-\label{app:c:buffer-class}
-
-Represents a temporary storage area for cards (thread-local storage simulation).
-
-\paragraph{Properties:}
-
+\paragraph*{Key Methods (GDSync-exposed):}
 \begin{itemize}
-    \item \texttt{buffer\_id: int} - Unique identifier
-    \item \texttt{owner\_id: int} - ID of owning player (-1 for shared)
-    \item \texttt{contained\_cards: Array[Card]} - Cards currently in buffer
-    \item \texttt{max\_capacity: int} - Maximum number of cards (optional)
+    \item \texttt{sync\_complete\_game\_state(state\_data)} --- Full state reconciliation
+    \item \texttt{sync\_card\_moved(value, from\_idx, to\_idx, client\_id)} --- Card repositioning
+    \item \texttt{sync\_card\_entered\_buffer(value, player\_id)} --- Card enters local buffer
+    \item \texttt{sync\_card\_left\_buffer(value, player\_id, new\_idx)} --- Card leaves buffer
+    \item \texttt{barrier\_thread\_reached(player\_id)} --- Player reached barrier
+    \item \texttt{barrier\_activate()} --- All threads at barrier; activate
+    \item \texttt{barrier\_release()} --- Release barrier; resume normal play
 \end{itemize}
 
-\paragraph{Methods:}
+\subsection{BarrierManager (barrier\_manager.gd)}
+\label{app:c:barrier-manager-class}
 
+Implements barrier synchronization state machine.
+
+\paragraph*{States:} \texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE} $\to$ \texttt{RUNNING}.
+
+\paragraph*{Key Methods:}
 \begin{itemize}
-    \item \texttt{accept\_card(card: Card) -> bool} - Attempts to add card
-    \item \texttt{remove\_card(card: Card)} - Removes card from buffer
-    \item \texttt{get\_cards() -> Array[Card]} - Returns all contained cards
-    \item \texttt{is\_full() -> bool} - Checks if buffer is at capacity
-    \item \texttt{sort\_contents()} - Sorts cards within buffer
+    \item \texttt{enter\_waiting\_state(initiator\_id, all\_player\_ids)} --- Transition to waiting state
+    \item \texttt{activate\_barrier()} --- Transition to active state (all threads arrived)
+    \item \texttt{release\_barrier()} --- Reset and return to running state
+    \item \texttt{determine\_main\_thread(first\_id, all\_ids) -> int} --- Select coordinator (first-to-reach or round-robin)
 \end{itemize}
 
-\paragraph{Signals:}
-
+\paragraph*{Signals:}
 \begin{itemize}
-    \item \texttt{card\_added(card: Card)} - Emitted when card added
-    \item \texttt{card\_removed(card: Card)} - Emitted when card removed
-    \item \texttt{buffer\_sorted()} - Emitted after sorting
+    \item \texttt{barrier\_state\_changed(new\_state)} --- State transition notification
+    \item \texttt{thread\_reached\_barrier(player\_id)} --- Player arrival notification
+    \item \texttt{main\_thread\_assigned(player\_id)} --- Main thread selected
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\section{Multiplayer Classes}
-\label{app:c:multiplayer-classes}
+\subsection{ConnectionManager (connection\_manager.gd)}
+\label{app:c:connection-manager-class}
 
-\subsection{LobbyManager Class}
-\label{app:c:lobby-manager-class}
+Autoload that wraps GDSync signals into game-level events.
 
-Manages multiplayer lobby functionality.
-
-\paragraph{Properties:}
-
+\paragraph*{Key Methods:}
 \begin{itemize}
-    \item \texttt{players: Dictionary} - Map of player\_id to player\_info
-    \item \texttt{is\_host: bool} - Whether local player is host
-    \item \texttt{room\_code: String} - Unique room identifier
+    \item \texttt{am\_i\_host() -> bool} --- Whether local player is lobby host
+    \item \texttt{get\_my\_client\_id() -> int} --- Local player's GDSync client ID
+    \item \texttt{get\_player\_list() -> MultiplayerTypes.PlayersMap} --- Current player map
 \end{itemize}
 
-\paragraph{Methods:}
-
+\paragraph*{Key Signals:}
 \begin{itemize}
-    \item \texttt{create\_lobby() -> String} - Creates lobby, returns room code
-    \item \texttt{join\_lobby(code: String) -> bool} - Joins existing lobby
-    \item \texttt{add\_player(player\_id: int, player\_name: String)} - Adds player to lobby
-    \item \texttt{remove\_player(player\_id: int)} - Removes player from lobby
-    \item \texttt{start\_game()} - Initiates game start (host only)
-\end{itemize}
-
-\paragraph{RPCs:}
-
-\begin{itemize}
-    \item \texttt{@rpc rpc\_player\_joined(player\_id: int, player\_name: String)} - Broadcasts player join
-    \item \texttt{@rpc rpc\_player\_left(player\_id: int)} - Broadcasts player leave
-    \item \texttt{@rpc rpc\_start\_game()} - Signals game start to all clients
-\end{itemize}
-
-\paragraph{Signals:}
-
-\begin{itemize}
-    \item \texttt{player\_joined(player\_id: int, player\_name: String)} - Player joined
-    \item \texttt{player\_left(player\_id: int)} - Player left
-    \item \texttt{game\_started()} - Game has started
+    \item \texttt{player\_joined\_lobby(player\_id)} --- Player entered lobby
+    \item \texttt{player\_list\_updated(players)} --- Player list changed
+    \item \texttt{lobby\_joined(lobby\_name)} --- Local player joined a lobby
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{NetworkSync Class}
-\label{app:c:network-sync-class}
+\section{GDSync Framework Usage}
+\label{app:c:gdsync-usage}
 
-Handles state synchronization across clients.
+This project uses GDSync's explicit function exposure model. GDSync does \emph{not} use annotations or decorators for RPC. Instead, functions are registered at runtime:
 
-\paragraph{Properties:}
+\begin{lstlisting}[caption={GDSync function exposure (actual API)}]
+# Expose a function for remote calls
+GDSync.expose_func(self.my_function)
 
-\begin{itemize}
-    \item \texttt{card\_ownership: Dictionary} - Maps card\_id to owner\_player\_id
-    \item \texttt{game\_state: Dictionary} - Global game state data
-\end{itemize}
+# Call function on all peers
+GDSync.call_func(self.my_function, [arg1, arg2])
 
-\paragraph{Methods:}
+# Call function on a specific peer
+GDSync.call_func_on(target_peer_id, self.my_function, [arg1, arg2])
 
-\begin{itemize}
-    \item \texttt{@GDSync.rpc sync\_move\_card(card\_id, target\_id, position)} - Syncs card movement
-    \item \texttt{@GDSync.rpc request\_move\_card(card\_id, target\_id)} - Requests validated move
-    \item \texttt{update\_card\_visibility()} - Updates visibility based on ownership
-    \item \texttt{broadcast\_game\_state()} - Sends full state to new clients
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\section{GDSync Framework API}
-\label{app:c:gdsync-api}
-
-\subsection{Sync Annotations}
-\label{app:c:gdsync-sync}
-
-GDSync provides annotations for automatic synchronization:
-
-\paragraph{@GDSync.sync}
-
-Marks a variable or node for automatic synchronization.
-
-\begin{lstlisting}
-# Synchronize a variable
-@GDSync.sync(mode=GDSync.SYNC_MODE.AUTHORITY)
-var player_position: Vector2
-
-# Synchronize a node
-@GDSync.sync(mode=GDSync.SYNC_MODE.REPLICATED)
-var replicated_node: Node
+# Expose a variable for synchronization
+GDSync.expose_var(self, "variable_name")
 \end{lstlisting}
 
-\paragraph{Sync Modes:}
-
+\paragraph*{Key GDSync Signals:}
 \begin{itemize}
-    \item \texttt{AUTHORITY} - Only authority (usually host) can modify
-    \item \texttt{REPLICATED} - Replicated to all peers
-    \item \texttt{OWNER} - Only owner can modify
+    \item \texttt{GDSync.connected} --- Successfully connected to server
+    \item \texttt{GDSync.connection\_failed} --- Connection attempt failed
+    \item \texttt{GDSync.lobby\_created} --- Lobby created (host)
+    \item \texttt{GDSync.lobby\_joined} --- Joined an existing lobby
+    \item \texttt{GDSync.client\_joined} --- A new client joined the lobby
+    \item \texttt{GDSync.client\_left} --- A client left the lobby
+    \item \texttt{GDSync.lobbies\_received} --- Lobby list received
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\subsection{RPC Annotations}
-\label{app:c:gdsync-rpc}
-
-\paragraph{@GDSync.rpc}
-
-Marks a function for remote procedure call.
-
-\begin{lstlisting}
-# RPC callable by any peer
-@GDSync.rpc(call_local=true)
-func my_networked_function(arg1: int, arg2: String):
-    # Function body
-    pass
-
-# Authority-only RPC
-@GDSync.rpc(call_local=false, authority_only=true)
-func host_only_function():
-    # Only host can call this
-    pass
-\end{lstlisting}
-
-\paragraph{Parameters:}
-
-\begin{itemize}
-    \item \texttt{call\_local: bool} - Whether to also execute locally
-    \item \texttt{authority\_only: bool} - Restrict to authority
-    \item \texttt{reliable: bool} - Use reliable transmission
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\subsection{Connection Management}
-\label{app:c:gdsync-connection}
-
-\paragraph{Methods:}
-
-\begin{itemize}
-    \item \texttt{GDSync.create\_server(port: int)} - Creates server
-    \item \texttt{GDSync.connect\_to\_server(address: String, port: int)} - Connects to server
-    \item \texttt{GDSync.disconnect()} - Disconnects from network
-    \item \texttt{GDSync.get\_peers() -> Array} - Returns list of connected peers
-\end{itemize}
-
-\paragraph{Signals:}
-
-\begin{itemize}
-    \item \texttt{peer\_connected(peer\_id: int)} - Peer connected
-    \item \texttt{peer\_disconnected(peer\_id: int)} - Peer disconnected
-    \item \texttt{connection\_failed()} - Connection attempt failed
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\section{Plugin APIs}
-\label{app:c:plugin-apis}
-
-\subsection{ToastParty API}
-\label{app:c:toastparty-api}
-
-\paragraph{Methods:}
-
-\begin{itemize}
-    \item \texttt{ToastParty.show\_toast(message: String, duration: int)}
-    \item \texttt{ToastParty.show\_toast\_at\_position(message: String, position: Vector2, duration: int)}
-\end{itemize}
-
-\paragraph{Constants:}
-
-\begin{itemize}
-    \item \texttt{LENGTH\_SHORT} - 2 seconds
-    \item \texttt{LENGTH\_LONG} - 5 seconds
-    \item \texttt{TYPE\_INFO} - Informational toast
-    \item \texttt{TYPE\_SUCCESS} - Success toast (green)
-    \item \texttt{TYPE\_ERROR} - Error toast (red)
-    \item \texttt{TYPE\_WARNING} - Warning toast (yellow)
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\subsection{Logger API}
-\label{app:c:logger-api}
-
-\paragraph{Methods:}
-
-\begin{itemize}
-    \item \texttt{Logger.debug(message: String)} - Debug-level logging
-    \item \texttt{Logger.info(message: String)} - Info-level logging
-    \item \texttt{Logger.warn(message: String)} - Warning-level logging
-    \item \texttt{Logger.error(message: String)} - Error-level logging
-\end{itemize}
-
-\paragraph{Configuration:}
-
-\begin{itemize}
-    \item \texttt{Logger.set\_log\_level(level: int)} - Set minimum log level
-    \item \texttt{Logger.enable\_file\_logging(path: String)} - Log to file
-    \item \texttt{Logger.add\_filter(tag: String)} - Filter log messages
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\section{Utility APIs}
-\label{app:c:utility-apis}
-
-\subsection{Profiler API}
-\label{app:c:profiler-api}
-
-\paragraph{Methods:}
-
-\begin{itemize}
-    \item \texttt{Profiler.start\_timer(label: String)} - Start timing
-    \item \texttt{Profiler.end\_timer(label: String) -> float} - End timing, return elapsed ms
-    \item \texttt{Profiler.measure\_fps() -> float} - Get current FPS
-    \item \texttt{Profiler.get\_memory\_usage() -> int} - Get memory usage in bytes
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\subsection{Config Manager API}
-\label{app:c:config-api}
-
-\paragraph{Methods:}
-
-\begin{itemize}
-    \item \texttt{Config.get\_value(section: String, key: String, default: Variant) -> Variant}
-    \item \texttt{Config.set\_value(section: String, key: String, value: Variant)}
-    \item \texttt{Config.save\_config()} - Save configuration to disk
-    \item \texttt{Config.load\_config()} - Load configuration from disk
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\section{Event System}
-\label{app:c:event-system}
-
-\subsection{Global Events}
-\label{app:c:global-events}
-
-The game uses an event bus for decoupled communication.
-
-\paragraph{Usage:}
-
-\begin{lstlisting}
-# Emit global event
-EventBus.emit("game_started", {"players": 4})
-
-# Listen for event
-EventBus.connect("game_started", _on_game_started)
-
-func _on_game_started(data: Dictionary):
-    print("Game started with ", data["players"], " players")
-\end{lstlisting}
-
-\paragraph{Common Events:}
-
-\begin{itemize}
-    \item \texttt{game\_started} - Game has begun
-    \item \texttt{game\_ended} - Game has concluded
-    \item \texttt{player\_joined} - Player joined lobby
-    \item \texttt{player\_left} - Player left game
-    \item \texttt{card\_moved} - Card was moved
-    \item \texttt{sorting\_complete} - Sorting finished
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\section{Extension Points}
-\label{app:c:extension-points}
-
-\subsection{Custom Game Modes}
-\label{app:c:custom-game-modes}
-
-To create custom game modes, extend the \texttt{GameMode} base class:
-
-\begin{lstlisting}
-extends GameMode
-class_name MyCustomMode
-
-func _init():
-    mode_name = "My Custom Mode"
-    mode_description = "A custom game variant"
-
-func setup_game():
-    # Custom initialization logic
-    pass
-
-func validate_move(card: Card, target: Node) -> bool:
-    # Custom move validation
-    return true
-
-func check_win_condition() -> bool:
-    # Custom win condition
-    return false
-\end{lstlisting}
-
-%-----------------------------------------------------------------------
-\subsection{Custom Card Types}
-\label{app:c:custom-card-types}
-
-Extend the Card class for custom card behavior:
-
-\begin{lstlisting}
-extends Card
-class_name SpecialCard
-
-@export var special_ability: String = ""
-
-func activate_ability():
-    match special_ability:
-        "double_value":
-            card_value *= 2
-        "wildcard":
-            # Can match any value
-            pass
-    update_display()
-\end{lstlisting}
-
-%-----------------------------------------------------------------------
-\section{Development Tools}
-\label{app:c:dev-tools}
-
-\subsection{Debug Commands}
-\label{app:c:debug-commands}
-
-Console commands for development:
-
-\begin{itemize}
-    \item \texttt{/spawn\_cards <count>} - Generate cards
-    \item \texttt{/sort\_all} - Automatically sort all cards
-    \item \texttt{/reset\_game} - Reset game state
-    \item \texttt{/show\_network\_stats} - Display network statistics
-    \item \texttt{/toggle\_debug\_ui} - Show/hide debug information
-\end{itemize}
+\noindent For protected mode details and the web-export compatibility layer, see Chapter~\ref{ch:problems}, Section~\ref{subsec:protected-mode-issue} and Chapter~\ref{ch:implementation}, Section~\ref{sec:web-patch-implementation}.
 
 %-----------------------------------------------------------------------

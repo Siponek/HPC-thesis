@@ -1,7 +1,15 @@
+% !TeX root = ../main.tex
 \chapter{Background and Literature Review}
 \label{ch:background}
 
-This chapter provides the foundational knowledge and contextual background necessary to understand the HPC Sorting Serious Game. We review key concepts in parallel computing, serious games in education, web-based game development, and multiplayer networking architectures.
+This chapter provides the foundational knowledge and contextual background necessary to understand the HPC Sorting Serious Game. It reviews key concepts in parallel computing, serious games in education, web-based game development, and multiplayer networking architectures.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/diagrams/background-concept-overview.png}
+    \caption{Conceptual overview of the four knowledge domains converging in this thesis.}
+    \label{fig:background-concept-overview}
+\end{figure}
 
 %-----------------------------------------------------------------------
 \section{Parallel Computing Fundamentals}
@@ -15,29 +23,29 @@ Parallel computing is the simultaneous execution of multiple computational tasks
 
 Two primary paradigms dominate parallel computing education and practice: shared-memory parallelism and distributed-memory parallelism.
 
-\subsubsection{Shared-Memory Parallelism}
+\subsubsection*{Shared-Memory Parallelism}
 
 In shared-memory systems, multiple processors or cores access a common address space. All threads can read and write to the same memory locations, enabling efficient data sharing but requiring careful synchronization to prevent race conditions.
 
 \textbf{Characteristics:}
 \begin{itemize}
     \item All processors access the same physical memory
-    \item Communication occurs through shared variables
+    \item Communication between threads occurs through shared variables
     \item Synchronization primitives (locks, barriers, atomic operations) prevent conflicts
     \item Lower communication overhead compared to distributed memory
-    \item Limited scalability due to memory bandwidth constraints
+    \item Scalability typically limited to a single workstation (one multi-core node)
 \end{itemize}
 
 \textbf{Applications:} Shared-memory parallelism is ideal for problems requiring frequent communication between processing units, such as iterative algorithms, graph processing, and data analytics on multicore processors.
 
-\subsubsection{Distributed-Memory Parallelism}
+\subsubsection*{Distributed-Memory Parallelism}
 
 In distributed-memory systems, each processor has its own local memory. Processors communicate by explicitly sending and receiving messages over a network, requiring programmers to manage data distribution and communication patterns.
 
 \textbf{Characteristics:}
 \begin{itemize}
     \item Each processor has private memory space
-    \item Communication requires explicit message passing
+    \item Communication between processes requires explicit message passing
     \item Scalable to thousands or millions of processors
     \item Higher communication overhead and latency
     \item No shared state eliminates race conditions but complicates programming
@@ -52,13 +60,13 @@ In distributed-memory systems, each processor has its own local memory. Processo
 OpenMP (Open Multi-Processing) is a widely-used API for shared-memory parallel programming in C, C++, and Fortran. It uses compiler directives (pragmas) to specify parallel regions, enabling incremental parallelization of sequential code.
 
 \textbf{Core Concepts:}
-\begin{description}
-    \item[Parallel Regions] Code sections executed by multiple threads simultaneously
-    \item[Work-Sharing Constructs] Distribute loop iterations or tasks among threads
-    \item[Data Scoping] Variables can be shared (visible to all threads) or private (thread-local copies)
-    \item[Synchronization] Barriers, critical sections, and atomic operations coordinate thread execution
-    \item[Scheduling] Strategies (static, dynamic, guided) control how iterations are assigned to threads
-\end{description}
+\begin{enumerate}
+    \item \textbf{Parallel Regions}: Code sections executed by multiple threads simultaneously
+    \item \textbf{Work-Sharing Constructs}: Distribute loop iterations or tasks among threads
+    \item \textbf{Data Scoping}: Variables can be shared (visible to all threads) or private (thread-local copies)
+    \item \textbf{Synchronization}: Barriers, critical sections, and atomic operations coordinate thread execution
+    \item \textbf{Scheduling}: Strategies (static, dynamic, guided) control how iterations are assigned to threads
+\end{enumerate}
 
 \paragraph*{Example Code:}
 
@@ -125,6 +133,17 @@ Sorting is a fundamental algorithmic problem that benefits significantly from pa
     \item Time complexity: $O(\frac{n \log n}{p})$ with $p$ processors
 \end{itemize}
 
+\paragraph*{Parallel Quicksort:}
+Parallel quicksort \citep{sanders2019sequential} exploits task-level parallelism through its recursive divide-and-conquer structure:
+\begin{itemize}
+    \item Select a \emph{pivot} element from the array
+    \item \textbf{Partition} the array: elements $\leq$ pivot go left, elements $>$ pivot go right
+    \item Recursively sort the left and right partitions \emph{in parallel} (each assigned to a different thread/task)
+    \item Quality of the pivot determines load balance---a poor pivot creates unequal partitions
+    \item Expected time complexity: $O\!\left(\frac{n \log n}{p}\right)$ with $p$ processors, assuming balanced pivots
+\end{itemize}
+Unlike merge sort, where the \emph{merge} phase is the synchronization bottleneck, quicksort's challenge is the \emph{partition} phase: threads must agree on a pivot and redistribute data before independent recursion can proceed. Parallel partitioning schemes (e.g., each thread partitions a local block, then a prefix-sum determines final positions) can parallelize this step, but at the cost of additional communication \citep{sanders2019sequential}.
+
 \paragraph*{Sample Sort (MPI Pattern):}
 \begin{itemize}
     \item Distribute data across processes
@@ -136,7 +155,7 @@ Sorting is a fundamental algorithmic problem that benefits significantly from pa
     \item \textit{Note: Not implemented in this thesis; discussed for context}
 \end{itemize}
 
-\textbf{Relevance to Educational Game:} The card-sorting game mechanics map to parallel sorting algorithms. In the implemented game, players act as threads (OpenMP) coordinating through shared memory to sort cards efficiently, making abstract algorithmic concepts tangible through gameplay. Future extensions could explore MPI-style distributed sorting (see Chapter~\ref{ch:conclusion}).
+\textbf{Relevance to Educational Game:} The card-sorting game mechanics map directly to parallel sorting algorithms \citep{sanders2019sequential}. \emph{Parallel merge sort} maps to the game's divide-into-buffers, sort-locally, then merge-back workflow, with barriers separating each merge round. \emph{Parallel quicksort} maps to collaborative pivot selection and partitioning, followed by sub-group recursion into smaller card sub-arrays. In the implemented game, players act as threads (OpenMP) coordinating through shared memory to sort cards efficiently, making abstract algorithmic concepts tangible through gameplay. Chapter~\ref{ch:architecture} demonstrates how the existing algorithm-agnostic architecture already supports both strategies without code changes, and Chapter~\ref{ch:conclusion} outlines potential guided modes as medium-term extensions.
 
 %-----------------------------------------------------------------------
 \section{Serious Games in Education}
@@ -148,7 +167,7 @@ Serious games—games designed primarily for purposes beyond entertainment—hav
 \subsection{Definition and Characteristics}
 \label{subsec:serious-games-definition}
 
-\citet{zyda2005visual} defines serious games as games that ``do not have entertainment, enjoyment, or fun as their primary purpose.'' These games leverage game design principles to achieve learning objectives, skill development, or behavioral change.
+\citet{zyda2005visual} defines a serious game as ``a mental contest, played with a computer in accordance with specific rules, that uses entertainment to further \textelp{} training, education, health, public policy, and strategic communication objectives.'' These games leverage game design principles to achieve learning objectives, skill development, or behavioral change.
 
 \textbf{Key Characteristics:}
 \begin{itemize}
@@ -166,17 +185,17 @@ Serious games—games designed primarily for purposes beyond entertainment—hav
 
 Game-based learning draws on several established educational theories:
 
-\subsubsection{Constructivism}
+\paragraph*{Constructivism:}
 
-Constructivist theory posits that learners actively construct knowledge through experience rather than passively receiving information. Games naturally support constructivist learning by placing players in problem-solving scenarios where they discover principles through experimentation.
+Constructivist theory \citep{piaget1970genetic} posits that learners actively construct knowledge through experience rather than passively receiving information. Games naturally support constructivist learning by placing players in problem-solving scenarios where they discover principles through experimentation.
 
-\subsubsection{Flow Theory}
+\paragraph*{Flow Theory:}
 
-\citet{csikszentmihalyi1990flow} describes ``flow'' as the optimal psychological state where challenge level matches skill level, producing deep engagement. Well-designed educational games maintain flow by dynamically adjusting difficulty, keeping learners in the zone of proximal development.
+\citet{csikszentmihalyi1990flow} describes ``flow'' as the optimal psychological state where challenge level matches skill level, producing deep engagement. Well-designed educational games maintain flow by dynamically adjusting difficulty, keeping learners challenged without overwhelming them.
 
-\subsubsection{Experiential Learning}
+\paragraph*{Experiential Learning:}
 
-Kolb's experiential learning cycle—concrete experience, reflective observation, abstract conceptualization, active experimentation—aligns perfectly with game mechanics. Players experience situations, observe outcomes, form hypotheses, and test them iteratively.
+\citet{kolb1984experiential}'s experiential learning cycle---concrete experience, reflective observation, abstract conceptualization, active experimentation---aligns naturally with game mechanics. Players experience situations, observe outcomes, form hypotheses, and test them iteratively.
 
 %-----------------------------------------------------------------------
 \subsection{Empirical Evidence}
@@ -186,7 +205,7 @@ Research consistently demonstrates the effectiveness of serious games for learni
 
 \paragraph*{\citet{connolly2012systematic} Meta-Analysis:}
 
-A systematic literature review of 129 papers found that serious games positively impact learning outcomes across multiple domains. Key findings include:
+A systematic literature review analysing 70 empirical studies found that serious games positively impact learning outcomes across multiple domains. Key findings include:
 
 \begin{itemize}
     \item Improved knowledge acquisition and retention
@@ -211,41 +230,19 @@ A study of digital game-based learning in high school computer science found tha
 \subsection{Serious Games in Computer Science}
 \label{subsec:games-cs-education}
 
-Several successful serious games target computer science education:
-
-\paragraph*{CodeCombat:}
-\begin{itemize}
-    \item Teaches programming through RPG-style gameplay
-    \item Players write real code to control characters
-    \item Supports Python, JavaScript, and other languages
-    \item Used in thousands of classrooms worldwide
-\end{itemize}
-
-\paragraph*{Lightbot:}
-\begin{itemize}
-    \item Introduces programming concepts through puzzle-solving
-    \item Teaches sequencing, loops, and procedures
-    \item No syntax required—visual programming interface
-    \item Suitable for young learners
-\end{itemize}
+Several successful serious games target computer science education.
+\textbf{CodeCombat} \citep{codecombat} teaches programming through RPG-style gameplay in which players write real Python or JavaScript code to control characters; it is used in thousands of classrooms worldwide.
+\textbf{Lightbot} \citep{lightbot} introduces sequencing, loops, and procedures through a visual puzzle interface that requires no programming syntax, making it accessible to young learners.
 
 \paragraph*{Parallel Computing Games:}
 
-Few games specifically target parallel computing education. Notable exceptions include:
-
-\begin{itemize}
-    \item \textbf{PARMACS Simulator}: Interactive visualization of parallel algorithms
-    \item \textbf{ParSim}: Educational tool for parallel algorithm design
-    \item \textbf{CUDA Learning Games}: GPU programming challenges
-\end{itemize}
-
-However, these tools typically focus on visualization rather than hands-on, game-like interaction, and few provide multiplayer experiences.
+In contrast to introductory programming, very few serious games target advanced topics like parallel computing education. Instructors typically rely on traditional, non-gamified software visualizers or simulation tools to teach parallel algorithm design, highlighting a significant gap in the current game-based learning landscape for advanced computer science topics.
 
 %-----------------------------------------------------------------------
 \subsection{Serious Games for HPC Education}
 \label{subsec:serious-games-hpc}
 
-High-Performance Computing education faces unique challenges that serious games can address:
+High Performance Computing education faces unique challenges that serious games can address:
 
 \paragraph*{Why Games for HPC?}
 
@@ -263,17 +260,24 @@ The following mappings enable intuitive understanding of HPC concepts through ga
     \centering
     \caption{HPC concepts mapped to game mechanics}
     \label{tab:hpc-game-mapping}
-    \begin{tabular}{@{}ll@{}}
+    \begin{tabular}{@{}l|l@{}}
         \toprule
         \textbf{HPC Concept}   & \textbf{Game Mechanic}                   \\
         \midrule
         Threads/Processes      & Players                                  \\
+        \midrule
         Shared Memory          & Shared game board/container              \\
+        \midrule
         Thread-Local Storage   & Private player inventory                 \\
+        \midrule
         Synchronization        & Turn-taking or barriers                  \\
+        \midrule
         Race Conditions        & Conflicting simultaneous actions         \\
+        \midrule
         Speedup                & Time comparison (1 player vs. N players) \\
+        \midrule
         Communication Overhead & Time to transfer items between players   \\
+        \midrule
         Load Balancing         & Equal distribution of work               \\
         \bottomrule
     \end{tabular}
@@ -321,17 +325,15 @@ Web browsers provide a universal platform for educational game deployment, elimi
 \subsection{Game Engines for Web}
 \label{subsec:web-game-engines}
 
-Godot Engine emerged as the optimal choice for this project due to:
+Several game engines support web deployment through HTML5/WebAssembly export, each with different trade-offs relevant to educational game development:
+\begin{description}
+    \item[Unity] offers a mature ecosystem with extensive documentation and a large asset marketplace \citep{unity_engine,unity_asset_store}. Browser deployment is supported through WebGL builds \citep{unity_webgl_docs}, but web exports tend to be large (often tens of MB), and plan/licensing thresholds can introduce constraints for open-source educational projects \citep{unity_pricing}.
+    \item[Unreal Engine] provides advanced rendering and networking capabilities \citep{unreal_engine}; however, browser delivery is commonly handled through Pixel Streaming rather than lightweight HTML5/WebAssembly export \citep{unreal_pixel_streaming}, and its high-fidelity 3D focus is often less suitable for lightweight 2D browser applications.
+    \item[Godot Engine] is fully open-source (MIT license) \citep{godot_engine,godot_license}, supports Web export \citep{godot_web_export}, and provides a Python-like scripting language (GDScript) alongside a scene-based architecture oriented toward rapid 2D development.
+    \item[Cocos2d/Cocos Creator] is efficient for 2D applications and supports web publishing alongside cross-platform builds \citep{cocos_creator,cocos_web_build}, though its tooling ecosystem is smaller and the editor workflow is less integrated than some alternatives.
+\end{description}
 
-\begin{itemize}
-    \item Completely free and open-source (MIT license)
-    \item Excellent 2D rendering performance
-    \item Lightweight web exports (smaller than Unity or Unreal)
-    \item GDScript language similar to Python (accessible for students)
-    \item Active community and extensive documentation
-    \item Built-in HTML5 export templates
-    \item Scene-based architecture promotes modular design
-\end{itemize}
+Key evaluation criteria for an educational web game include export size (affecting load time), 2D rendering quality, scripting accessibility for students who may inspect source code, and licensing compatibility with open educational resources. The engine selection process, evaluation evidence, and final decision are presented in Chapter~\ref{ch:methodology}, Section~\ref{subsec:godot-selection}.
 
 %-----------------------------------------------------------------------
 \section{Multiplayer Game Architecture}
@@ -339,66 +341,44 @@ Godot Engine emerged as the optimal choice for this project due to:
 
 Multiplayer functionality is essential for simulating OpenMP shared-memory parallelism with multiple players collaborating on shared data. This section reviews common multiplayer architectures and networking technologies.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/diagrams/networking-approach-comparison}
+    \caption{Comparison of networking approaches for browser-first deployment, highlighting the HTTP/SSE relay selected for this thesis.}
+    \label{fig:networking-approach-comparison}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Summary matrix of networking approach evaluation criteria}
+    \label{tab:networking-approach-summary}
+    \small
+    \begin{tabular}{@{}p{0.28\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}@{}}
+        \toprule
+        \textbf{Evaluation Criteria} & \textbf{Client-Server} & \textbf{P2P (WebRTC)} & \textbf{HTTP/SSE Relay} \\
+        \midrule
+        Browser compatibility        & Partial                & Problematic           & \textbf{Universal}      \\
+        \midrule
+        Infrastructure needs         & High                   & Low (STUN/TURN)       & \textbf{Minimal}        \\
+        \midrule
+        Implementation complexity    & Medium                 & High                  & \textbf{Low}            \\
+        \midrule
+        Latency                      & Low                    & Lowest                & Moderate                \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 %-----------------------------------------------------------------------
 \subsection{Client-Server Architecture}
 \label{subsec:client-server}
 
-Traditional multiplayer games use a client-server model:
-
-\textbf{Characteristics:}
-\begin{itemize}
-    \item Dedicated server hosts game state
-    \item Clients send inputs to server
-    \item Server validates actions, updates state, broadcasts to clients
-    \item Authoritative server prevents cheating
-    \item Requires server infrastructure and maintenance
-\end{itemize}
-
-\textbf{Advantages:}
-\begin{itemize}
-    \item Strong consistency and cheat prevention
-    \item Clients need not communicate directly
-    \item Server can enforce rules and validate actions
-\end{itemize}
-
-\textbf{Disadvantages:}
-\begin{itemize}
-    \item Requires dedicated servers (cost, maintenance)
-    \item Single point of failure
-    \item Latency for all communications
-    \item Scalability challenges with many concurrent games
-\end{itemize}
+In a traditional client-server model, a dedicated server hosts the authoritative game state. Clients send their inputs to the server, which validates actions, updates the canonical state, and broadcasts the result to all connected clients. This architecture provides strong consistency guarantees and inherent cheat prevention, since no client can unilaterally alter the game state. However, it requires maintaining dedicated server infrastructure, introduces a single point of failure, and routes all communication through the server, adding latency to every interaction. These costs are justified in scenarios where state correctness is paramount, but they impose operational overhead that may be disproportionate for small-scale educational deployments.
 
 %-----------------------------------------------------------------------
 \subsection{Peer-to-Peer Architecture}
 \label{subsec:p2p}
 
-Peer-to-peer (P2P) networks eliminate dedicated servers by allowing clients to communicate directly:
-
-\textbf{Characteristics:}
-\begin{itemize}
-    \item Clients connect directly to each other
-    \item No central server required (except for matchmaking)
-    \item One peer often designated as ``host'' for authority
-    \item Lower latency for direct connections
-    \item More complex connection establishment (NAT traversal)
-\end{itemize}
-
-\textbf{Advantages:}
-\begin{itemize}
-    \item No server infrastructure costs
-    \item Lower latency between peers
-    \item Decentralized—no single point of failure
-    \item Scalable for small groups (2--8 players)
-\end{itemize}
-
-\textbf{Disadvantages:}
-\begin{itemize}
-    \item NAT traversal complexity
-    \item Host has performance burden
-    \item Cheat prevention more difficult
-    \item Connection quality varies with peer networks
-\end{itemize}
+Peer-to-peer (P2P) networks eliminate the need for a dedicated server by allowing clients to communicate directly. One peer is typically designated as ``host'' to serve as the authority for conflict resolution. This approach removes server infrastructure costs and can reduce latency for direct connections between nearby peers. However, establishing connections is considerably more complex due to NAT traversal requirements, and the host peer bears a disproportionate performance burden. Cheat prevention is also more difficult, since clients have more control over state. P2P topologies scale well for small groups (2--8 players) but become impractical as group size increases due to the quadratic growth in connection count.
 
 %-----------------------------------------------------------------------
 \subsection{Web Transport Technologies}
@@ -406,22 +386,9 @@ Peer-to-peer (P2P) networks eliminate dedicated servers by allowing clients to c
 
 Web browsers offer several options for real-time communication, each with trade-offs:
 
-\paragraph*{HTTP Polling:}
-\begin{itemize}
-    \item Client repeatedly requests updates from server
-    \item Simple to implement, universally supported
-    \item Higher latency and server load due to frequent requests
-    \item Suitable for low-frequency updates
-\end{itemize}
+\paragraph*{HTTP Polling} is the simplest approach: the client repeatedly requests updates from the server at fixed intervals. It is universally supported and trivial to implement, but incurs higher latency and server load due to the frequency of requests, making it suitable only for low-frequency state updates.
 
-\paragraph*{Server-Sent Events (SSE):}
-\begin{itemize}
-    \item Server pushes events to client over HTTP
-    \item Simpler than WebSocket (HTTP-based, no special protocol)
-    \item Unidirectional (server to client only)
-    \item Automatic reconnection built into browser API
-    \item Good browser support and proxy compatibility
-\end{itemize}
+\paragraph*{Server-Sent Events (SSE)} allow the server to push events to the client over a persistent HTTP connection. SSE is simpler than WebSocket (it uses standard HTTP with no protocol upgrade), supports automatic reconnection through the browser API, and enjoys broad proxy compatibility. The trade-off is that the channel is unidirectional---server to client only---so client-to-server communication must use a separate mechanism such as HTTP POST.
 
 \paragraph*{HTTP + SSE Relay Architecture:}
 
@@ -441,44 +408,18 @@ For web-based multiplayer games requiring broad browser compatibility, a relay s
 
 Maintaining consistent game state across multiple clients is challenging. Common patterns include:
 
-\paragraph*{Deterministic Lockstep:}
-\begin{itemize}
-    \item All clients simulate the same game logic
-    \item Inputs synchronized and executed simultaneously
-    \item Guarantees identical state on all clients
-    \item Sensitive to latency and packet loss
-    \item Used in RTS games (Age of Empires, StarCraft)
-\end{itemize}
+\paragraph*{Deterministic Lockstep}
+requires all clients to simulate identical game logic, with inputs synchronized and executed simultaneously. This guarantees identical state on every client but is highly sensitive to latency and packet loss, making it most suitable for real-time strategy games (e.g., \textit{Age of Empires}, \textit{StarCraft}).
 
-\paragraph*{Client-Side Prediction:}
-\begin{itemize}
-    \item Clients predict results of actions immediately
-    \item Server validates and corrects if necessary
-    \item Provides responsive feel despite latency
-    \item Requires reconciliation when predictions wrong
-    \item Used in FPS games (Counter-Strike, Overwatch)
-\end{itemize}
+\paragraph*{Client-Side Prediction}
+allows clients to predict the results of their own actions immediately, while the server validates and corrects if necessary. This provides a responsive feel despite latency, at the cost of occasional reconciliation when predictions are wrong. First-person shooters such as \textit{Counter-Strike} and \textit{Overwatch} rely on this technique.
 
-\paragraph*{Authoritative Server/Host:}
-\begin{itemize}
-    \item Server/host maintains canonical state
-    \item Clients send actions, receive state updates
-    \item Simple to implement and reason about
-    \item Higher latency but stronger consistency
-    \item Suitable for turn-based or slower-paced games
-\end{itemize}
+\paragraph*{Authoritative Server/Host}
+models maintain a single canonical state on the server or host. Clients send proposed actions and receive authoritative state updates in return. This approach is simpler to implement and reason about, provides stronger consistency, and is well-suited for turn-based or slower-paced games where moderate latency is acceptable.
 
-\paragraph*{Selected Approach:}
+\paragraph*{Suitability for Educational Games:}
 
-For the HPC Sorting Game, a \textbf{host-authoritative model} was chosen because:
-
-\begin{itemize}
-    \item Educational focus prioritizes clarity over competitive performance
-    \item Collaborative nature tolerates moderate latency
-    \item Simpler implementation reduces development complexity
-    \item Prevents inconsistencies and ensures fair learning environment
-    \item Aligns with centralized coordination patterns in parallel systems
-\end{itemize}
+For educational multiplayer games where correctness and pedagogical clarity take priority over competitive low-latency performance, the \textbf{authoritative server/host} model is a natural fit: it is straightforward to implement, prevents inconsistencies across clients, and aligns with centralized coordination patterns found in parallel computing. The specific synchronization model adopted for this thesis is discussed in Chapter~\ref{ch:methodology}.
 
 %-----------------------------------------------------------------------
 \section{Related Work}
@@ -490,72 +431,22 @@ This section reviews existing educational tools and games related to parallel co
 \subsection{Parallel Computing Educational Tools}
 \label{subsec:parallel-tools}
 
-Several tools exist for teaching parallel computing, each with strengths and limitations:
-
-\paragraph*{PARMACS:}
-\begin{itemize}
-    \item Parallel algorithm visualization tool
-    \item Shows thread/process execution timelines
-    \item Limited interactivity—primarily observational
-    \item Desktop-only platform
-\end{itemize}
-
-\paragraph*{OpenMP Visualization Tools:}
-\begin{itemize}
-    \item Intel VTune, TAU (Tuning and Analysis Utilities)
-    \item Focused on performance profiling
-    \item Steep learning curve for students
-    \item Not designed for introductory education
-\end{itemize}
-
-\paragraph*{MPI Tools:}
-\begin{itemize}
-    \item MPICH, Open MPI with debugging tools
-    \item Require cluster access or virtual machines
-    \item Focus on actual parallel programming, not conceptual learning
-    \item \textit{Note: MPI concepts discussed for context; not covered in this thesis}
-\end{itemize}
+Several tools exist for teaching parallel computing, each with strengths and limitations.
+Tools such as \textbf{Intel VTune} \citep{intel_vtune} and \textbf{TAU} (Tuning and Analysis Utilities) \citep{tau_shende2006} focus on OpenMP performance profiling; while powerful, they have steep learning curves and are designed for optimization work rather than introductory education.
+\textbf{MPICH} \citep{mpich_website} and \textbf{Open MPI} \citep{openmpi_website} supply debugging tools for MPI-based programs, but require cluster access or virtual machines and presuppose programming ability.
 
 \paragraph*{Gap Identification:}
 
-Existing tools generally fall into two categories:
-
-\begin{enumerate}
-    \item \textbf{Visualization tools}: Show parallel execution but lack hands-on interaction
-    \item \textbf{Programming environments}: Require coding skills, deterring beginners
-\end{enumerate}
-
-Few tools bridge the gap between conceptual understanding and practical implementation. Fewer still are designed for web platforms or incorporate game mechanics to enhance engagement.
+Existing tools generally fall into two categories: (1)~visualization tools that show parallel execution but lack hands-on interaction, and (2)~programming environments that require coding skills, deterring beginners. Few tools bridge the gap between conceptual understanding and practical implementation, and fewer still are designed for web platforms or incorporate game mechanics to enhance engagement.
 
 %-----------------------------------------------------------------------
 \subsection{Serious Games for Computing Education}
 \label{subsec:cs-games}
 
-Several serious games successfully teach computing concepts:
-
-\paragraph*{CodeCombat:}
-\begin{itemize}
-    \item Teaches programming through RPG gameplay
-    \item Players write real code in Python/JavaScript
-    \item Excellent for syntax and basic algorithms
-    \item Does not address parallel computing
-\end{itemize}
-
-\paragraph*{Human Resource Machine:}
-\begin{itemize}
-    \item Puzzle game teaching assembly-like programming
-    \item Visual programming—no syntax barriers
-    \item Excellent for teaching sequential thinking
-    \item Single-threaded—no parallelism concepts
-\end{itemize}
-
-\paragraph*{Shenzhen I/O:}
-\begin{itemize}
-    \item Hardware design and programming game
-    \item Teaches low-level optimization
-    \item Complex and targeted at experienced programmers
-    \item No explicit parallel computing focus
-\end{itemize}
+Several serious games have successfully taught computing concepts, though none specifically target OpenMP-style parallel computing on web platforms.
+\textbf{CodeCombat} \citep{codecombat} teaches programming through RPG gameplay in which players write real Python or JavaScript; it is effective for syntax and basic algorithms but does not address parallelism.
+\textbf{Human Resource Machine} \citep{human_resource_machine} uses visual assembly-like puzzles to teach sequential algorithmic thinking without syntax barriers, but its single-threaded model excludes parallelism concepts.
+\textbf{Shenzhen I/O} \citep{shenzhen_io} targets hardware design and low-level optimization for experienced programmers; while sophisticated, it has no explicit parallel computing focus.
 
 \paragraph*{Gap in Parallel Computing Games:}
 
@@ -568,12 +459,8 @@ No widely-adopted serious game specifically teaches parallel computing concepts 
 The pedagogical approach for this thesis draws inspiration from physical classroom activities:
 
 \paragraph*{CS Unplugged:}
-\begin{itemize}
-    \item Collection of unplugged computer science activities
-    \item Teaches algorithms, sorting, searching without computers
-    \item Highly engaging but not scalable or repeatable
-    \item Limited to in-person classroom settings
-\end{itemize}
+
+The CS Unplugged \citep{cs_unplugged} collection teaches computer science concepts---algorithms, sorting, searching---through hands-on activities that require no computers. These activities are highly engaging but inherently limited to in-person classroom settings and are difficult to scale or reproduce consistently.
 
 \paragraph*{Professor D'Agostino's Card Sorting Experiments:}
 
@@ -611,7 +498,7 @@ This chapter established the foundational knowledge necessary to understand the 
 
     \item \textbf{Serious Games}: Examined theoretical foundations, empirical evidence, and successful examples of game-based learning in computer science education.
 
-    \item \textbf{Web Development}: Discussed advantages and challenges of web platforms for educational games, and the rationale for selecting Godot Engine with web export capabilities.
+    \item \textbf{Web Development}: Discussed advantages and challenges of web platforms for educational games, and surveyed available game engines with web export capabilities.
 
     \item \textbf{Multiplayer Architecture}: Compared client-server and peer-to-peer models, introduced web transport technologies (HTTP/SSE), and justified the host-authoritative approach for OpenMP simulation.
 

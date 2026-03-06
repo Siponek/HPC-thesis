@@ -17,6 +17,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage[english]{babel}
 \usepackage{csquotes}
 \usepackage{graphicx}
@@ -32,11 +33,13 @@
 \usepackage{siunitx}
 \usepackage{booktabs}
 \usepackage{array,multirow,makecell}
+\usepackage{adjustbox}
 \usepackage{listings}
 \usepackage{geometry}
 \usepackage{titlesec}
 \usepackage{tocloft}
 \usepackage{mdframed}
+\usepackage{microtype}
 
 %-----------------------------------------------------------------------
 %	GEOMETRY
@@ -67,19 +70,22 @@
 %-----------------------------------------------------------------------
 %	CODE LISTING SETUP
 %-----------------------------------------------------------------------
-
+  
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
+ 
 \lstdefinestyle{gdscript}{
-    backgroundcolor=\color{backcolour},
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
+    belowcaptionskip=1\baselineskip,
+    frame=none,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\bfseries\color{green!40!black},
+    commentstyle=\itshape\color{purple!40!black},
+    identifierstyle=\color{blue},
+    backgroundcolor=\color{gray!10!white},
     breakatwhitespace=false,
     breaklines=true,
     captionpos=b,
@@ -140,6 +146,24 @@
 \newcommand*\hpc{HPC}
 
 %-----------------------------------------------------------------------
+% Measurement placeholders — replace \MEASURE{placeholder} with actual values
+% after running benchmarks. Search for \MEASURE to find all unfilled values.
+\newcommand{\MEASURE}[1]{\textbf{[\,#1\,]}}  % renders as bold [placeholder]
+
+% --- Web Export Size (measured via Get-ChildItem + Python gzip) ---
+\newcommand{\exportSizeUncompressed}{135}           % MB, uncompressed export folder (actual: 135.32 MB)
+\newcommand{\exportSizeGzip}{30}                    % MB, gzip-compressed (actual: 30.38 MB at level 6)
+\newcommand{\exportSizeWasm}{40}                    % MB, index.side.wasm=38.88 + index.wasm=1.52 = 40.4 MB
+\newcommand{\exportSizeScenes}{91}                  % MB, index.pck=90.4 MB (bundles scenes, scripts, assets)
+\newcommand{\exportSizeAssets}{\MEASURE{??}}       % MB, subset of .pck — not separately measurable without Godot PCK tool
+\newcommand{\exportSizeGDSync}{\MEASURE{??}}       % MB, subset of .pck — not separately measurable without Godot PCK tool
+
+% --- Memory (measured via Chrome Task Manager: ~530 MB baseline across all states) ---
+% No per-state variables needed — memory is engine-dominated, reported as prose in 06-results.tex
+
+% (Load time and event latency reported as prose in 06-results.tex, no variables needed)
+
+%-----------------------------------------------------------------------
 %	BEGIN DOCUMENT
 %-----------------------------------------------------------------------
 
@@ -149,7 +173,8 @@
 \title{A serious game for High Performance Computing}
 \author{Szymon Zinkowicz}
 \advisor{Prof. Daniele D'Agostino}
-\examiner{Prof. Maura Cerioli}
+% \examiner{Prof. Maura Cerioli}
+\examiner{Prof. Gianna Reggio}
 
 % Generate title page using masterthesis.cls
 \maketitle
@@ -169,8 +194,8 @@
 
     \vspace{1.5\baselineskip}
 
-    \textit{To my girlfriend Magdalena,\\
-        who has always been patient and caring.}
+    %     \textit{To my girlfriend Magdalena,\\
+    %         who has always been focused and keeping me on my toes.}
 }
 
 %-----------------------------------------------------------------------
@@ -180,15 +205,15 @@
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 
-High-Performance Computing (HPC) and parallel programming pose significant pedagogical challenges, requiring students to internalize abstractions at the beginning without tangible interactive experiences. Serious games facilitate intuitive understanding through engagement, surfacing misconceptions and enabling targeted instruction.
+High Performance Computing (HPC) and parallel programming pose significant pedagogical challenges, requiring students to internalize abstractions at the beginning without tangible interactive experiences. Serious games facilitate intuitive understanding through engagement, surfacing misconceptions and enabling targeted instruction.
 
-This thesis presents an educational serious game with the goal to support teachers in presenting fundamental parallel computing concepts—specifically OpenMP (shared memory)—through interactive card-sorting mechanics in web browsers. The game materializes abstract concepts through concrete manipulation: players sort cards collaboratively in multiplayer mode with private buffer zones, simulating OpenMP shared memory with thread-local storage. Students cooperate via a Web interface to minimize sorting time under constraints, learning concepts like speedup, scalability, communication overhead, multithreading, and message passing.
+This thesis presents an educational serious game with the goal to support teachers in presenting fundamental parallel computing concepts—specifically OpenMP (shared memory)—through interactive card-sorting mechanics in web browsers. The game materializes abstract concepts through concrete manipulation: players sort cards collaboratively in multiplayer mode with local buffer zones, simulating OpenMP shared memory with thread-local storage. Students cooperate via a Web interface to minimize sorting time under constraints, learning concepts like speedup, scalability, communication overhead and multithreading.
 
-Implemented using the Godot Engine with web export capabilities, this work investigates both pedagogical and technical challenges inherent in the development of web-based educational multiplayer games. The development process involved the identification of a suitable cross-platform game engine, the design of extensible networking mechanisms, and iterative prototyping to balance educational goals with technical feasibility.
+The development process involved the identification of a suitable cross-platform game engine, the design of extensible networking mechanisms, and iterative prototyping to balance educational goals with technical feasibility.
 
-Key contributions include: (1) novel pedagogical mapping between card-sorting mechanics and HPC concepts derived from physical classroom experiments, (2) robust multiplayer state synchronization for educational purposes using GDSync, (3) responsive UI/UX solutions for manipulating 50+ interactive elements across screen sizes in web browsers, (4) comprehensive documentation of technical challenges and solutions regarding GDSync and multiplayer synchronization, and (5) an open-source, extensible platform for HPC education research suitable for conference publication and scientific journals.
+Key contributions include: (1) original mapping between card-sorting mechanics and HPC concepts derived from physical classroom experiments, (2) robust multiplayer state synchronization for educational purposes using GDSync, (3) responsive UI/UX solutions for manipulating 50+ interactive elements across screen sizes in web browsers, (4) comprehensive documentation of technical challenges and solutions regarding GDSync and multiplayer synchronization, and (5) an open-source, extensible platform for HPC education research suitable for conference publication and scientific journals.
 
-\textbf{Keywords:} Serious Games, High-Performance Computing, Parallel Computing Education, OpenMP,
+\textbf{Keywords:} Serious Games, High Performance Computing, Parallel Computing Education, OpenMP,
 %MPI,
 Web-Based Game Development, Multiplayer Synchronization, Godot Engine, GDScript, Card Sorting, Educational Technology
 
@@ -199,9 +224,9 @@ Web-Based Game Development, Multiplayer Synchronization, Godot Engine, GDScript,
 \chapter*{Acknowledgements}
 \addcontentsline{toc}{chapter}{Acknowledgements}
 
-I would like to express my sincere gratitude to my supervisor, Professor Daniele D'Agostino, for his guidance, valuable insights, and continuous support throughout this thesis work. His much needed enthusiasm was what has put me on the rails for High-Performance Computing research. His expertise in High-Performance Computing and educational methodologies has been instrumental in shaping this research.
+I would like to express my sincere gratitude to my supervisor, Professor Daniele D'Agostino, for his guidance, valuable insights, and continuous support throughout this thesis work. His much needed enthusiasm was what has put me on the rails for High Performance Computing research. His expertise in High Performance Computing and educational methodologies has been instrumental in shaping this research.
 
-I am also grateful to Professor Maura Cerioli for serving as the reviewer of this thesis, steering me in right direction regarding organisational aspects and providing constructive feedback.
+I am also grateful to Professor Maura Cerioli for serving as the reviewer of this thesis for the first period, steering me in right direction regarding organisational aspects and providing constructive feedback.
 
 Special thanks to the Godot Engine community and the developers of the GDSync framework for their open-source contributions and support in resolving technical issues encountered during development.
 
@@ -225,8 +250,8 @@ Finally, I thank my family and friends for their encouragement and patience duri
 \input{chapters/03-methodology}
 \input{chapters/04-architecture}
 \input{chapters/05-implementation}
-\input{chapters/06-problems}
-\input{chapters/07-results}
+\input{chapters/06-results}
+\input{chapters/07-problems}
 \input{chapters/08-conclusion}
 
 
@@ -250,8 +275,9 @@ Finally, I thank my family and friends for their encouragement and patience duri
 \chapter{API Documentation}
 \input{appendices/appendix-c-api-documentation}
 
-\chapter{Study Materials}
-\input{appendices/appendix-d-study-materials}
+%TODO - add study materials (slides, exercises, etc.) as appendix D after the review
+% \chapter{Study Materials}
+% \input{appendices/appendix-d-study-materials}
 
 %-----------------------------------------------------------------------
 

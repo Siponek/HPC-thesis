@@ -1,0 +1,53 @@
+---
+title: "Literature Landscape: Domains Converging in This Thesis"
+---
+graph TD
+    HPC["<b>Parallel Computing Fundamentals</b>
+    <ul style='text-align:left'>
+    <li>Shared-memory (OpenMP)</li>
+    <li>Sequential vs parallel execution</li>
+    <li>Synchronization primitives</li>
+    <li>Speedup and efficiency metrics</li>
+    </ul>"]
+
+    SG["<b>Serious Games in Education</b>
+    <ul style='text-align:left'>
+    <li>Learning through play</li>
+    <li>Constructivist / experiential learning</li>
+    <li>Game-based vs gamification</li>
+    <li>Engagement and motivation</li>
+    </ul>"]
+
+    WEB["<b>Web-Based Game Development</b>
+    <ul style='text-align:left'>
+    <li>Cross-platform browser deployment</li>
+    <li>WebAssembly / HTML5 export</li>
+    <li>Game engine trade-offs (Godot)</li>
+    <li>UI/UX for educational tools</li>
+    </ul>"]
+
+    NET["<b>Multiplayer Networking Architecture</b>
+    <ul style='text-align:left'>
+    <li>Client-server vs P2P models</li>
+    <li>HTTP/SSE relay for browser constraints</li>
+    <li>State synchronization</li>
+    <li>Lobby and session management</li>
+    </ul>"]
+
+    THESIS["<b>HPC Sorting — Serious Game</b><br/><i>(this thesis)</i>
+    <ul style='text-align:left'>
+    <li>Card-sorting game that maps parallel computing concepts to tangible game mechanics</li>
+    <li>Deployed as a web-first multiplayer application</li>
+    <li>Each domain contributes essential knowledge and constraints that shaped the game's design and implementation</li>
+    </ul>"]
+
+    HPC -->|"domain knowledge"| THESIS
+    SG -->|"pedagogy"| THESIS
+    WEB -->|"platform"| THESIS
+    NET -->|"architecture"| THESIS
+
+    style HPC fill:#D4E6F1,stroke:#2E86C1,stroke-width:2px,color:#000
+    style SG fill:#D5F5E3,stroke:#27AE60,stroke-width:2px,color:#000
+    style WEB fill:#FCF3CF,stroke:#F39C12,stroke-width:2px,color:#000
+    style NET fill:#FADBD8,stroke:#E74C3C,stroke-width:2px,color:#000
+    style THESIS fill:#E8DAEF,stroke:#7D3C98,stroke-width:3px,color:#000
