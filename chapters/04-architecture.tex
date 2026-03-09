@@ -315,29 +315,31 @@ Architecture-level performance strategies include:
 Observed constraints and measured outcomes are discussed in Chapter~\ref{ch:results}.
 
 %-----------------------------------------------------------------------
-\section{Algorithm-Agnostic Design: Supporting Parallel Sorting Strategies}
+\section{Architectural Support for Parallel Sorting Strategies}
 \label{sec:algorithm-mode-extensibility}
 
-The game does not enforce a specific sorting algorithm. Instead, its architecture provides general-purpose mechanics---a shared card container, player local buffers, and barrier synchronization---that naturally accommodate \emph{any} parallel sorting strategy a player (or instructor) chooses to employ. This section demonstrates how two well-known parallel algorithms, \textbf{Parallel Merge Sort} and \textbf{Parallel Quicksort} \citep{sanders2019sequential}, can be carried out within the existing tool without any code changes.
+The game does not enforce a specific sorting algorithm. Instead, its architecture provides general-purpose mechanics---a shared card container, player local buffers, and barrier synchronization---that support \textbf{static partitioning strategies} such as parallel merge sort. As established in the domain model (Section~\ref{subsec:supported-strategies}), the game does \emph{not} support recursive strategies such as parallel quicksort, which require dynamic pivot selection and multi-round data redistribution. This section demonstrates how parallel merge sort can be carried out within the existing tool without code changes, explains why quicksort falls outside the current mechanics, and identifies what architectural extensions would be needed to support it in the future.
 
 %-----------------------------------------------------------------------
-\subsection{How the Existing Mechanics Support Any Algorithm}
+\subsection{How the Existing Mechanics Support Static Partitioning}
 \label{subsec:algo-mode-arch-support}
 
-Three existing architectural components form a general-purpose substrate for parallel sorting strategies:
+Three existing architectural components form the substrate for static partitioning strategies:
 
 \begin{itemize}
-    \item \textbf{Shared card container (shared memory)}: All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative partitioning (quicksort), independent sub-array sorting (merge sort), or any other rearrangement strategy.
+    \item \textbf{Shared card container (shared memory)}: All cards are visible and draggable in a common horizontal container. Any player can reorder any card at any time, just as any thread can access shared memory. This allows collaborative rearrangement and independent sub-array sorting.
 
-    \item \textbf{Player local buffers (partitioned shared memory)}: Each player has local buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players naturally use buffers for local sorting (merge sort) or for staging cards during partitioning (quicksort).
+    \item \textbf{Player local buffers (partitioned shared memory)}: Each player has local buffer slots for temporarily holding cards. The buffer contiguity validation enforces that a player works on a logically coherent subset of the data. Players use buffers for local sorting before returning cards to the shared container.
 
-    \item \textbf{Barrier synchronization (\texttt{\#pragma omp barrier})}: The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging, or after partitioning before recursing into sub-arrays. The main-thread selection mechanism is currently considered as "first player to reach barrier".
+    \item \textbf{Barrier synchronization (\texttt{\#pragma omp barrier})}: The \texttt{BarrierManager}'s three-state FSM (\texttt{RUNNING} $\to$ \texttt{WAITING\_AT\_BARRIER} $\to$ \texttt{BARRIER\_ACTIVE}) lets players coordinate between algorithm phases---e.g., after local sorting before merging. The main-thread selection mechanism assigns the coordinator role to the first player to reach the barrier.
 \end{itemize}
+
+These components directly support the ``divide into intervals, sort locally, assemble'' workflow described in the domain model (Section~\ref{sec:game-description}). They do \emph{not} support recursive repartitioning, dynamic pivot negotiation, or task-based sub-group splitting required by quicksort.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/diagrams/algorithm-mode-class-extension.png}
-    \caption{Existing component architecture and how it supports parallel sorting strategies: \texttt{CardManager} provides card logic, \texttt{MultiplayerCardManager} adds synchronization, \texttt{BarrierManager} provides coordination, and \texttt{CardBuffer} provides per-thread work areas---together enabling any sorting algorithm}
+    \caption{Existing component architecture and how it supports parallel sorting strategies: \texttt{CardManager} provides card logic, \texttt{MultiplayerCardManager} adds synchronization, \texttt{BarrierManager} provides coordination, and \texttt{CardBuffer} provides per-thread work areas---together supporting static partitioning strategies such as parallel merge sort}
     \label{fig:algorithm-mode-class-extension}
 \end{figure}
 
@@ -369,59 +371,55 @@ The pedagogical mappings that emerge naturally from this strategy:
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Performing Parallel Quicksort with the Tool}
+\subsection{Why Parallel Quicksort Is Not Supported}
 \label{subsec:quicksort-mode}
 
-Players can execute a parallel quicksort strategy using the same mechanics (Figure~\ref{fig:parallel-quicksort-game-flow}):
+Parallel quicksort requires capabilities that fall outside the current game mechanics:
 
 \begin{enumerate}
-    \item \textbf{Pivot selection}: Players agree on a pivot card (e.g., the median of three randomly chosen cards, or simply a card chosen by the ``coordinator'').
-    \item \textbf{Collaborative partition}: All players simultaneously rearrange cards in the shared container so that values $\leq$ pivot are on the left and values $>$ pivot are on the right.
-    \item \textbf{Recursive split}: Players informally divide into sub-groups---one group works on the left partition, the other on the right. Each sub-group repeats the process on their sub-array until all cards are sorted.
+    \item \textbf{Dynamic pivot selection}: Players would need a mechanism to collectively agree on a pivot value at each recursion level. The current game has no in-game communication channel for negotiating pivots---players can only move cards.
+    \item \textbf{Multi-round recursive repartitioning}: After each pivot-based partition, the remaining sub-arrays must be recursively subdivided among smaller sub-groups. The game's single-round ``pick your interval, sort locally, assemble'' workflow has no concept of recursive sub-rounds or dynamic sub-group formation.
+    \item \textbf{Task-based sub-group splitting}: In parallel quicksort, the set of threads working on a sub-problem changes at each recursion level. The current barrier mechanism synchronizes \emph{all} players simultaneously; it cannot synchronize arbitrary subsets independently.
 \end{enumerate}
+
+Figure~\ref{fig:parallel-quicksort-game-flow} illustrates how players \emph{might conceptually} perform quicksort if the mechanics were extended, but the current tool does not enforce or support this workflow.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.92\textwidth]{figures/diagrams/parallel-quicksort-game-flow}
-    \caption{How players perform parallel quicksort using the existing tool: select a pivot, collaboratively partition cards around it, then split into sub-groups for recursive sorting}
+    \caption{Conceptual illustration of how parallel quicksort \emph{could} be performed if the game were extended with dynamic pivot selection, recursive sub-rounds, and sub-group barriers. This workflow is \textbf{not currently supported} by the tool.}
     \label{fig:parallel-quicksort-game-flow}
 \end{figure}
 
-The pedagogical mappings that emerge naturally from this strategy:
-\begin{itemize}
-    \item \emph{Pivot quality $\to$ load balance}: a poor pivot creates unequal sub-arrays, visually demonstrating workload imbalance
-    \item \emph{Collaborative partitioning}: multiple players moving cards simultaneously $\equiv$ parallel partition step
-    \item \emph{Task-based parallelism}: player sub-groups independently working on sub-arrays $\equiv$ \texttt{\#pragma omp task}
-    \item \emph{Communication overhead}: time spent agreeing on pivots and coordinating partitions $\equiv$ inter-thread communication cost
-\end{itemize}
+Extending the game to support guided quicksort is identified as future work in Chapter~\ref{ch:conclusion}, Section~\ref{subsec:medium-term-extensions}.
 
 %-----------------------------------------------------------------------
-\subsection{Comparison of Strategies Within the Tool}
+\subsection{Comparison: Merge Sort (Supported) vs.\ Quicksort (Not Supported)}
 \label{subsec:algo-mode-comparison}
 
-Table~\ref{tab:algo-mode-comparison} summarizes how the two strategies differ in their use of existing game components and the HPC concepts they make visible to players.
+Table~\ref{tab:algo-mode-comparison} summarizes why parallel merge sort is supported by the existing mechanics while parallel quicksort is not.
 
 \begin{table}[htbp]
     \centering
-    \caption{Comparison of parallel sorting strategies playable within the existing tool}
+    \caption{Comparison of parallel sorting strategies: merge sort is supported; quicksort requires extensions}
     \label{tab:algo-mode-comparison}
     \begin{tabular}{@{}p{3.8cm}p{5.2cm}p{5.2cm}@{}}
         \toprule
-        \textbf{Aspect}    & \textbf{Merge Sort Strategy}           & \textbf{Quicksort Strategy}                \\
+        \textbf{Aspect}    & \textbf{Merge Sort (Supported)}              & \textbf{Quicksort (Not Supported)}                                     \\
         \midrule
-        Parallelism model  & Data parallelism (equal partitions)    & Task parallelism (recursive fork)          \\
-        Barrier usage      & Heavy---between every merge round      & Light---coordination at partition steps    \\
-        Buffer usage       & Heavy---local sorting in local buffers & Light---partition done in shared container \\
-        Load balance       & Always balanced (equal partitions)     & Variable---depends on pivot quality        \\
-        Primary HPC lesson & Barrier sync, reduction pattern        & Load imbalance, task creation              \\
+        Parallelism model  & Data parallelism (equal partitions)          & Task parallelism (recursive fork)                                      \\
+        Partition method   & Static, pre-agreed intervals                 & Dynamic, pivot-dependent                                               \\
+        Barrier usage      & Between merge rounds (supported)             & Between partition rounds (not supported---requires sub-group barriers) \\
+        Buffer usage       & Heavy---local sorting in local buffers       & Light---partition done in shared container                             \\
+        Load balance       & Always balanced (equal partitions)           & Variable---depends on pivot quality                                    \\
+        Primary HPC lesson & Barrier sync, reduction pattern              & Load imbalance, task creation                                          \\
+        Game support       & \textbf{Yes}---existing mechanics sufficient & \textbf{No}---requires pivot UI, recursive rounds, sub-group barriers  \\
         \bottomrule
     \end{tabular}
 \end{table}
-
-The tool's algorithm-agnostic design means instructors can assign different strategies to different groups and have students compare their experiences---e.g., observing that merge sort leads to more barrier usage while quicksort exposes load-imbalance issues. This flexibility is a direct consequence of the general-purpose shared-container, public-buffer, and barrier architecture.
 
 %-----------------------------------------------------------------------
 \section{Summary}
 \label{sec:architecture-summary}
 
-This chapter documented architectural decisions that made the tool technically feasible and pedagogically interpretable in a web-first multiplayer context. The focus was on synchronization boundaries, state visibility semantics, and authority patterns rather than exhaustive implementation detail. Section~\ref{sec:algorithm-mode-extensibility} demonstrated that the existing architecture---the shared card container, player work buffers, and barrier synchronization---is algorithm-agnostic: players can execute parallel merge sort, quicksort, or any other sorting strategy without requiring tool modifications. Detailed implementation evidence is provided in Chapter~\ref{ch:implementation}, while educational and operational effectiveness is evaluated in Chapter~\ref{ch:results}.
+This chapter documented architectural decisions that made the tool technically feasible and pedagogically interpretable in a web-first multiplayer context. The focus was on synchronization boundaries, state visibility semantics, and authority patterns rather than exhaustive implementation detail. Section~\ref{sec:algorithm-mode-extensibility} demonstrated that the existing architecture---the shared card container, player work buffers, and barrier synchronization---supports \textbf{static partitioning strategies} such as parallel merge sort. Parallel quicksort is \emph{not} supported by the current mechanics due to its requirement for dynamic pivot selection, recursive repartitioning, and sub-group barriers; extending the tool to support quicksort is discussed as future work in Chapter~\ref{ch:conclusion}. Detailed implementation evidence is provided in Chapter~\ref{ch:implementation}, while educational and operational effectiveness is evaluated in Chapter~\ref{ch:results}.

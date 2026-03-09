@@ -4,7 +4,7 @@
 
 This chapter presents key implementation mechanisms of the HPC Sorting Serious Game. It covers the core game logic, multiplayer synchronization protocol, barrier synchronization (a direct pedagogical mapping to \texttt{\#pragma omp barrier}), the web-export compatibility patch, and development observability tooling. Tool/framework selection rationale is documented in Chapter~\ref{ch:methodology}, architectural decisions in Chapter~\ref{ch:architecture}, and effectiveness evaluation in Chapter~\ref{ch:results}.
 
-The complete source code is available in the project repository \citep{github_project}. External tool and framework links are listed in Appendix~\ref{app:d:tool-links}.
+The complete source code is available in the project repository \citep{github_project}.
 
 %-----------------------------------------------------------------------
 \section{Implementation Focus Areas}
@@ -30,7 +30,7 @@ The single-player card management logic resides in \texttt{card\_manager.gd} (70
 \subsection{Card Generation and Initialization}
 \label{subsec:card-generation}
 
-Card generation supports configurable counts (10--200) with optional unique or repeated values. The initialization sequence in \texttt{\_ready()} follows a deterministic pipeline:
+Card generation supports configurable counts (1--200) with optional unique or repeated values. The initialization sequence in \texttt{\_ready()} follows a deterministic pipeline:
 
 \begin{lstlisting}[caption={Card manager initialization pipeline (card\_manager.gd)}]
 func _ready():
@@ -116,7 +116,7 @@ This inheritance structure allows the multiplayer mode to reuse all card generat
 
 The multiplayer \texttt{\_ready()} overrides the parent to branch on host vs.\ client role:
 
-\begin{lstlisting}[caption={Multiplayer initialization with host/client branching (multiplayer\_card\_manager.gd)}]
+\begin{lstlisting}[caption={Multiplayer initialization with host/client (multiplayer\_card\_manager.gd)}]
 func _ready():
     is_host = ConnectionManager.am_i_host()
     my_client_id = ConnectionManager.get_my_client_id()

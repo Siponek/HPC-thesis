@@ -1,7 +1,6 @@
 % !TeX root = ../main.tex
 \chapter{Methodology}
 \label{ch:methodology}
-
 This chapter describes the research methodology, requirements analysis, design approach, and technology selection decisions that guided the development of the HPC Sorting Serious Game. The methodology follows a Design Science Research approach, emphasizing iterative development and evaluation.
 
 %-----------------------------------------------------------------------
@@ -43,6 +42,81 @@ DSR is appropriate for this research because:
     \item Evaluation can be both utility-based (does it work?) and design-based (is it well-constructed?)
 \end{itemize}
 
+%-----------------------------------------------------------------------
+\section{Game Description: The Domain Model}
+\label{sec:game-description}
+%-----------------------------------------------------------------------
+
+This section provides a complete description of the game as experienced by players. It serves as the \emph{domain model} for the system: all requirements, architectural decisions, and implementation choices in subsequent chapters and sections derive from the gameplay described here. Parallel computing concepts referenced below are introduced in Chapter~\ref{ch:background}.
+
+%-----------------------------------------------------------------------
+\subsection{Setup}
+\label{subsec:game-setup}
+
+$m$~players (students) are selected to collaboratively sort a deck of $n$~numbered cards. Before play begins the group agrees on a \textbf{parallel strategy}---a plan for dividing the work. The canonical strategy is \emph{interval partitioning}: each player is assigned a contiguous block of values. For example, with $n = 100$ cards and $m = 10$ players, player~1 is responsible for cards~1--10, player~2 for cards~11--20, and so on.
+
+The game begins with all $n$~cards placed face-up in a \textbf{shared container}---a single space visible and accessible to every player, representing shared memory. A timer starts.
+
+%-----------------------------------------------------------------------
+\subsection{Local Sorting Phase}
+\label{subsec:local-sorting-phase}
+
+Each player picks up the cards belonging to their assigned interval from the shared container and moves them into their own \textbf{local buffer}---a dedicated work area visible only to that player. Players then sort their subset independently and in parallel. No coordination between players is required during this phase; each player works on their own cards without interference.
+
+%-----------------------------------------------------------------------
+\subsection{Barrier and Assembly Phase}
+\label{subsec:barrier-assembly-phase}
+
+When a player has finished sorting their local subset, they signal readiness by reaching a \textbf{barrier point}. No player may proceed to the next step until every player has arrived at the barrier---directly modeling the \texttt{\#pragma omp barrier} construct from OpenMP. Once the barrier is released, the \textbf{main thread player}---the first player to have finished sorting their subset---assembles the individually sorted subsets back into the shared container in the correct global order.
+
+%-----------------------------------------------------------------------
+\subsection{Completion and Measurement}
+\label{subsec:completion-measurement}
+
+The game ends when all $n$~cards are in the shared container in ascending order. The elapsed time~$T_m$ is recorded. Players can then compare this time against a \textbf{sequential baseline}~$T_1$---the time measured when a single player sorts all $n$~cards alone in single-player mode---to observe the parallel speedup~$S = T_1 / T_m$.
+
+\paragraph*{Single-player mode.}
+Single-player mode represents sequential execution by a single thread. The player works alone, sorting all cards without any synchronization overhead. The measured time serves as the sequential baseline~$T_1$. A player may also create a multiplayer session without other participants; the gameplay is identical, but operated through the multiplayer interface.
+
+%-----------------------------------------------------------------------
+\subsection{Supported Sorting Strategies}
+\label{subsec:supported-strategies}
+
+The game's mechanics---pre-assigned fixed intervals, independent local sorting, barrier synchronization, and ordered assembly---naturally support \textbf{static partitioning strategies} such as parallel merge sort (divide into buffers, sort locally, merge back). However, the game does \emph{not} support \textbf{recursive strategies} such as parallel quicksort. Quicksort requires dynamic pivot selection and recursive repartitioning at runtime: threads must agree on a pivot, redistribute data based on the pivot, and then recursively repeat the process on sub-partitions. This dynamic, multi-round redistribution cannot be expressed through the game's single-round ``pick your interval, sort locally, assemble'' workflow. The architectural implications of this constraint are discussed in Chapter~\ref{ch:architecture}.
+
+%-----------------------------------------------------------------------
+\subsection{Summary of Gameplay Elements}
+\label{subsec:gameplay-elements-summary}
+
+Table~\ref{tab:gameplay-elements} summarizes the mapping between game elements and their parallel computing counterparts.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Core gameplay elements and their parallel computing counterparts.}
+    \label{tab:gameplay-elements}
+    \begin{tabular}{@{}p{4.2cm}p{4.5cm}p{4.8cm}@{}}
+        \toprule
+        \textbf{Game element}    & \textbf{HPC concept}          & \textbf{Mechanic}                  \\
+        \midrule
+        $m$~players              & $m$~parallel threads          & Simultaneous independent action    \\
+        \midrule
+        Shared card container    & Shared memory                 & All players see the same cards     \\
+        \midrule
+        Private player buffer    & Thread-local storage          & Cards invisible to other players   \\
+        \midrule
+        Interval assignment      & Static work distribution      & Pre-game agreement                 \\
+        \midrule
+        Barrier point            & \texttt{\#pragma omp barrier} & All must arrive before assembly    \\
+        \midrule
+        Main thread player       & Master / coordinator thread   & First to finish; assembles results \\
+        \midrule
+        Timer ($T_m$ vs.\ $T_1$) & Speedup $S = T_1 / T_m$       & Measured automatically             \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%-----------------------------------------------------------------------
+
 \section{Requirements Analysis}
 \label{sec:requirements}
 
@@ -79,8 +153,8 @@ The primary purpose of the game is education. Requirements were derived from HPC
 
 \paragraph*{ER4: Progressive Difficulty}
 \begin{itemize}
-    \item Support variable numbers of cards (10--200) for scalability lessons
-    \item Support variable numbers of players (E.g. 10--40) for parallelism degree
+    \item Support variable numbers of cards (1--200) for scalability lessons
+    \item Support variable numbers of players (E.g. 2--40) for parallelism degree
     \item Provide different sorting challenges (random, partially sorted, reverse sorted)
 \end{itemize}
 
@@ -192,13 +266,15 @@ Non-functional requirements specify quality attributes of the system:
 \subsection{Core Concept}
 \label{subsec:core-concept}
 
-The game presents players with a deck of numbered cards that must be sorted in ascending order. This simple metaphor maps directly to parallel sorting algorithms, with different game modes representing different execution paradigms:
+The game uses a deck of numbered cards that players must arrange in ascending order. While the task itself is simple, it serves as an analogy for several models of sorting execution used in parallel computing. Different gameplay configurations correspond to different computational paradigms.
 
-\paragraph*{Single-Player Mode (Sequential Execution):} Represents traditional sequential algorithm execution where a single process sorts all data. The player works alone with all cards visible, performing the entire sorting task independently.
+\paragraph*{Single-Player Mode (Sequential Execution):}
+In this configuration the sorting task is handled by a single participant. All cards are visible and accessible to the player, who performs every step of the ordering process alone. This mirrors the behaviour of a sequential algorithm, where a single process operates on the entire dataset without concurrent assistance.
 
-\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):} Represents shared-memory parallelism where multiple threads cooperate on a single address space. All players work collaboratively with cards visible in a shared container (representing shared memory), each player uses work buffer zones for local sorting (representing partitioned regions of shared memory), and players work simultaneously without forced turn-taking (representing OpenMP's implicit synchronization and parallel execution model).
+\paragraph*{Multiplayer Mode (OpenMP Shared-Memory Parallelism):}
+The multiplayer configuration introduces cooperative sorting. Multiple players manipulate the same visible card set stored in a shared container, analogous to a shared-memory environment. Each participant may temporarily move subsets of cards into local buffer zones while organizing them before reintegrating them into the common space. Because players act concurrently rather than in strict turns, the interaction resembles the execution model of OpenMP, where threads operate in parallel while implicitly coordinating access to shared data.
 
-The complete architecture and pedagogical mapping are detailed in Chapter~\ref{ch:architecture}.
+A detailed description of the system architecture and the educational rationale behind this mapping is provided in Chapter~\ref{ch:architecture}.
 
 \begin{figure}[htbp]
     \centering

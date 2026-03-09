@@ -23,7 +23,7 @@ The implemented system includes all planned core features:
 
 \paragraph*{Single-Player Mode:}
 \begin{itemize}
-    \item Configurable number of cards (10--200)
+    \item Configurable number of cards (1--200)
     \item Random card shuffling and generation
     \item Drag-and-drop card manipulation
     \item local buffer zones for local sorting
@@ -35,7 +35,7 @@ The implemented system includes all planned core features:
 \paragraph*{Multiplayer Mode:}
 \begin{itemize}
     \item Lobby system with room creation and joining
-    \item Support for 10--40 players
+    \item Support for 2--40 players
     \item HTTP/SSE relay-based networking
     \item Real-time state synchronization across clients
     \item Shared container visible to all players (OpenMP shared memory)
@@ -484,7 +484,7 @@ Assessment of how well the completed system meets the requirements defined in Se
 
     \item \textbf{Educational Scaffolding}: Limited in-game explanations; requires instructor context
 
-    \item \textbf{Sorting Algorithm Guidance}: The tool's algorithm-agnostic design supports any parallel sorting strategy (see Chapter~\ref{ch:architecture}, Section~\ref{sec:algorithm-mode-extensibility}), but does not yet provide guided step-by-step modes for specific algorithms
+    \item \textbf{Sorting Algorithm Guidance}: The tool supports static partitioning strategies such as parallel merge sort (see Chapter~\ref{ch:architecture}, Section~\ref{sec:algorithm-mode-extensibility}), but does not support recursive strategies such as parallel quicksort and does not yet provide guided step-by-step modes for specific algorithms
 
     \item \textbf{Performance Metrics}: Basic timing and moves; lacks detailed profiling (speedup curves, scalability graphs)
 

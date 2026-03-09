@@ -248,28 +248,28 @@ Enhancements requiring 3--6 months of development:
 \paragraph*{Additional Game Modes:}
 
 \begin{enumerate}
-    \item \textbf{Guided Algorithm Modes}: While the tool already supports any parallel sorting strategy through its algorithm-agnostic design (Chapter~\ref{ch:architecture}, Section~\ref{sec:algorithm-mode-extensibility}), future work could add \emph{guided} modes that walk students through specific algorithms step-by-step \citep{sanders2019sequential}:
+    \item \textbf{Guided Algorithm Modes}: The tool currently supports static partitioning strategies such as parallel merge sort through its existing mechanics (Chapter~\ref{ch:architecture}, Section~\ref{sec:algorithm-mode-extensibility}). Future work could add \emph{guided} modes that walk students through specific algorithms step-by-step \citep{sanders2019sequential}:
           \begin{itemize}
-              \item \textbf{Guided Parallel Merge Sort}: System-enforced phase progression (divide $\to$ local sort $\to$ merge rounds) with automatic partition assignment and barrier triggers, building on the strategy players can already execute freely.
-              \item \textbf{Guided Parallel Quicksort}: System-provided pivot selection UI, partition validation, and automatic sub-group assignment, adding structure to the quicksort strategy players can already perform manually.
+              \item \textbf{Guided Parallel Merge Sort}: System-enforced phase progression (divide $\to$ local sort $\to$ merge rounds) with automatic partition assignment and barrier triggers, adding structure to the strategy players can already execute freely.
+              \item \textbf{Guided Parallel Quicksort}: This would require \emph{new game mechanics} not present in the current tool: a pivot selection UI, partition validation, recursive sub-round management, and sub-group barrier synchronization. This represents a significant architectural extension rather than a guided overlay on existing mechanics.
               \item Sample sort (distributed-memory style, future MPI extension)
               \item Bitonic sort
           \end{itemize}
 
-          Table~\ref{tab:future-algo-mode-comparison} summarizes the pedagogical distinctions between the two primary strategies and what guided modes would add.
+          Table~\ref{tab:future-algo-mode-comparison} summarizes the pedagogical distinctions and implementation effort.
 
           \begin{table}[htbp]
               \centering
-              \caption{Parallel sorting strategies supported by the tool and potential guided-mode enhancements}
+              \caption{Potential guided-mode enhancements for parallel sorting strategies}
               \label{tab:future-algo-mode-comparison}
               \begin{tabular}{@{}p{3.5cm}p{5cm}p{5cm}@{}}
                   \toprule
-                  \textbf{Aspect}   & \textbf{Merge Sort}                             & \textbf{Quicksort}                                     \\
+                  \textbf{Aspect}  & \textbf{Merge Sort}                          & \textbf{Quicksort}                                                       \\
                   \midrule
-                  Already supported & Buffers for local sort, barriers for merge sync & Shared container for partition, sub-group coordination \\
-                  Guided mode adds  & Auto partition assignment, phase enforcement    & Pivot UI, partition validation, auto sub-group split   \\
-                  Primary lesson    & Barrier sync, reduction                         & Load imbalance, task fork                              \\
-                  Effort estimate   & Medium (3--4 weeks)                             & High (5--7 weeks)                                      \\
+                  Current support  & Playable with existing mechanics             & \textbf{Not supported}---requires new mechanics                          \\
+                  Guided mode adds & Auto partition assignment, phase enforcement & Pivot UI, partition validation, recursive sub-rounds, sub-group barriers \\
+                  Primary lesson   & Barrier sync, reduction                      & Load imbalance, task fork                                                \\
+                  Effort estimate  & Medium (3--4 weeks)                          & High (5--7 weeks)                                                        \\
                   \bottomrule
               \end{tabular}
           \end{table}
@@ -315,7 +315,7 @@ Enhancements requiring 3--6 months of development:
     \item Real-time monitoring of student gameplay
     \item Assessment and analytics integration
     \item Customizable game parameters and scenarios
-    \item Integration with study materials, classroom activities, and assessment rubrics provided in Appendix~\ref{app:d:classroom-activities}
+          % \item Integration with study materials, classroom activities, and assessment rubrics provided in Appendix~\ref{app:d:classroom-activities}
 \end{itemize}
 
 %-----------------------------------------------------------------------

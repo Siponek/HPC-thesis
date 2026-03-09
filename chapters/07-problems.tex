@@ -442,10 +442,13 @@ Not all students have high-end hardware. The game needed to run acceptably acros
 
 The following strategies were evaluated; not all were fully implemented in the current version:
 \begin{itemize}
-    \item Reduce draw calls through batching
-    \item Viewport culling to avoid rendering off-screen cards (partially implemented via Godot's built-in culling)
-    \item Texture atlases, level-of-detail (LOD), and adjustable quality settings were considered but deferred as profiling showed rendering bottlenecks were manageable for the target card counts (see Chapter~\ref{ch:results}, Section~\ref{subsec:framerate})
+    \item Reduce draw calls through Godot's built-in 2D batching
+    \item Viewport culling to avoid rendering off-screen cards (handled by Godot's built-in culling)
+    \item Texture atlases to reduce texture swaps when rendering many card sprites
+    \item Server-side gzip/Brotli compression of the exported WebAssembly and resource files, reducing the network transfer size from approximately 135~MB to 60~MB
 \end{itemize}
+
+Profiling showed that rendering bottlenecks were manageable for the target card counts (1--200), so more aggressive optimizations were not required (see Chapter~\ref{ch:results}, Section~\ref{subsec:export-size}).
 
 %-----------------------------------------------------------------------
 \section{Testing Challenges}
