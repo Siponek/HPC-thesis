@@ -354,17 +354,16 @@ provided the best overall balance for this thesis context. Godot~4.x exports to 
     \label{tab:engine-comparison}
     \begin{tabular}{@{}lcccc@{}}
         \toprule
-        \textbf{Criterion}      & \textbf{Unity}    & \textbf{Unreal}       & \textbf{Godot}     & \textbf{Cocos Creator} \\
+        \textbf{Criterion} & \textbf{Unity}   & \textbf{Unreal}       & \textbf{Godot} & \textbf{Cocos Creator} \\
         \midrule
-        Free/Open Source        & Partial           & Partial               & Yes (MIT)          & Yes                    \\
-        2D Performance          & Good              & Fair                  & Excellent          & Excellent              \\
-        Web Export Status       & Supported (WebGL) & Removed in UE5        & Native (WASM)      & Supported (WebGL)      \\
-        Typical Web Export Size & 50--100~MB        & N/A (Pixel Streaming) & 12--28~MB          & 15--30~MB              \\
-        Iteration Speed         & Medium (compile)  & Slow (C++ compile)    & Fast (interpreted) & Medium (transpile)     \\
-        Learning Curve          & Medium            & Steep                 & Gentle             & Medium                 \\
-        Networking APIs         & Good              & Excellent             & Good               & Minimal                \\
-        Community Size          & Large             & Large                 & Growing            & Small                  \\
-        License Cost            & Free tier limited & 5\% royalty $>$\$1M   & Free               & Free                   \\
+        License            & Freemium         & 5\% royalty           & MIT (free)     & Free                   \\
+        2D Performance     & Good             & Fair                  & Excellent      & Excellent              \\
+        Web Export         & WebGL            & Removed in UE5        & WASM           & WebGL                  \\
+        Export Size        & 50--100~MB       & N/A (Pixel Streaming) & 60--160~MB     & 15--30~MB              \\
+        Iteration Speed    & Medium (compile) & Slow (C++ compile)    & Fast           & Medium (transpile)     \\
+        Learning Curve     & Medium           & Steep                 & Gentle         & Medium                 \\
+        Networking APIs    & Good             & Excellent             & Good           & Minimal                \\
+        Community Size     & Large            & Large                 & Growing        & Small                  \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -522,7 +521,7 @@ Once a WebRTC connection is established, \texttt{RTCDataChannel} provides both r
 Beyond the transport layer, all application-level features must be built from scratch: lobby management (room creation, player lists, join/leave lifecycle), host election and migration, state synchronization (variable replication, conflict resolution), RPC dispatch (function exposure, parameter serialization), ownership tracking, and a security model to prevent unauthorized remote calls. These features alone represent weeks of development effort.
 
 \paragraph*{Partial solution---PackRTC addon:}
-The PackRTC addon (already present in this project's \texttt{addons/} directory) provides a partial implementation: it handles WebRTC signaling via a hosted server at \texttt{packcloud.himaji.xyz}, supports both mesh and server/client topologies, and manages ICE candidate exchange. However, PackRTC covers \textit{only} the transport layer---it provides no lobby management, state synchronization, RPC system, or security model. Building these features on top of PackRTC was estimated to require 6--8~weeks, comparable to the raw Godot networking approach.
+The PackRTC addon \citep{packrtc_addon} (already present in this project's \texttt{addons/} directory) provides a partial implementation: it handles WebRTC signaling via a hosted server at \texttt{packcloud.himaji.xyz}, supports both mesh and server/client topologies, and manages ICE candidate exchange. However, PackRTC covers \textit{only} the transport layer---it provides no lobby management, state synchronization, RPC system, or security model. Building these features on top of PackRTC was estimated to require 6--8~weeks, comparable to the raw Godot networking approach.
 
 \paragraph*{Estimated total effort:} 8--12~weeks for a complete implementation, with significant additional debugging overhead for NAT traversal edge cases across diverse classroom network configurations.
 
@@ -909,7 +908,7 @@ To assess the criteria outlined above, the following methodologies were applied:
 
 \paragraph*{Development Platform:}
 \begin{itemize}
-    \item \textbf{OS}: Windows 11 / Linux (Ubuntu 22.04)
+    \item \textbf{OS}: Windows 11
     \item \textbf{IDE}: Visual Studio Code with GDScript extension
     \item \textbf{Engine}: Godot Engine 4.5.x
     \item \textbf{Version Control}: Git with GitHub repository
@@ -917,9 +916,9 @@ To assess the criteria outlined above, the following methodologies were applied:
 
 \paragraph*{Testing Environment:}
 \begin{itemize}
-    \item Primary: Chrome 120+ (Windows, macOS)
-    \item Secondary: Firefox 120+ (Windows, Linux)
-    \item Tertiary: Safari 17+ (macOS)
+    \item Primary: Chrome 145+ (Windows, Linux)
+    \item Secondary: Firefox 148+ (Windows, Linux)
+    \item Tertiary: Edge 145+ (Linux)
     \item Local development server for testing
 \end{itemize}
 

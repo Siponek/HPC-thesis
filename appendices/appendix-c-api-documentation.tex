@@ -256,7 +256,7 @@ Autoload that wraps GDSync signals into game-level events.
 
 This project uses GDSync's explicit function exposure model. GDSync does \emph{not} use annotations or decorators for RPC. Instead, functions are registered at runtime:
 
-\begin{lstlisting}[caption={GDSync function exposure (actual API)}]
+\begin{lstlisting}[style={gdscript}, caption={GDSync function exposure (actual API)}]
 # Expose a function for remote calls
 GDSync.expose_func(self.my_function)
 

@@ -3,26 +3,27 @@
 !include ../shared/theme.puml
 
 ' --- FONT SIZES ---
-skinparam TitleFontSize 38
-skinparam SwimlaneTitleFontSize 34
-skinparam NoteFontSize 34
-skinparam ActivityFontSize 34
-skinparam ActivityDiamondFontSize 34
+skinparam TitleFontSize 44
+skinparam SwimlaneTitleFontSize 38
+skinparam NoteFontSize 38
+skinparam ActivityFontSize 38
+skinparam ActivityDiamondFontSize 38
 skinparam style strictuml
 skinparam ArrowThickness 4 
-skinparam FooterFontSize 34
-skinparam ParticipantFontSize 34
-skinparam LegendFontSize 34
-skinparam SwimlaneTitleFontSize 34
+skinparam FooterFontSize 44
+skinparam ParticipantFontSize 38
+skinparam LegendFontSize 38
+skinparam SwimlaneTitleFontSize 38
 skinparam SwimlaneBorderThickness 2
-skinparam DefaultFontSize 34
+skinparam DefaultFontSize 38
+
 
 ' --- COLORS ---
 skinparam ActivityDiamondBackgroundColor #FFFFCC
 skinparam ActivityBackgroundColor #F0F8FF
 skinparam PartitionBackgroundColor #FAFAFA
 
-title Performing Parallel Quicksort with the Existing Tool
+' title Performing Parallel Quicksort with the Existing Tool
 
 |#LightYellow|System|
 |#LightGreen|All Players\nin Sub-Group|
@@ -35,15 +36,18 @@ start
 
 partition "**Phase 1 — Pivot Selection**\n" {
     |Coordinator|
-    :Select pivot card\n(median-of-three or random);
+    :Select\npivot card\n(median-of-three\nor random);
     
     note right
       Pivot card
-      highlighted with
-      glowing border.
+      highlighted
+      with glowing
+      border.
       ——
-      **Maps to:** pivot
-      selection strategy
+      **Maps to:**
+      pivot
+      selection
+      strategy
       in quicksort
     end note
     :Confirm pivot →\nshow partition zones;
@@ -66,7 +70,7 @@ partition "**Phase 2 — Collaborative Partition**\n" {
 }
 
 |System|
-:Validate partition correctness;
+:Validate\npartition\ncorrectness;
 note right
   Check: all cards left
   of pivot ≤ pivot value,
@@ -74,16 +78,23 @@ note right
 end note
 
 if (Partition balanced?) then (roughly equal)
-    :Assign ~p/2 players\nto each sub-array;
-    note right: **Balanced load**
+    :Assign ~p/2\nplayers\nto each\nsub-array;
+    note right
+    **Balanced**
+    **load**
+    end note
 else (highly unequal)
-    :More players assigned\nto larger sub-array;
+    :More players\nassigned to\nlarger\nsub-array;
     note left
-      **Load imbalance!**
-      Visual warning shown.
+      **Load**
+      **imbalance!**
+      Visual warning
+      shown.
       ——
-      **Maps to:** poor pivot
-      → uneven workload
+      **Maps to:**
+      poor pivot
+      → uneven
+      workload
     end note
 endif
 
@@ -123,24 +134,15 @@ partition "**Phase 3 — Recursive Fork**\n" {
 
 |System|
 :All sub-arrays sorted\n→ **Game complete!**;
-note right
-  Cards are sorted
-  in-place. Task tree
+note left
+  Cards are
+  sorted. Task tree
   visualization shows
   completed recursion.
-  Show completion stats.
+  Show stats.
 end note
 stop
 
-' legend right
-'   |= HPC Concept |= Game Mechanic |
-'   | Pivot selection | Player/system chooses pivot card |
-'   | Parallel partition | All players rearrange simultaneously |
-'   | Load imbalance | Unequal sub-arrays from bad pivot |
-'   | Task-based parallelism | Player sub-groups fork to sub-arrays |
-'   | Recursion termination | Sub-array of 1–2 cards = base case |
-' endlegend
-
-center footer Players perform Parallel Quicksort using existing shared container and coordination
+' center footer Players perform Parallel Quicksort using existing shared container and coordination
 
 @enduml

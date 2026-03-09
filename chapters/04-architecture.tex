@@ -164,7 +164,7 @@ Two synchronization patterns are central:
     \item \textbf{Host broadcast reconciliation}: final shared state is re-broadcast to all peers to converge state.
 \end{itemize}
 
-\begin{lstlisting}[language={}, caption={Architectural pattern: host-authoritative move confirmation (pseudocode)}]
+\begin{lstlisting}[style={gdscript}, caption={Architectural pattern: host-authoritative move confirmation (pseudocode)}]
 # Client proposes move -> host validates -> host broadcasts canonical state
 on_client_move(card_id, target_slot):
     if host_validate(card_id, target_slot):
@@ -189,7 +189,7 @@ The web-export signaling patch details are intentionally analyzed in Chapter~\re
 % TODO: [Done Criteria] Excerpt shows sync entrypoint delegating into manager logic and where authority is enforced.
 % TODO: [Cross-refs] Chapter~\ref{ch:problems}, Section~\ref{subsec:web-patch-case-study}.
 
-\begin{lstlisting}[language={}, caption={Architectural boundary: sync wrapper delegates to game manager (pseudocode)}]
+\begin{lstlisting}[style={gdscript}, caption={Architectural boundary: sync wrapper delegates to game manager (pseudocode)}]
 @GDSync.rpc(call_local=true)
 func sync_move(card_id: int, target_id: int):
     multiplayer_manager.apply_authoritative_move(card_id, target_id)
@@ -238,7 +238,7 @@ This model reflects OpenMP’s shared-memory paradigm: all threads operate on a 
     \label{fig:card-move-shared-container}
 \end{figure}
 
-\begin{lstlisting}[language={}, caption={Architectural mechanism: local buffer visibility gate (pseudocode)}]
+\begin{lstlisting}[style={gdscript}, caption={Architectural mechanism: local buffer visibility gate (pseudocode)}]
 if card.in_private_buffer():
     card.visible = (card.buffer_owner_id == local_player_id)
 else:
@@ -408,11 +408,17 @@ Table~\ref{tab:algo-mode-comparison} summarizes why parallel merge sort is suppo
         \textbf{Aspect}    & \textbf{Merge Sort (Supported)}              & \textbf{Quicksort (Not Supported)}                                     \\
         \midrule
         Parallelism model  & Data parallelism (equal partitions)          & Task parallelism (recursive fork)                                      \\
+        \midrule
         Partition method   & Static, pre-agreed intervals                 & Dynamic, pivot-dependent                                               \\
+        \midrule
         Barrier usage      & Between merge rounds (supported)             & Between partition rounds (not supported---requires sub-group barriers) \\
+        \midrule
         Buffer usage       & Heavy---local sorting in local buffers       & Light---partition done in shared container                             \\
+        \midrule
         Load balance       & Always balanced (equal partitions)           & Variable---depends on pivot quality                                    \\
+        \midrule
         Primary HPC lesson & Barrier sync, reduction pattern              & Load imbalance, task creation                                          \\
+        \midrule
         Game support       & \textbf{Yes}---existing mechanics sufficient & \textbf{No}---requires pivot UI, recursive rounds, sub-group barriers  \\
         \bottomrule
     \end{tabular}

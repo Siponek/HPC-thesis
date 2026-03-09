@@ -539,21 +539,24 @@ This chapter presented the core implementation mechanisms of the HPC Sorting Ser
 
 \begin{table}[htbp]
     \centering
-    \caption{Key source file locations}
-    \begin{tabular}{@{}p{5cm}p{8.5cm}@{}}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \caption{Key source file locations (\texttt{MP/} = \texttt{scenes/Multiplayer/})}
+    \label{tab:source-files}
+    \begin{tabular}{@{}p{4.2cm}p{7.5cm}@{}}
         \toprule
-        \textbf{Component}        & \textbf{Path}                                                             \\
+        \textbf{Component}        & \textbf{Path}                                             \\
         \midrule
-        Card Manager (base)       & \texttt{scenes/CardScene/scripts/card\_manager.gd}                        \\
-        Multiplayer Card Manager  & \texttt{scenes/Multiplayer/MultiplayerGame/multiplayer\_card\_manager.gd} \\
-        Barrier Manager           & \texttt{scenes/Multiplayer/MultiplayerGame/barrier\_manager.gd}           \\
-        Connection Manager        & \texttt{scenes/Multiplayer/connection\_manager.gd}                        \\
-        Multiplayer Lobby         & \texttt{scenes/Multiplayer/Lobby/multiplayer\_lobby.gd}                   \\
-        GDSync Web Patch          & \texttt{scenes/Multiplayer/GDSyncWebPatch/gdsync\_web\_patch.gd}          \\
-        Signaling LocalServer     & \texttt{scenes/Multiplayer/GDSyncWebPatch/local\_server\_signaling.gd}    \\
-        Signaling Client          & \texttt{scenes/Multiplayer/GDSyncWebPatch/signaling\_client.gd}           \\
-        Scene Manager             & \texttt{scene\_manager.gd}                                                \\
-        Signaling Server (Python) & \texttt{signaling-server/server.py}                                       \\
+        Card Manager (base)       & \texttt{scenes/CardScene/scripts/card\_manager.gd}        \\
+        Multiplayer Card Manager  & \texttt{MP/MultiplayerGame/multiplayer\_card\_manager.gd} \\
+        Barrier Manager           & \texttt{MP/MultiplayerGame/barrier\_manager.gd}           \\
+        Connection Manager        & \texttt{MP/connection\_manager.gd}                        \\
+        Multiplayer Lobby         & \texttt{MP/Lobby/multiplayer\_lobby.gd}                   \\
+        GDSync Web Patch          & \texttt{MP/GDSyncWebPatch/gdsync\_web\_patch.gd}          \\
+        Signaling LocalServer     & \texttt{MP/GDSyncWebPatch/local\_server\_signaling.gd}    \\
+        Signaling Client          & \texttt{MP/GDSyncWebPatch/signaling\_client.gd}           \\
+        Scene Manager             & \texttt{scene\_manager.gd}                                \\
+        Signaling Server (Python) & \texttt{signaling-server/server.py}                       \\
         \bottomrule
     \end{tabular}
 \end{table}

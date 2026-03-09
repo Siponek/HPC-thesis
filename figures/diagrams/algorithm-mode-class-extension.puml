@@ -4,14 +4,14 @@
 
 ' --- FONT SIZES & THICKNESS ---
 skinparam DefaultFontSize 34
-skinparam TitleFontSize 38
+skinparam TitleFontSize 44
 skinparam ClassFontSize 34
 skinparam ClassAttributeFontSize 30
 skinparam NoteFontSize 34
 skinparam PackageFontSize 34
 skinparam ArrowThickness 4 
 skinparam style strictuml
-skinparam FooterFontSize 34
+skinparam FooterFontSize 44
 
 ' --- SPACING & LAYOUT ---
 skinparam nodesep 120

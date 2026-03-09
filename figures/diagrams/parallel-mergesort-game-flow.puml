@@ -1,14 +1,15 @@
 @startuml parallel-mergesort-game-flow
 !theme plain
 !include ../shared/theme.puml
-
+!pragma useVerticalIf on
 ' --- FONT SIZES ---
-skinparam defaultFontSize 34
-skinparam TitleFontSize 38
-skinparam SwimlaneTitleFontSize 34
-skinparam NoteFontSize 34
-skinparam ActivityFontSize 34
-skinparam ActivityDiamondFontSize 34
+skinparam defaultFontSize 44
+skinparam TitleFontSize 44
+skinparam FooterFontSize 44
+skinparam SwimlaneTitleFontSize 38
+skinparam NoteFontSize 38
+skinparam ActivityFontSize 38
+skinparam ActivityDiamondFontSize 38
 skinparam style strictuml
 skinparam ArrowThickness 4 
  
@@ -18,12 +19,12 @@ skinparam ActivityDiamondBackgroundColor #FFFFCC
 skinparam ActivityBackgroundColor #F0F8FF
 skinparam PartitionBackgroundColor #FAFAFA
 
-title Performing Parallel Merge Sort with the Existing Tool
+' title Performing Parallel Merge Sort with the Existing Tool
 
 |#LightBlue|System|
-|#LightGreen|All\nPlayers|
-|#LightYellow|Merger\n(Main Thread)|
-|#LightPink|Non-Merger\n(Blocked)|
+|#LightGreen|All Players|
+|#LightYellow|Merger (Main Thread)|
+|#LightPink|Non-Merger (Blocked)|
 
 |System|
 start
@@ -42,7 +43,7 @@ end note
 ' FIX 2: Added \n at the end of the string to create vertical padding!
 partition "**Phase 1 — Local Sort** (parallel, independent)\n" {
     
-    |All\nPlayers|
+    |All Players|
     fork
         :Player 1 sorts\npartition 1\nusing local buffer;
     fork again
@@ -52,10 +53,13 @@ partition "**Phase 1 — Local Sort** (parallel, independent)\n" {
     :Each player clicks\n"Reach Barrier Done";
     
     note right
-      Each player works **only**
-      on their assigned zone.
-      Buffer contiguity check
-      enforces coherent subsets.
+      Each player
+      works **only**
+      on their
+      assigned zone.
+      Buffer contiguity
+      check enforces
+      coherent subsets.
       ——
       **Maps to:**
       embarrassingly
@@ -68,8 +72,10 @@ partition "**Phase 1 — Local Sort** (parallel, independent)\n" {
 :All local sorts validated;\n→ **Barrier activates**;
 note right
   Reuses existing
-  **BarrierManager** FSM:
-  RUNNING → WAITING
+  **BarrierManager**
+  FSM:
+  RUNNING
+  → WAITING
   → BARRIER_ACTIVE
 end note
 
@@ -84,25 +90,28 @@ partition "**Phase 2 — Merge Rounds**\n(⌈log₂ p⌉ rounds)\n" {
         end note
 
         fork
-            |Merger\n(Main Thread)|
-            :Merge two adjacent\nsorted runs into one;
+            |Merger (Main Thread)|
+            :Merge two\nadjacent sorted\nruns into one;
             note left
-              Merger interacts
+              Merger
+              interacts
               with shared
-              container. Other
-              cards visible.
+              container.
+              Other cards
+              visible.
               ——
               **Maps to:**
               reduction /
               tree merging
             end note
         fork again
-            |Non-Merger\n(Blocked)|
-            :See lock overlay\n(barrier active);
+            |Non-Merger (Blocked)|
+            :See lock\noverlay\n(barrier active);
             note left
               **Maps to:**
-              thread idle time
-              / sync cost
+              thread idle
+              time / sync
+              cost
             end note
         end fork
 
@@ -116,14 +125,16 @@ partition "**Phase 2 — Merge Rounds**\n(⌈log₂ p⌉ rounds)\n" {
 |System|
 :All cards in ascending order\n→ **Game complete!**;
 note right
-  Single fully sorted
-  array in shared
-  container. Show
-  completion stats:
-  time, moves, rounds.
+  Single fully
+  sorted array
+  in shared
+  container.
+  Show completion
+  stats: time,
+  moves, rounds.
 end note
 stop
 
-center footer Players perform Parallel Merge Sort using existing shared container, buffers, and barriers
+' center footer Players perform Parallel Merge Sort using existing shared container, buffers, and barriers
 
 @enduml
